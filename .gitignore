@@ -1,0 +1,22 @@
+# Local Python environments
+venv/
+.venv/
+env/
+
+# Generated Python files
+__pycache__/
+*.py[cod]
+
+# Local environment settings
+.env
+.env.*
+!.env.example
+!.env.sample
+
+# ITviec login cookies and saved browser sessions
+cookie.txt
+cookie_*.txt
+cookies.txt
+cookies*.json
+.itviec_auth*.json
+.itviec_auth_*.tmp

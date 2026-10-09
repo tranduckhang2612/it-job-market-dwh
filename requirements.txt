@@ -1,0 +1,9 @@
+# Python >= 3.10
+# Runtime: crawl HTTP, parse HTML, and store raw/normalized data in PostgreSQL.
+requests==2.34.2
+beautifulsoup4==4.15.0
+psycopg[binary]==3.3.6
+
+# Used by --browser / --login; requests mode does not need Chromium.
+# Install the browser separately when needed: python -m playwright install chromium
+playwright==1.63.0
