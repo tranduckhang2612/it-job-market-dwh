@@ -1024,8 +1024,9 @@ def build_parser(*, default_output_dir=Path("itviec_data/raw"), description=None
     return parser
 
 
-def parse_args(argv=None, *, default_output_dir=Path("itviec_data/raw"), description=None):
-    parser = build_parser(default_output_dir=default_output_dir, description=description)
+def parse_args(argv=None, *, default_output_dir=Path("itviec_data/raw"), description=None, parser=None):
+    if parser is None:
+        parser = build_parser(default_output_dir=default_output_dir, description=description)
     args = parser.parse_args(argv)
     args.browser = args.browser or args.login
     if args.login and args.cookie_file:

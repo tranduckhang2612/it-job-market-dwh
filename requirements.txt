@@ -1,5 +1,5 @@
 # Python >= 3.10
-# Runtime: crawl HTTP, parse HTML, and store raw/normalized data in PostgreSQL.
+# Runtime: crawl HTTP, parse HTML, and store raw/staging data in PostgreSQL.
 requests==2.34.2
 beautifulsoup4==4.15.0
 psycopg[binary]==3.3.6
