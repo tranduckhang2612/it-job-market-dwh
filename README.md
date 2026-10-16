@@ -1,10 +1,12 @@
 # IT Job Market DWH
 
-Project thu thập tin tuyển dụng ITviec, lưu dữ liệu thô vào PostgreSQL, sau đó làm sạch và ánh xạ về cấu trúc chung gồm 30 trường.
+Project thu thập tin tuyển dụng việc làm IT (ITviec, TopDev), lưu dữ liệu thô vào PostgreSQL, sau đó làm sạch và ánh xạ về cấu trúc chung gồm 30 trường chuẩn hóa (Schema 1.1).
 
-**Luồng hiện tại:** crawl → JSON thô trong PostgreSQL → chuẩn hóa → các bảng staging → kiểm định → view đầu vào DWH.
+**Luồng dữ liệu:** crawl → JSON thô trong PostgreSQL (`raw`) → chuẩn hóa 30 trường (`staging`) → kiểm định đối chiếu chất lượng → view đầu vào DWH (`staging.dwh_ready_jobs`).
 
-Phạm vi hiện tại kết thúc ở dữ liệu staging đã kiểm định, sẵn sàng làm nguồn nạp DWH. Entry point duy nhất là `main_itviec.py`; sau khi thiết lập lần đầu, chạy `python main_itviec.py` để thực hiện toàn bộ luồng trên.
+Entry points:
+* **ITviec**: `python main_itviec.py`
+* **TopDev**: `python main_topdev.py` (hỗ trợ cờ `--limit`, `--check-db`, `--cookie`, `--cookie-file`, `--token`)
 
 ## Bước 1. Chuẩn bị công cụ
 

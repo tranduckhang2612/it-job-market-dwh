@@ -20,3 +20,10 @@ cookies.txt
 cookies*.json
 .itviec_auth*.json
 .itviec_auth_*.tmp
+
+# TopDev login cookies and local dump files
+topdev_cookie*.txt
+topdev_sample.json
+topdev_normalized.json
+*_sample.json
+*_normalized.json
