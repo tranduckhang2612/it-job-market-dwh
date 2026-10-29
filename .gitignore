@@ -27,3 +27,9 @@ topdev_sample.json
 topdev_normalized.json
 *_sample.json
 *_normalized.json
+
+# Keep generated database snapshots, dumps and binary reports local.
+# Only Markdown review documents belong in version control under reports/.
+reports/**
+!reports/**/
+!reports/**/*.md

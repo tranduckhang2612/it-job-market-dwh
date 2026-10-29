@@ -37,6 +37,11 @@ if sys.platform == "win32":
         pass
 
 
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+from data_preprocessing.staging_cleaning import CLEANING_VERSION
+
 LOG = logging.getLogger("topdev.staging")
 
 NORMALIZED_FIELDS = (
@@ -325,7 +330,7 @@ def normalize_locations(raw: dict) -> tuple[str | None, list[str]]:
     if isinstance(addresses, dict):
         full_list = addresses.get("full_addresses") or []
         if isinstance(full_list, list) and full_list:
-            location_text = clean(full_list[0])
+            location_text = "\n".join(dict.fromkeys(clean(v) for v in full_list if isinstance(v, str) and clean(v)))
 
         region_list = addresses.get("address_region_array") or []
         if isinstance(region_list, list):
@@ -385,145 +390,87 @@ def normalize_work_mode(raw: dict) -> str | None:
     return None
 
 
+def _section_text(value):
+    if isinstance(value, list):
+        return "\n".join(_section_text(item) for item in value)
+    if isinstance(value, dict):
+        return _section_text(value.get("value") or "")
+    return html_to_text(str(value or ""))
+
+
 def normalize_salary(raw: dict) -> dict:
-    salary_obj = raw.get("salary") or {}
-    if not isinstance(salary_obj, dict):
-        salary_obj = {}
-
-    is_negotiable = str(salary_obj.get("is_negotiable", "0")) == "1"
-    raw_val = salary_obj.get("value")
-    min_filter = salary_obj.get("min_filter") or 0
-    max_filter = salary_obj.get("max_filter") or 0
-
-    raw_min = salary_obj.get("min")
-    raw_max = salary_obj.get("max")
-    if not min_filter and raw_min and "*" not in str(raw_min):
-        try:
-            cleaned_min = re.sub(r"[^\d.]", "", str(raw_min))
-            if cleaned_min:
-                min_filter = float(cleaned_min)
-        except (ValueError, TypeError):
-            pass
-    if not max_filter and raw_max and "*" not in str(raw_max):
-        try:
-            cleaned_max = re.sub(r"[^\d.]", "", str(raw_max))
-            if cleaned_max:
-                max_filter = float(cleaned_max)
-        except (ValueError, TypeError):
-            pass
-
-    currency = salary_obj.get("currency") or "VND"
-    unit = str(salary_obj.get("unit") or "MONTH").lower()
-    period = "month" if "month" in unit else "month"
-
-    salary_text = None
-    salary_min = None
-    salary_max = None
-    salary_status = "unknown"
-    salary_basis = None
-
-    # Kiểm tra gross / net
-    desc_text = (str(raw.get("benefits_original") or "") + " " + str(raw.get("description") or "")).lower()
-    if re.search(r"\bgross\b", desc_text):
-        salary_basis = "gross"
-    elif re.search(r"\bnet\b", desc_text):
-        salary_basis = "net"
-
-    if is_negotiable or (raw_val and "negotiable" in str(raw_val).lower()):
-        salary_status = "negotiable"
-        salary_text = "Thương lượng"
-    elif min_filter > 0 or max_filter > 0:
-        salary_status = "disclosed"
-        salary_min = float(min_filter) if min_filter > 0 else None
-        salary_max = float(max_filter) if max_filter > 0 else None
-        if salary_min is not None and salary_max is not None and salary_min > salary_max:
-            salary_min, salary_max = salary_max, salary_min
-        if raw_val and "*" not in str(raw_val):
-            salary_text = clean(raw_val)
-        else:
-            if salary_min and salary_max:
-                salary_text = f"{int(salary_min):,} - {int(salary_max):,} {currency}"
-            elif salary_max:
-                salary_text = f"Up to {int(salary_max):,} {currency}"
-            elif salary_min:
-                salary_text = f"From {int(salary_min):,} {currency}"
-    elif raw_val and "*" not in str(raw_val) and re.search(r"\d", str(raw_val)):
-        salary_text = clean(raw_val)
-        # Parse số từ raw_val
-        nums = [float(x.replace(",", "").replace(".", "")) for x in re.findall(r"\b\d+(?:[.,]\d+)?\b", raw_val)]
-        if nums:
-            salary_status = "disclosed"
-            if len(nums) >= 2:
-                salary_min, salary_max = min(nums[:2]), max(nums[:2])
+    # Reuse the tested locale-aware monetary parser; never strip punctuation
+    # from numbers or infer MONTH/VND when those units are absent.
+    from data_preprocessing.itviec_normalize_data import normalize_itviec as common
+    obj = raw.get("salary") or {}
+    obj = obj if isinstance(obj, dict) else {"value": str(obj)}
+    value = clean(obj.get("value")) or None
+    visible = value if value and "*" not in value else None
+    currency = clean(obj.get("currency")) or None
+    unit = clean(obj.get("unit")) or None
+    low = common._se_numeric(obj.get("min_filter")) or common._se_numeric(obj.get("min"))
+    high = common._se_numeric(obj.get("max_filter")) or common._se_numeric(obj.get("max"))
+    negotiable = str(obj.get("is_negotiable", "0")).lower() in {"1", "true"}
+    structured = {"currency": currency, "value": {"unitText": unit}}
+    if not negotiable:
+        structured["value"].update(minValue=low, maxValue=high)
+    result = common.normalize_salary({"salary": {"text": visible, "structured": structured}})
+    if result["salary_status"] == "disclosed":
+        if result["salary_text"] is None:
+            if result["salary_min"] is not None and result["salary_max"] is not None:
+                result["salary_text"] = f"{result['salary_min']:,.0f} - {result['salary_max']:,.0f} {currency or ''}".strip()
             else:
-                salary_max = nums[0]
-    else:
-        salary_status = "not_disclosed"
+                bound = result["salary_min"] or result["salary_max"]
+                label = "From" if result["salary_min"] is not None else "Up to"
+                result["salary_text"] = f"{label} {bound:,.0f} {currency or ''}".strip()
+        return result
 
-    # Bảo đảm ràng buộc CHECK
-    if salary_status == "disclosed":
-        if salary_min is None and salary_max is None:
-            salary_status = "not_disclosed"
-    else:
-        salary_min = None
-        salary_max = None
-
-    return {
-        "salary_text": salary_text,
-        "salary_min": salary_min,
-        "salary_max": salary_max,
-        "salary_currency": currency if salary_status == "disclosed" else None,
-        "salary_period": period if salary_status == "disclosed" else None,
-        "salary_basis": salary_basis,
-        "salary_status": salary_status,
-    }
+    # Only labelled compensation sentences qualify. Meal allowance, budgets,
+    # 13th-month bonuses and leave days must not turn into salary bounds.
+    candidates = []
+    generic = []
+    for field in ("benefits_original", "description", "benefits"):
+        text = _section_text(raw.get(field))
+        for line in re.split(r"\n|(?<=[.!?;])\s+(?=[A-ZĐ])", text):
+            if not re.search(r"lương|thu nhập|salary|compensation|trợ cấp thực tập|stipend", line, re.I):
+                continue
+            if re.search(r"phụ cấp|allowance|bonus|thưởng|learning budget|bảo hiểm|insurance", line, re.I):
+                continue
+            parsed = common.normalize_salary({"salary": {"text": line, "structured": structured}})
+            # API numeric filters are not evidence for a narrative fallback.
+            if parsed["salary_status"] == "disclosed" and common._se_salary_bounds(line) != (None, None):
+                candidates.append(parsed)
+            elif parsed["salary_status"] in {"negotiable", "not_disclosed"}:
+                generic.append(parsed)
+    signatures = {(p["salary_min"], p["salary_max"], p["salary_currency"], p["salary_period"]) for p in candidates}
+    if len(signatures) == 1:
+        return candidates[0]
+    if len(signatures) > 1:
+        return {"salary_text": " | ".join(p["salary_text"] for p in candidates),
+                "salary_min": None, "salary_max": None, "salary_currency": None,
+                "salary_period": None, "salary_basis": None, "salary_status": "unknown"}
+    if negotiable:
+        return common.normalize_salary({"salary": {"text": visible or "Thỏa thuận"}})
+    if generic:
+        return generic[0]
+    if result["salary_text"] is None:
+        result["salary_status"] = "not_disclosed"
+    return result
 
 
 def normalize_experience(raw: dict) -> dict:
-    req_text = str(raw.get("requirements_original") or raw.get("requirements") or "")
-    full_text = req_text + " " + str(raw.get("description") or "")
-    exp_months = None
-
-    if isinstance(raw.get("experienceRequirements"), dict):
-        exp_months = raw["experienceRequirements"].get("monthsOfExperience")
-
-    exp_text = None
-    exp_min = None
-    exp_max = None
-
-    # Tìm các đoạn văn bản kinh nghiệm
-    match = re.search(
-        r"((?:tối thiểu|ít nhất|khoảng|từ)?\s*\d+(?:\s*[-–—to]\s*\d+)?\s*(?:năm|tháng|year[s]?|month[s]?)\s*kinh\s*nghiệm)",
-        full_text, flags=re.I
-    )
-    if match:
-        exp_text = clean(match.group(1))
-
-    # Tìm số năm
-    range_match = re.search(r"(\d+)\s*(?:-|–|—|to|đến)\s*(\d+)\s*(năm|year)", full_text, flags=re.I)
-    single_match = re.search(r"(\d+)\s*(?:năm|year)", full_text, flags=re.I)
-    month_match = re.search(r"(\d+)\s*(?:tháng|month)", full_text, flags=re.I)
-
-    if range_match:
-        exp_min = float(range_match.group(1))
-        exp_max = float(range_match.group(2))
-    elif single_match:
-        exp_min = float(single_match.group(1))
-    elif month_match:
-        exp_min = round(float(month_match.group(1)) / 12.0, 1)
-    elif exp_months and isinstance(exp_months, (int, float)) and exp_months > 0:
-        exp_min = round(float(exp_months) / 12.0, 1)
-        if not exp_text:
-            exp_text = f"{exp_months} tháng kinh nghiệm"
-
-    if exp_min is not None and exp_max is not None and exp_min > exp_max:
-        exp_min, exp_max = exp_max, exp_min
-
-    return {
-        "experience_text": exp_text,
-        "experience_min_years": exp_min,
-        "experience_max_years": exp_max,
-    }
+    from data_preprocessing.itviec_normalize_data import normalize_itviec as common
+    # Never scan benefits/company history. Description is used only for older
+    # input shapes without a requirements section.
+    requirements = _section_text(raw.get("requirements_original") or raw.get("requirements") or raw.get("description"))
+    result = common.normalize_experience({"your_skills_and_experience": requirements})
+    structured = raw.get("experienceRequirements")
+    if isinstance(structured, dict) and result["experience_text"] is None:
+        months = common._se_numeric(structured.get("monthsOfExperience"), allow_zero=True)
+        if months is not None:
+            result["experience_min_years"] = round(months / 12, 6)
+            result["experience_text"] = f"{months} tháng kinh nghiệm"
+    return result
 
 
 SKILL_CATEGORIES = {
@@ -584,6 +531,25 @@ def normalize_requirements(raw: dict) -> dict:
                 "requirement_type": "preferred"
             })
 
+    # Add explicit requirement-section evidence missing from listing tags.
+    # The shared parser handles local negation and required/preferred clauses.
+    from data_preprocessing.itviec_normalize_data import normalize_itviec as common
+    from data_preprocessing.staging_cleaning import _SKILLS
+    inferred = common.normalize_requirements({"your_skills_and_experience": _section_text(
+        raw.get("requirements_original") or raw.get("requirements"))})
+    canonical_names = {_SKILLS.get(s["name"].casefold(), (s["name"], ""))[0].casefold() for s in skills}
+    for skill in inferred["skills"]:
+        if skill["requirement_type"] == "unspecified":
+            occurrences = [(line, start, end) for line, _ in common.req_lines({"your_skills_and_experience": _section_text(
+                raw.get("requirements_original") or raw.get("requirements"))})
+                for start, end, name, _ in common.req_skill_matches(line) if name == skill["name"]]
+            if occurrences and all(common.req_item_is_negated(line, start, end) for line, start, end in occurrences):
+                continue
+        name = _SKILLS.get(skill["name"].casefold(), (skill["name"], ""))[0].casefold()
+        if name not in canonical_names:
+            canonical_names.add(name)
+            skills.append(skill)
+
     # 2. Knowledge
     knowledge = []
     desc = key(str(raw.get("description") or "") + " " + str(raw.get("requirements_original") or ""))
@@ -627,6 +593,10 @@ def normalize_requirements(raw: dict) -> dict:
             "level_text": level,
             "requirement_type": "preferred"
         })
+
+    for language in inferred["foreign_languages"]:
+        if not any(f["language"].casefold() == language["language"].casefold() for f in foreign_languages):
+            foreign_languages.append(language)
 
     # 4. Kỹ năng mềm
     soft_skills = []
@@ -709,6 +679,8 @@ def normalize_job(raw: dict, crawl_run_id: str, observed_at: str | None = None) 
         }
 
     record = {field: record[field] for field in NORMALIZED_FIELDS}
+    from data_preprocessing.staging_cleaning import clean_record
+    record = clean_record(record)
     validate_normalized_job(record)
     return record
 
@@ -917,6 +889,7 @@ def stage_database_run(crawl_run_id: str, args) -> int:
         staging_meta = {
             "status": staging_status,
             "version": NORMALIZATION_VERSION,
+            "cleaning_version": CLEANING_VERSION,
             "ready_for_dwh": staging_status == "succeeded",
             "raw_count": len(raw_rows),
             "normalized_count": len(normalized_jobs),

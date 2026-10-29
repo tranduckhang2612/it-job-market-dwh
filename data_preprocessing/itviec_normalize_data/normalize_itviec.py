@@ -37,6 +37,11 @@ from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import urlsplit, urlunsplit
 
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+from data_preprocessing.staging_cleaning import CLEANING_VERSION
+
 LOG = logging.getLogger("itviec.staging")
 
 
@@ -615,8 +620,8 @@ REQ_SKILL_VOCABULARY = [
     ("JavaScript", "programming_language", ["javascript", "java script", "js"]),
     ("TypeScript", "programming_language", ["typescript", "type script"]),
     ("Go", "programming_language", ["golang", "go"]),
-    ("C++", "programming_language", ["c++"]),
-    ("C#", "programming_language", ["c#", "c sharp"]),
+    ("C++", "programming_language", ["c++", "cpp", "cplus", "cplusplus", "c plus plus", "c plus"]),
+    ("C#", "programming_language", ["c#", "c sharp", "csharp", "c-sharp"]),
     ("C", "programming_language", ["c"]),
     ("PHP", "programming_language", ["php"]),
     ("Ruby", "programming_language", ["ruby"]),
@@ -637,7 +642,8 @@ REQ_SKILL_VOCABULARY = [
     (".NET", "framework", [".net", "dotnet"]),
     ("React", "framework", ["reactjs", "react.js", "react"]),
     ("Next.js", "framework", ["nextjs", "next.js"]),
-    ("Angular", "framework", ["angularjs", "angular.js", "angular"]),
+    ("Angular", "framework", ["angular"]),
+    ("AngularJS", "framework", ["angularjs", "angular.js"]),
     ("jQuery", "framework", ["jquery"]),
     ("Bootstrap", "framework", ["bootstrap"]),
     ("Vue.js", "framework", ["vuejs", "vue.js", "vue"]),
@@ -1188,7 +1194,9 @@ def normalized_datetime(value, *, date_only=False) -> str | None:
             return None
         value += "T00:00:00"
     try:
-        result = datetime.fromisoformat(value.replace("Z", "+00:00"))
+        value = re.sub(r"(\.\d{1,6})(?=[+-]\d{2}:\d{2}$)",
+                       lambda m: "." + m.group(1)[1:].ljust(6, "0"), value.replace("Z", "+00:00"))
+        result = datetime.fromisoformat(value)
     except ValueError:
         return None
     # A timezone-less timestamp cannot establish an observation instant.
@@ -1464,6 +1472,8 @@ def normalize_job(raw: dict, crawl_run_id: str, observed_at: str | None = None) 
             **normalize_requirements(raw), **normalize_experience(raw), **normalize_salary(raw),
         }
     record = {field: record[field] for field in NORMALIZED_FIELDS}
+    from data_preprocessing.staging_cleaning import clean_record
+    record = clean_record(record)
     validate_normalized_job(record)
     return record
 
@@ -1913,7 +1923,7 @@ def stage_database_run(crawl_run_id: str, args) -> int:
             with connection.cursor() as cursor:
                 cursor.execute(_DB_METADATA_SQL, (jsonb({
                     "status": "running", "started_at": started, "finished_at": None,
-                    "version": NORMALIZATION_VERSION, "raw_count": row_count,
+                    "version": NORMALIZATION_VERSION, "cleaning_version": CLEANING_VERSION, "raw_count": row_count,
                     "staged_count": 0, "error_count": 0, "errors": [],
                     "ready_for_dwh": False, "source_complete": source_complete,
                     "quality": quality,
@@ -1960,7 +1970,7 @@ def stage_database_run(crawl_run_id: str, args) -> int:
         if run_found:
             summary = {
                 "status": status, "started_at": started, "finished_at": datetime.now(VIETNAM_TZ).isoformat(),
-                "version": NORMALIZATION_VERSION, "raw_count": row_count,
+                "version": NORMALIZATION_VERSION, "cleaning_version": CLEANING_VERSION, "raw_count": row_count,
                 "staged_count": staged_count, "error_count": len(errors), "errors": errors,
                 "ready_for_dwh": (not storage_failed and status == 'succeeded' and staged_count == row_count
                                   and row_count > 0 and quality['validated_count'] == row_count),

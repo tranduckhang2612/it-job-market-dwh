@@ -1,0 +1,2175 @@
+{
+  "version": "2026.10.29.1",
+  "domains": {
+    "skill": [
+      {
+        "name": "Python",
+        "aliases": [
+          "python"
+        ],
+        "category": "programming_languages"
+      },
+      {
+        "name": "Java",
+        "aliases": [
+          "java"
+        ],
+        "category": "programming_languages"
+      },
+      {
+        "name": "JavaScript",
+        "aliases": [
+          "javascript",
+          "java script",
+          "js"
+        ],
+        "category": "programming_languages"
+      },
+      {
+        "name": "TypeScript",
+        "aliases": [
+          "typescript",
+          "type script",
+          "ts"
+        ],
+        "category": "programming_languages"
+      },
+      {
+        "name": "Go",
+        "aliases": [
+          "go",
+          "golang"
+        ],
+        "category": "programming_languages"
+      },
+      {
+        "name": "C++",
+        "aliases": [
+          "c++",
+          "cpp",
+          "cplus",
+          "cplusplus",
+          "c plus",
+          "c plus plus",
+          "c plusplus",
+          "c + +",
+          "c++ (cpp)"
+        ],
+        "category": "programming_languages"
+      },
+      {
+        "name": "C#",
+        "aliases": [
+          "c#",
+          "c sharp",
+          "csharp",
+          "c-sharp",
+          "c♯"
+        ],
+        "category": "programming_languages"
+      },
+      {
+        "name": "C",
+        "aliases": [
+          "c"
+        ],
+        "category": "programming_languages"
+      },
+      {
+        "name": "PHP",
+        "aliases": [
+          "php"
+        ],
+        "category": "programming_languages"
+      },
+      {
+        "name": "Ruby",
+        "aliases": [
+          "ruby"
+        ],
+        "category": "programming_languages"
+      },
+      {
+        "name": "R",
+        "aliases": [
+          "r",
+          "rlang",
+          "r language",
+          "r programming language",
+          "r programming"
+        ],
+        "category": "programming_languages"
+      },
+      {
+        "name": "Kotlin",
+        "aliases": [
+          "kotlin"
+        ],
+        "category": "programming_languages"
+      },
+      {
+        "name": "Swift",
+        "aliases": [
+          "swift"
+        ],
+        "category": "programming_languages"
+      },
+      {
+        "name": "Rust",
+        "aliases": [
+          "rust"
+        ],
+        "category": "programming_languages"
+      },
+      {
+        "name": "Scala",
+        "aliases": [
+          "scala"
+        ],
+        "category": "programming_languages"
+      },
+      {
+        "name": "Dart",
+        "aliases": [
+          "dart"
+        ],
+        "category": "programming_languages"
+      },
+      {
+        "name": "SQL",
+        "aliases": [
+          "sql"
+        ],
+        "category": "query_languages"
+      },
+      {
+        "name": "HTML",
+        "aliases": [
+          "html",
+          "html5"
+        ],
+        "category": "markup_languages"
+      },
+      {
+        "name": "CSS",
+        "aliases": [
+          "css",
+          "css3"
+        ],
+        "category": "stylesheet_languages"
+      },
+      {
+        "name": "Bash",
+        "aliases": [
+          "bash"
+        ],
+        "category": "programming_languages"
+      },
+      {
+        "name": "PowerShell",
+        "aliases": [
+          "powershell"
+        ],
+        "category": "programming_languages"
+      },
+      {
+        "name": "Spring Boot",
+        "aliases": [
+          "spring boot",
+          "springboot"
+        ],
+        "category": "frameworks_libraries"
+      },
+      {
+        "name": "Spring",
+        "aliases": [
+          "spring",
+          "spring framework"
+        ],
+        "category": "frameworks_libraries"
+      },
+      {
+        "name": "ASP.NET",
+        "aliases": [
+          "asp.net",
+          "asp net"
+        ],
+        "category": "frameworks_libraries"
+      },
+      {
+        "name": ".NET",
+        "aliases": [
+          ".net",
+          "dotnet"
+        ],
+        "category": "frameworks_libraries"
+      },
+      {
+        "name": "React",
+        "aliases": [
+          "react",
+          "reactjs",
+          "react.js"
+        ],
+        "category": "frameworks_libraries"
+      },
+      {
+        "name": "Next.js",
+        "aliases": [
+          "next.js",
+          "nextjs"
+        ],
+        "category": "frameworks_libraries"
+      },
+      {
+        "name": "Angular",
+        "aliases": [
+          "angular"
+        ],
+        "category": "frameworks_libraries"
+      },
+      {
+        "name": "jQuery",
+        "aliases": [
+          "jquery"
+        ],
+        "category": "frameworks_libraries"
+      },
+      {
+        "name": "Bootstrap",
+        "aliases": [
+          "bootstrap"
+        ],
+        "category": "frameworks_libraries"
+      },
+      {
+        "name": "Vue.js",
+        "aliases": [
+          "vue.js",
+          "vuejs",
+          "vue"
+        ],
+        "category": "frameworks_libraries"
+      },
+      {
+        "name": "NestJS",
+        "aliases": [
+          "nestjs",
+          "nest.js"
+        ],
+        "category": "frameworks_libraries"
+      },
+      {
+        "name": "Node.js",
+        "aliases": [
+          "node.js",
+          "nodejs",
+          "node js"
+        ],
+        "category": "frameworks_libraries"
+      },
+      {
+        "name": "Django",
+        "aliases": [
+          "django"
+        ],
+        "category": "frameworks_libraries"
+      },
+      {
+        "name": "Flask",
+        "aliases": [
+          "flask"
+        ],
+        "category": "frameworks_libraries"
+      },
+      {
+        "name": "FastAPI",
+        "aliases": [
+          "fastapi",
+          "fast api"
+        ],
+        "category": "frameworks_libraries"
+      },
+      {
+        "name": "Laravel",
+        "aliases": [
+          "laravel"
+        ],
+        "category": "frameworks_libraries"
+      },
+      {
+        "name": "Ruby on Rails",
+        "aliases": [
+          "ruby on rails",
+          "rails"
+        ],
+        "category": "frameworks_libraries"
+      },
+      {
+        "name": "Flutter",
+        "aliases": [
+          "flutter"
+        ],
+        "category": "frameworks_libraries"
+      },
+      {
+        "name": "React Native",
+        "aliases": [
+          "react native"
+        ],
+        "category": "frameworks_libraries"
+      },
+      {
+        "name": "PyTorch",
+        "aliases": [
+          "pytorch"
+        ],
+        "category": "frameworks_libraries"
+      },
+      {
+        "name": "TensorFlow",
+        "aliases": [
+          "tensorflow",
+          "tensor flow"
+        ],
+        "category": "frameworks_libraries"
+      },
+      {
+        "name": "scikit-learn",
+        "aliases": [
+          "scikit-learn",
+          "sklearn"
+        ],
+        "category": "frameworks_libraries"
+      },
+      {
+        "name": "LangChain",
+        "aliases": [
+          "langchain"
+        ],
+        "category": "frameworks_libraries"
+      },
+      {
+        "name": "LangGraph",
+        "aliases": [
+          "langgraph"
+        ],
+        "category": "frameworks_libraries"
+      },
+      {
+        "name": "AutoGen",
+        "aliases": [
+          "autogen"
+        ],
+        "category": "frameworks_libraries"
+      },
+      {
+        "name": "DGL",
+        "aliases": [
+          "dgl"
+        ],
+        "category": "frameworks_libraries"
+      },
+      {
+        "name": "PyG",
+        "aliases": [
+          "pyg"
+        ],
+        "category": "frameworks_libraries"
+      },
+      {
+        "name": "PostgreSQL",
+        "aliases": [
+          "postgresql",
+          "postgres",
+          "pgsql"
+        ],
+        "category": "databases"
+      },
+      {
+        "name": "MySQL",
+        "aliases": [
+          "mysql"
+        ],
+        "category": "databases"
+      },
+      {
+        "name": "SQL Server",
+        "aliases": [
+          "sql server",
+          "microsoft sql server",
+          "sqlserver",
+          "mssql"
+        ],
+        "category": "databases"
+      },
+      {
+        "name": "MongoDB",
+        "aliases": [
+          "mongodb",
+          "mongo db"
+        ],
+        "category": "databases"
+      },
+      {
+        "name": "Oracle",
+        "aliases": [
+          "oracle",
+          "oracle database",
+          "oracle db"
+        ],
+        "category": "databases"
+      },
+      {
+        "name": "Redis",
+        "aliases": [
+          "redis"
+        ],
+        "category": "databases"
+      },
+      {
+        "name": "Cassandra",
+        "aliases": [
+          "cassandra"
+        ],
+        "category": "databases"
+      },
+      {
+        "name": "Elasticsearch",
+        "aliases": [
+          "elasticsearch",
+          "elastic search"
+        ],
+        "category": "databases"
+      },
+      {
+        "name": "SQLite",
+        "aliases": [
+          "sqlite"
+        ],
+        "category": "databases"
+      },
+      {
+        "name": "MariaDB",
+        "aliases": [
+          "mariadb"
+        ],
+        "category": "databases"
+      },
+      {
+        "name": "Milvus",
+        "aliases": [
+          "milvus"
+        ],
+        "category": "databases"
+      },
+      {
+        "name": "pgvector",
+        "aliases": [
+          "pgvector"
+        ],
+        "category": "databases"
+      },
+      {
+        "name": "NoSQL",
+        "aliases": [
+          "nosql",
+          "no sql"
+        ],
+        "category": "databases"
+      },
+      {
+        "name": "Docker",
+        "aliases": [
+          "docker"
+        ],
+        "category": "cloud_devops"
+      },
+      {
+        "name": "Kubernetes",
+        "aliases": [
+          "kubernetes",
+          "kubernete",
+          "k8s"
+        ],
+        "category": "cloud_devops"
+      },
+      {
+        "name": "Terraform",
+        "aliases": [
+          "terraform"
+        ],
+        "category": "tools"
+      },
+      {
+        "name": "Ansible",
+        "aliases": [
+          "ansible"
+        ],
+        "category": "tools"
+      },
+      {
+        "name": "Git",
+        "aliases": [
+          "git"
+        ],
+        "category": "tools"
+      },
+      {
+        "name": "GitFlow",
+        "aliases": [
+          "gitflow",
+          "git flow"
+        ],
+        "category": "methodology"
+      },
+      {
+        "name": "GitHub Actions",
+        "aliases": [
+          "github actions"
+        ],
+        "category": "tools"
+      },
+      {
+        "name": "GitHub",
+        "aliases": [
+          "github"
+        ],
+        "category": "platforms"
+      },
+      {
+        "name": "GitLab",
+        "aliases": [
+          "gitlab"
+        ],
+        "category": "platforms"
+      },
+      {
+        "name": "Jenkins",
+        "aliases": [
+          "jenkins"
+        ],
+        "category": "tools"
+      },
+      {
+        "name": "Argo CD",
+        "aliases": [
+          "argo cd",
+          "argocd"
+        ],
+        "category": "tools"
+      },
+      {
+        "name": "Kafka",
+        "aliases": [
+          "kafka",
+          "apache kafka"
+        ],
+        "category": "platforms"
+      },
+      {
+        "name": "RabbitMQ",
+        "aliases": [
+          "rabbitmq"
+        ],
+        "category": "platforms"
+      },
+      {
+        "name": "MLflow",
+        "aliases": [
+          "mlflow"
+        ],
+        "category": "tools"
+      },
+      {
+        "name": "Kubeflow",
+        "aliases": [
+          "kubeflow"
+        ],
+        "category": "platforms"
+      },
+      {
+        "name": "ONNX",
+        "aliases": [
+          "onnx"
+        ],
+        "category": "tools"
+      },
+      {
+        "name": "TensorFlow Serving",
+        "aliases": [
+          "tensorflow serving"
+        ],
+        "category": "tools"
+      },
+      {
+        "name": "Triton Inference Server",
+        "aliases": [
+          "triton inference server",
+          "tritonserver",
+          "triton server"
+        ],
+        "category": "tools"
+      },
+      {
+        "name": "AWS",
+        "aliases": [
+          "aws",
+          "amazon web services"
+        ],
+        "category": "platforms"
+      },
+      {
+        "name": "GCP",
+        "aliases": [
+          "gcp",
+          "google cloud platform",
+          "google cloud"
+        ],
+        "category": "platforms"
+      },
+      {
+        "name": "Azure",
+        "aliases": [
+          "azure",
+          "microsoft azure"
+        ],
+        "category": "platforms"
+      },
+      {
+        "name": "Google Kubernetes Engine",
+        "aliases": [
+          "google kubernetes engine",
+          "gke"
+        ],
+        "category": "platforms"
+      },
+      {
+        "name": "AWS CloudFormation",
+        "aliases": [
+          "aws cloudformation",
+          "cloudformation"
+        ],
+        "category": "tools"
+      },
+      {
+        "name": "AWS CDK",
+        "aliases": [
+          "aws cdk"
+        ],
+        "category": "tools"
+      },
+      {
+        "name": "Linux",
+        "aliases": [
+          "linux"
+        ],
+        "category": "platforms"
+      },
+      {
+        "name": "Ubuntu",
+        "aliases": [
+          "ubuntu"
+        ],
+        "category": "platforms"
+      },
+      {
+        "name": "CentOS",
+        "aliases": [
+          "centos"
+        ],
+        "category": "platforms"
+      },
+      {
+        "name": "Windows",
+        "aliases": [
+          "windows"
+        ],
+        "category": "platforms"
+      },
+      {
+        "name": "Android",
+        "aliases": [
+          "android"
+        ],
+        "category": "platforms"
+      },
+      {
+        "name": "iOS",
+        "aliases": [
+          "ios"
+        ],
+        "category": "platforms"
+      },
+      {
+        "name": "Figma",
+        "aliases": [
+          "figma"
+        ],
+        "category": "tools"
+      },
+      {
+        "name": "FigJam",
+        "aliases": [
+          "figjam"
+        ],
+        "category": "tools"
+      },
+      {
+        "name": "Sketch",
+        "aliases": [
+          "sketch"
+        ],
+        "category": "tools"
+      },
+      {
+        "name": "Adobe XD",
+        "aliases": [
+          "adobe xd"
+        ],
+        "category": "tools"
+      },
+      {
+        "name": "Jira",
+        "aliases": [
+          "jira"
+        ],
+        "category": "tools"
+      },
+      {
+        "name": "Trello",
+        "aliases": [
+          "trello"
+        ],
+        "category": "tools"
+      },
+      {
+        "name": "Notion",
+        "aliases": [
+          "notion"
+        ],
+        "category": "tools"
+      },
+      {
+        "name": "Confluence",
+        "aliases": [
+          "confluence"
+        ],
+        "category": "tools"
+      },
+      {
+        "name": "Lucidchart",
+        "aliases": [
+          "lucidchart"
+        ],
+        "category": "tools"
+      },
+      {
+        "name": "GitHub Copilot",
+        "aliases": [
+          "github copilot",
+          "copilot"
+        ],
+        "category": "tools"
+      },
+      {
+        "name": "Cursor",
+        "aliases": [
+          "cursor"
+        ],
+        "category": "tools"
+      },
+      {
+        "name": "ChatGPT",
+        "aliases": [
+          "chatgpt"
+        ],
+        "category": "tools"
+      },
+      {
+        "name": "Claude",
+        "aliases": [
+          "claude"
+        ],
+        "category": "tools"
+      },
+      {
+        "name": "Gemini",
+        "aliases": [
+          "gemini"
+        ],
+        "category": "tools"
+      },
+      {
+        "name": "REST API",
+        "aliases": [
+          "rest api",
+          "restful api",
+          "rest apis",
+          "restful"
+        ],
+        "category": "concepts"
+      },
+      {
+        "name": "gRPC",
+        "aliases": [
+          "grpc"
+        ],
+        "category": "architecture"
+      },
+      {
+        "name": "Microservices",
+        "aliases": [
+          "microservices",
+          "microservice",
+          "microservice architecture"
+        ],
+        "category": "architecture"
+      },
+      {
+        "name": "Software Architecture",
+        "aliases": [
+          "software architecture"
+        ],
+        "category": "architecture"
+      },
+      {
+        "name": "System Architecture",
+        "aliases": [
+          "system architecture"
+        ],
+        "category": "architecture"
+      },
+      {
+        "name": "CI/CD",
+        "aliases": [
+          "ci/cd",
+          "ci / cd",
+          "continuous integration",
+          "continuous delivery"
+        ],
+        "category": "methodology"
+      },
+      {
+        "name": "Agile",
+        "aliases": [
+          "agile"
+        ],
+        "category": "methodology"
+      },
+      {
+        "name": "Scrum",
+        "aliases": [
+          "scrum"
+        ],
+        "category": "methodology"
+      },
+      {
+        "name": "Kanban",
+        "aliases": [
+          "kanban"
+        ],
+        "category": "methodology"
+      },
+      {
+        "name": "Waterfall",
+        "aliases": [
+          "waterfall"
+        ],
+        "category": "methodology"
+      },
+      {
+        "name": "DevOps",
+        "aliases": [
+          "devops"
+        ],
+        "category": "methodology"
+      },
+      {
+        "name": "DevSecOps",
+        "aliases": [
+          "devsecops"
+        ],
+        "category": "methodology"
+      },
+      {
+        "name": "MLOps",
+        "aliases": [
+          "mlops"
+        ],
+        "category": "methodology"
+      },
+      {
+        "name": "Unit Testing",
+        "aliases": [
+          "unit testing",
+          "unit test"
+        ],
+        "category": "methodology"
+      },
+      {
+        "name": "Integration Testing",
+        "aliases": [
+          "integration testing",
+          "integration test"
+        ],
+        "category": "methodology"
+      },
+      {
+        "name": "Test Automation",
+        "aliases": [
+          "test automation",
+          "automation test",
+          "automated testing"
+        ],
+        "category": "methodology"
+      },
+      {
+        "name": "AI",
+        "aliases": [
+          "ai",
+          "artificial intelligence",
+          "tri tue nhan tao"
+        ],
+        "category": "domain"
+      },
+      {
+        "name": "Machine Learning",
+        "aliases": [
+          "machine learning",
+          "ml"
+        ],
+        "category": "domain"
+      },
+      {
+        "name": "Deep Learning",
+        "aliases": [
+          "deep learning"
+        ],
+        "category": "domain"
+      },
+      {
+        "name": "Computer Vision",
+        "aliases": [
+          "computer vision"
+        ],
+        "category": "domain"
+      },
+      {
+        "name": "NLP",
+        "aliases": [
+          "nlp",
+          "natural language processing"
+        ],
+        "category": "domain"
+      },
+      {
+        "name": "LLM",
+        "aliases": [
+          "llm",
+          "large language models",
+          "large language model",
+          "llms"
+        ],
+        "category": "domain"
+      },
+      {
+        "name": "RAG",
+        "aliases": [
+          "rag",
+          "retrieval augmented generation",
+          "retrieval-augmented generation"
+        ],
+        "category": "architecture"
+      },
+      {
+        "name": "UI/UX",
+        "aliases": [
+          "ui/ux",
+          "ui-ux",
+          "ux/ui"
+        ],
+        "category": "domain"
+      },
+      {
+        "name": ".NET Core",
+        "aliases": [
+          ".net core",
+          "dotnet core"
+        ],
+        "category": "frameworks_libraries"
+      },
+      {
+        "name": "ASP.NET Core",
+        "aliases": [
+          "asp.net core",
+          "asp net core",
+          "aspnetcore"
+        ],
+        "category": "frameworks_libraries"
+      },
+      {
+        "name": "Power BI",
+        "aliases": [
+          "power bi",
+          "powerbi",
+          "microsoft power bi"
+        ],
+        "category": "tools"
+      },
+      {
+        "name": "Magento 2",
+        "aliases": [
+          "magento 2",
+          "magento2"
+        ],
+        "category": "platforms"
+      },
+      {
+        "name": "Shopify",
+        "aliases": [
+          "shopify"
+        ],
+        "category": "platforms"
+      },
+      {
+        "name": "InVision",
+        "aliases": [
+          "invision"
+        ],
+        "category": "tools"
+      },
+      {
+        "name": "API",
+        "aliases": [
+          "api"
+        ],
+        "category": "concepts"
+      },
+      {
+        "name": "Marketing",
+        "aliases": [
+          "marketing"
+        ],
+        "category": "domain"
+      },
+      {
+        "name": "Embedded",
+        "aliases": [
+          "embedded"
+        ],
+        "category": "domain"
+      },
+      {
+        "name": "RTOS",
+        "aliases": [
+          "rtos"
+        ],
+        "category": "platforms"
+      },
+      {
+        "name": "Kernel",
+        "aliases": [
+          "kernel"
+        ],
+        "category": "concepts"
+      },
+      {
+        "name": "Banking and Finance",
+        "aliases": [
+          "banking and finance",
+          "banking & finance"
+        ],
+        "category": "domain"
+      },
+      {
+        "name": "E-commerce",
+        "aliases": [
+          "e-commerce",
+          "ecommerce",
+          "e commerce"
+        ],
+        "category": "domain"
+      },
+      {
+        "name": "Sales B2B",
+        "aliases": [
+          "sales b2b",
+          "b2b sales"
+        ],
+        "category": "domain"
+      },
+      {
+        "name": "Bán hàng",
+        "aliases": [
+          "bán hàng",
+          "ban hang"
+        ],
+        "category": "domain"
+      },
+      {
+        "name": "Phát triển kinh doanh",
+        "aliases": [
+          "phát triển kinh doanh",
+          "phat trien kinh doanh"
+        ],
+        "category": "domain"
+      },
+      {
+        "name": "AngularJS",
+        "aliases": [
+          "angularjs",
+          "angular.js"
+        ],
+        "category": "frameworks_libraries"
+      },
+      {
+        "name": "Quality Assurance",
+        "aliases": [
+          "quality assurance",
+          "qa"
+        ],
+        "category": "methodology"
+      }
+    ],
+    "role": [
+      {
+        "name": "Backend Developer",
+        "aliases": [
+          "backend developer",
+          "back-end developer",
+          "back end developer",
+          "backend"
+        ],
+        "category": "role"
+      },
+      {
+        "name": "Frontend Developer",
+        "aliases": [
+          "frontend developer",
+          "front-end developer",
+          "front end developer",
+          "frontend"
+        ],
+        "category": "role"
+      },
+      {
+        "name": "Fullstack Developer",
+        "aliases": [
+          "fullstack developer",
+          "full stack developer",
+          "full-stack developer"
+        ],
+        "category": "role"
+      },
+      {
+        "name": "Software Engineer",
+        "aliases": [
+          "software engineer",
+          "software developer",
+          "lập trình viên",
+          "lap trinh vien"
+        ],
+        "category": "role"
+      },
+      {
+        "name": "QA/QC Engineer",
+        "aliases": [
+          "qa/qc engineer",
+          "qa engineer",
+          "qc engineer",
+          "tester",
+          "automation tester",
+          "quality assurance"
+        ],
+        "category": "role"
+      },
+      {
+        "name": "Business Analyst",
+        "aliases": [
+          "business analyst",
+          "ba",
+          "business analysis"
+        ],
+        "category": "role"
+      },
+      {
+        "name": "Project Manager",
+        "aliases": [
+          "project manager",
+          "project management",
+          "quản lý dự án",
+          "quan ly du an"
+        ],
+        "category": "role"
+      },
+      {
+        "name": "DevOps Engineer",
+        "aliases": [
+          "devops engineer"
+        ],
+        "category": "role"
+      },
+      {
+        "name": "UI/UX Designer",
+        "aliases": [
+          "ui/ux designer",
+          "ui ux designer"
+        ],
+        "category": "role"
+      },
+      {
+        "name": "IT Specialist",
+        "aliases": [
+          "it specialist"
+        ],
+        "category": "role"
+      },
+      {
+        "name": "Data Engineer",
+        "aliases": [
+          "data engineer"
+        ],
+        "category": "role"
+      },
+      {
+        "name": "Data Analyst",
+        "aliases": [
+          "data analyst"
+        ],
+        "category": "role"
+      },
+      {
+        "name": "Data Scientist",
+        "aliases": [
+          "data scientist"
+        ],
+        "category": "role"
+      },
+      {
+        "name": "Machine Learning / AI Engineer",
+        "aliases": [
+          "machine learning / ai engineer"
+        ],
+        "category": "role"
+      },
+      {
+        "name": "Mobile Developer",
+        "aliases": [
+          "mobile developer"
+        ],
+        "category": "role"
+      },
+      {
+        "name": "System Engineer",
+        "aliases": [
+          "system engineer"
+        ],
+        "category": "role"
+      },
+      {
+        "name": "Network Engineer",
+        "aliases": [
+          "network engineer"
+        ],
+        "category": "role"
+      },
+      {
+        "name": "Security Engineer",
+        "aliases": [
+          "security engineer"
+        ],
+        "category": "role"
+      },
+      {
+        "name": "Product Manager",
+        "aliases": [
+          "product manager"
+        ],
+        "category": "role"
+      },
+      {
+        "name": "Product Owner",
+        "aliases": [
+          "product owner"
+        ],
+        "category": "role"
+      },
+      {
+        "name": "Scrum Master",
+        "aliases": [
+          "scrum master"
+        ],
+        "category": "role"
+      },
+      {
+        "name": "Solutions Architect",
+        "aliases": [
+          "solutions architect",
+          "solution architect"
+        ],
+        "category": "role"
+      },
+      {
+        "name": "Technical Lead",
+        "aliases": [
+          "technical lead"
+        ],
+        "category": "role"
+      },
+      {
+        "name": "Architecture",
+        "aliases": [
+          "architecture"
+        ],
+        "category": "role"
+      },
+      {
+        "name": "Engineering Management",
+        "aliases": [
+          "engineering management"
+        ],
+        "category": "role"
+      },
+      {
+        "name": "IT Audit/Risk",
+        "aliases": [
+          "it audit/risk"
+        ],
+        "category": "role"
+      },
+      {
+        "name": "Interpreter / Translator",
+        "aliases": [
+          "interpreter / translator",
+          "interpreter/ translator",
+          "interpreter/translator"
+        ],
+        "category": "role"
+      }
+    ],
+    "seniority": [
+      {
+        "name": "Internship",
+        "aliases": [
+          "internship",
+          "intern",
+          "thực tập",
+          "thuc tap",
+          "thực tập sinh",
+          "thuc tap sinh"
+        ],
+        "category": "seniority"
+      },
+      {
+        "name": "Fresher",
+        "aliases": [
+          "fresher",
+          "fresh graduate"
+        ],
+        "category": "seniority"
+      },
+      {
+        "name": "Junior",
+        "aliases": [
+          "junior",
+          "jr",
+          "jr."
+        ],
+        "category": "seniority"
+      },
+      {
+        "name": "Middle",
+        "aliases": [
+          "middle",
+          "mid",
+          "mid-level",
+          "mid level"
+        ],
+        "category": "seniority"
+      },
+      {
+        "name": "Senior",
+        "aliases": [
+          "senior",
+          "sr",
+          "sr."
+        ],
+        "category": "seniority"
+      },
+      {
+        "name": "Lead",
+        "aliases": [
+          "lead",
+          "leader",
+          "team lead"
+        ],
+        "category": "seniority"
+      },
+      {
+        "name": "Manager",
+        "aliases": [
+          "manager",
+          "quản lý",
+          "quan ly"
+        ],
+        "category": "seniority"
+      },
+      {
+        "name": "Director",
+        "aliases": [
+          "director",
+          "giám đốc",
+          "giam doc"
+        ],
+        "category": "seniority"
+      },
+      {
+        "name": "All levels",
+        "aliases": [
+          "all levels",
+          "mọi cấp độ",
+          "moi cap do",
+          "all level"
+        ],
+        "category": "seniority"
+      }
+    ],
+    "city": [
+      {
+        "name": "Hà Nội",
+        "aliases": [
+          "hà nội",
+          "ha noi",
+          "hanoi",
+          "tp hà nội",
+          "tp ha noi",
+          "thành phố hà nội",
+          "thanh pho ha noi"
+        ],
+        "category": "city"
+      },
+      {
+        "name": "Hồ Chí Minh",
+        "aliases": [
+          "hồ chí minh",
+          "ho chi minh",
+          "hcm",
+          "hcmc",
+          "tp.hcm",
+          "tp hcm",
+          "ho chi minh city",
+          "saigon",
+          "sài gòn",
+          "sai gon"
+        ],
+        "category": "city"
+      },
+      {
+        "name": "Đà Nẵng",
+        "aliases": [
+          "đà nẵng",
+          "da nang",
+          "danang",
+          "tp đà nẵng",
+          "tp da nang"
+        ],
+        "category": "city"
+      },
+      {
+        "name": "Đồng Nai",
+        "aliases": [
+          "đồng nai",
+          "dong nai"
+        ],
+        "category": "city"
+      },
+      {
+        "name": "Bình Thuận",
+        "aliases": [
+          "bình thuận",
+          "binh thuan"
+        ],
+        "category": "city"
+      },
+      {
+        "name": "Hải Phòng",
+        "aliases": [
+          "hải phòng",
+          "hai phong",
+          "haiphong"
+        ],
+        "category": "city"
+      },
+      {
+        "name": "Cần Thơ",
+        "aliases": [
+          "cần thơ",
+          "can tho",
+          "cantho"
+        ],
+        "category": "city"
+      },
+      {
+        "name": "Bắc Ninh",
+        "aliases": [
+          "bắc ninh",
+          "bac ninh"
+        ],
+        "category": "city"
+      },
+      {
+        "name": "Bình Dương",
+        "aliases": [
+          "bình dương",
+          "binh duong"
+        ],
+        "category": "city"
+      },
+      {
+        "name": "Hưng Yên",
+        "aliases": [
+          "hưng yên",
+          "hung yen"
+        ],
+        "category": "city"
+      },
+      {
+        "name": "Hải Dương",
+        "aliases": [
+          "hải dương",
+          "hai duong"
+        ],
+        "category": "city"
+      }
+    ],
+    "foreign_language": [
+      {
+        "name": "English",
+        "aliases": [
+          "english",
+          "tiếng anh",
+          "tieng anh",
+          "anh ngữ",
+          "anh ngu"
+        ],
+        "category": "foreign_language"
+      },
+      {
+        "name": "Japanese",
+        "aliases": [
+          "japanese",
+          "tiếng nhật",
+          "tieng nhat",
+          "nhật ngữ",
+          "nhat ngu"
+        ],
+        "category": "foreign_language"
+      },
+      {
+        "name": "Korean",
+        "aliases": [
+          "korean",
+          "tiếng hàn",
+          "tieng han"
+        ],
+        "category": "foreign_language"
+      },
+      {
+        "name": "Chinese",
+        "aliases": [
+          "chinese",
+          "tiếng trung",
+          "tieng trung",
+          "mandarin"
+        ],
+        "category": "foreign_language"
+      },
+      {
+        "name": "French",
+        "aliases": [
+          "french",
+          "tiếng pháp",
+          "tieng phap"
+        ],
+        "category": "foreign_language"
+      },
+      {
+        "name": "German",
+        "aliases": [
+          "german",
+          "tiếng đức",
+          "tieng duc"
+        ],
+        "category": "foreign_language"
+      },
+      {
+        "name": "Spanish",
+        "aliases": [
+          "spanish",
+          "tiếng tây ban nha",
+          "tieng tay ban nha"
+        ],
+        "category": "foreign_language"
+      },
+      {
+        "name": "Russian",
+        "aliases": [
+          "russian",
+          "tiếng nga",
+          "tieng nga"
+        ],
+        "category": "foreign_language"
+      },
+      {
+        "name": "Vietnamese",
+        "aliases": [
+          "vietnamese",
+          "tiếng việt",
+          "tieng viet"
+        ],
+        "category": "foreign_language"
+      }
+    ],
+    "degree": [
+      {
+        "name": "bachelor",
+        "aliases": [
+          "bachelor",
+          "đại học / cử nhân",
+          "dai hoc / cu nhan",
+          "đại học",
+          "dai hoc",
+          "cử nhân",
+          "cu nhan",
+          "bachelor degree",
+          "bachelors degree"
+        ],
+        "category": "degree"
+      },
+      {
+        "name": "master",
+        "aliases": [
+          "master",
+          "thạc sĩ",
+          "thac si",
+          "masters degree"
+        ],
+        "category": "degree"
+      },
+      {
+        "name": "doctorate",
+        "aliases": [
+          "doctorate",
+          "tiến sĩ",
+          "tien si",
+          "phd",
+          "ph.d."
+        ],
+        "category": "degree"
+      },
+      {
+        "name": "associate",
+        "aliases": [
+          "associate",
+          "cao đẳng",
+          "cao dang",
+          "college diploma"
+        ],
+        "category": "degree"
+      },
+      {
+        "name": "high_school",
+        "aliases": [
+          "high_school",
+          "trung học phổ thông",
+          "trung hoc pho thong",
+          "thpt"
+        ],
+        "category": "degree"
+      }
+    ],
+    "major": [
+      {
+        "name": "Information Technology",
+        "aliases": [
+          "information technology",
+          "cntt",
+          "công nghệ thông tin",
+          "cong nghe thong tin"
+        ],
+        "category": "major"
+      },
+      {
+        "name": "Computer Science",
+        "aliases": [
+          "computer science",
+          "khoa học máy tính",
+          "khoa hoc may tinh"
+        ],
+        "category": "major"
+      },
+      {
+        "name": "Software Engineering",
+        "aliases": [
+          "software engineering",
+          "kỹ thuật phần mềm",
+          "ky thuat phan mem",
+          "công nghệ phần mềm",
+          "cong nghe phan mem"
+        ],
+        "category": "major"
+      },
+      {
+        "name": "Information Systems",
+        "aliases": [
+          "information systems",
+          "hệ thống thông tin",
+          "he thong thong tin"
+        ],
+        "category": "major"
+      },
+      {
+        "name": "Information Security",
+        "aliases": [
+          "information security",
+          "an toàn thông tin",
+          "an toan thong tin"
+        ],
+        "category": "major"
+      },
+      {
+        "name": "Data Science",
+        "aliases": [
+          "data science",
+          "khoa học dữ liệu",
+          "khoa hoc du lieu"
+        ],
+        "category": "major"
+      },
+      {
+        "name": "Artificial Intelligence",
+        "aliases": [
+          "artificial intelligence",
+          "trí tuệ nhân tạo",
+          "tri tue nhan tao"
+        ],
+        "category": "major"
+      },
+      {
+        "name": "Computer Engineering",
+        "aliases": [
+          "computer engineering",
+          "kỹ thuật máy tính",
+          "ky thuat may tinh"
+        ],
+        "category": "major"
+      },
+      {
+        "name": "Electronics and Telecommunications",
+        "aliases": [
+          "electronics and telecommunications",
+          "điện tử viễn thông",
+          "dien tu vien thong"
+        ],
+        "category": "major"
+      },
+      {
+        "name": "Mathematics",
+        "aliases": [
+          "mathematics",
+          "toán học",
+          "toan hoc"
+        ],
+        "category": "major"
+      },
+      {
+        "name": "Statistics",
+        "aliases": [
+          "statistics",
+          "thống kê",
+          "thong ke"
+        ],
+        "category": "major"
+      },
+      {
+        "name": "Automation",
+        "aliases": [
+          "automation",
+          "tự động hóa",
+          "tu dong hoa"
+        ],
+        "category": "major"
+      }
+    ],
+    "soft_skill": [
+      {
+        "name": "Communication",
+        "aliases": [
+          "communication",
+          "giao tiếp",
+          "giao tiep"
+        ],
+        "category": "soft_skill"
+      },
+      {
+        "name": "Teamwork",
+        "aliases": [
+          "teamwork",
+          "làm việc nhóm",
+          "lam viec nhom"
+        ],
+        "category": "soft_skill"
+      },
+      {
+        "name": "Problem Solving",
+        "aliases": [
+          "problem solving",
+          "giải quyết vấn đề",
+          "giai quyet van de"
+        ],
+        "category": "soft_skill"
+      },
+      {
+        "name": "Critical Thinking",
+        "aliases": [
+          "critical thinking",
+          "tư duy phản biện",
+          "tu duy phan bien"
+        ],
+        "category": "soft_skill"
+      },
+      {
+        "name": "Time Management",
+        "aliases": [
+          "time management",
+          "quản lý thời gian",
+          "quan ly thoi gian"
+        ],
+        "category": "soft_skill"
+      },
+      {
+        "name": "Leadership",
+        "aliases": [
+          "leadership",
+          "lãnh đạo",
+          "lanh dao"
+        ],
+        "category": "soft_skill"
+      },
+      {
+        "name": "Self Learning",
+        "aliases": [
+          "self learning",
+          "tự học",
+          "tu hoc"
+        ],
+        "category": "soft_skill"
+      },
+      {
+        "name": "Adaptability",
+        "aliases": [
+          "adaptability",
+          "thích nghi",
+          "thich nghi"
+        ],
+        "category": "soft_skill"
+      },
+      {
+        "name": "Analytical Thinking",
+        "aliases": [
+          "analytical thinking"
+        ],
+        "category": "soft_skill"
+      },
+      {
+        "name": "Attention to Detail",
+        "aliases": [
+          "attention to detail"
+        ],
+        "category": "soft_skill"
+      },
+      {
+        "name": "Mentoring",
+        "aliases": [
+          "mentoring"
+        ],
+        "category": "soft_skill"
+      },
+      {
+        "name": "Ownership",
+        "aliases": [
+          "ownership"
+        ],
+        "category": "soft_skill"
+      },
+      {
+        "name": "Decision Making",
+        "aliases": [
+          "decision making"
+        ],
+        "category": "soft_skill"
+      },
+      {
+        "name": "Conflict Resolution",
+        "aliases": [
+          "conflict resolution"
+        ],
+        "category": "soft_skill"
+      },
+      {
+        "name": "Stakeholder Management",
+        "aliases": [
+          "stakeholder management"
+        ],
+        "category": "soft_skill"
+      },
+      {
+        "name": "Presentation",
+        "aliases": [
+          "presentation"
+        ],
+        "category": "soft_skill"
+      },
+      {
+        "name": "Work Planning",
+        "aliases": [
+          "work planning"
+        ],
+        "category": "soft_skill"
+      }
+    ],
+    "knowledge": [
+      {
+        "name": "Agile",
+        "aliases": [
+          "agile"
+        ],
+        "category": "knowledge"
+      },
+      {
+        "name": "Scrum",
+        "aliases": [
+          "scrum"
+        ],
+        "category": "knowledge"
+      },
+      {
+        "name": "REST API",
+        "aliases": [
+          "rest api",
+          "restful api"
+        ],
+        "category": "knowledge"
+      },
+      {
+        "name": "Microservices",
+        "aliases": [
+          "microservices",
+          "microservice"
+        ],
+        "category": "knowledge"
+      },
+      {
+        "name": "OOP",
+        "aliases": [
+          "oop",
+          "object oriented programming"
+        ],
+        "category": "knowledge"
+      },
+      {
+        "name": "CI/CD",
+        "aliases": [
+          "ci/cd",
+          "ci / cd"
+        ],
+        "category": "knowledge"
+      },
+      {
+        "name": "Design Patterns",
+        "aliases": [
+          "design patterns",
+          "design pattern"
+        ],
+        "category": "knowledge"
+      },
+      {
+        "name": "Data Structures & Algorithms",
+        "aliases": [
+          "data structures & algorithms",
+          "dsa"
+        ],
+        "category": "knowledge"
+      }
+    ],
+    "work_mode": [
+      {
+        "name": "onsite",
+        "aliases": [
+          "onsite",
+          "on-site",
+          "on site",
+          "trực tiếp",
+          "truc tiep",
+          "tại văn phòng",
+          "tai van phong"
+        ],
+        "category": "work_mode"
+      },
+      {
+        "name": "hybrid",
+        "aliases": [
+          "hybrid",
+          "kết hợp",
+          "ket hop"
+        ],
+        "category": "work_mode"
+      },
+      {
+        "name": "remote",
+        "aliases": [
+          "remote",
+          "từ xa",
+          "tu xa"
+        ],
+        "category": "work_mode"
+      }
+    ],
+    "currency": [
+      {
+        "name": "VND",
+        "aliases": [
+          "vnd",
+          "vnđ",
+          "đồng việt nam",
+          "dong viet nam",
+          "₫"
+        ],
+        "category": "currency"
+      },
+      {
+        "name": "USD",
+        "aliases": [
+          "usd",
+          "us dollar",
+          "us$"
+        ],
+        "category": "currency"
+      },
+      {
+        "name": "EUR",
+        "aliases": [
+          "eur",
+          "euro",
+          "€"
+        ],
+        "category": "currency"
+      }
+    ],
+    "salary_period": [
+      {
+        "name": "month",
+        "aliases": [
+          "month",
+          "monthly",
+          "tháng",
+          "thang"
+        ],
+        "category": "salary_period"
+      },
+      {
+        "name": "year",
+        "aliases": [
+          "year",
+          "yearly",
+          "annually",
+          "năm",
+          "nam"
+        ],
+        "category": "salary_period"
+      },
+      {
+        "name": "week",
+        "aliases": [
+          "week",
+          "weekly",
+          "tuần",
+          "tuan"
+        ],
+        "category": "salary_period"
+      },
+      {
+        "name": "day",
+        "aliases": [
+          "day",
+          "daily",
+          "ngày",
+          "ngay"
+        ],
+        "category": "salary_period"
+      },
+      {
+        "name": "hour",
+        "aliases": [
+          "hour",
+          "hourly",
+          "giờ",
+          "gio"
+        ],
+        "category": "salary_period"
+      }
+    ],
+    "salary_basis": [
+      {
+        "name": "gross",
+        "aliases": [
+          "gross",
+          "trước thuế",
+          "truoc thue"
+        ],
+        "category": "salary_basis"
+      },
+      {
+        "name": "net",
+        "aliases": [
+          "net",
+          "sau thuế",
+          "sau thue"
+        ],
+        "category": "salary_basis"
+      }
+    ],
+    "requirement": [
+      {
+        "name": "required",
+        "aliases": [
+          "required",
+          "mandatory",
+          "bắt buộc",
+          "bat buoc"
+        ],
+        "category": "requirement"
+      },
+      {
+        "name": "preferred",
+        "aliases": [
+          "preferred",
+          "ưu tiên",
+          "uu tien",
+          "nice to have"
+        ],
+        "category": "requirement"
+      },
+      {
+        "name": "unspecified",
+        "aliases": [
+          "unspecified",
+          "chưa xác định",
+          "chua xac dinh"
+        ],
+        "category": "requirement"
+      }
+    ]
+  }
+}
