@@ -71,7 +71,7 @@ class CanonicalAtomicTests(unittest.TestCase):
         j=job();j['skills']=[{'name':n,'category':'technical','requirement_type':req} for n,req in [('cpp','preferred'),('Cplus','required'),('C/C++','unspecified')]]
         out=c.clean_record(j)
         self.assertEqual(len(out['skills']),2)
-        self.assertEqual(next(s for s in out['skills'] if s['name']=='C++')['requirement_type'],'required')
+        self.assertEqual(next(s for s in out['skills'] if s['name']=='C++'),{'name':'C++','category':'programming_languages'})
     def test_record_copy_lineage_and_idempotence(self):
         j=job(skills=['C/C++','JS'],extra_skills=['Agile & Scrum']);before=copy.deepcopy(j);out=c.clean_record(j)
         self.assertEqual(j,before)

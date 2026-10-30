@@ -352,37 +352,27 @@ LIMIT 10;
 Mã thoát của chương trình: `0` hoàn thành, `1` thiếu cookie mặc định/không có bản ghi hợp lệ, `2` xử lý một phần, `3` browser cần đăng nhập, `4` lỗi DB/schema, `130` người dùng dừng.
 
 
-## Làm sạch staging bổ sung
+## Analytics và hợp đồng dữ liệu 1.2
 
-Bộ quy tắc chung ở `data_preprocessing/staging_cleaning.py` được gọi bởi cả hai normalizer. Phiên bản quy tắc hiện tại `2026.10.29.1` tách biệt với schema 30 trường phiên bản `1.1`.
+Từ 30/10/2026: bỏ `requirement_type` khỏi kỹ năng, học vấn và ngoại ngữ trong dữ liệu chuẩn hóa và DB. Vẫn 30 trường cấp cao; cấu trúc lồng thay đổi nên consumer cũ cần cập nhật. Phiên bản quy tắc `2026.10.30.1`.
 
-Công cụ bảo trì đọc raw đã lưu, giữ nguyên lịch sử quan sát, dry-run mặc định:
+- [Kiến trúc trực quan raw → staging → analytics → Power BI và DW vật lý đề xuất](docs/KIEN_TRUC_DW_VA_ANALYTICS.md).
+- [Quy tắc alias dùng chung](data_preprocessing/standardization_catalog.json).
+- [SQL analytics hiện hành](data_preprocessing/analytics.sql).
+- [Migration và rollback](tools/configure_analytics.py).
 
 ```powershell
-# Cấu hình DATABASE_URL hoặc PGHOST/PGPORT/PGDATABASE/PGUSER/PGPASSWORD trước.
-py -3.10 tools/clean_staging.py --out reports/cleaning-next/dry-run
-py -3.10 tools/clean_staging.py --apply --out reports/cleaning-next/applied
-# Phục hồi đúng đợt, có kiểm tra snapshot chống ghi đè cập nhật mới.
-py -3.10 tools/clean_staging.py --rollback reports/cleaning-next/applied
+# Cấu hình DATABASE_URL hoặc PG* bên ngoài trước khi chạy DB.
+python -m unittest discover -s tests -v
+python tools/configure_analytics.py --out reports/analytics-next/check
+python tools/configure_analytics.py --apply --out reports/analytics-next/applied
+python tools/configure_analytics.py --rollback reports/analytics-next/applied
 ```
 
-Mỗi lần apply dùng thư mục mới để giữ bằng chứng trước/sau. Công cụ giữ nguyên raw.job_postings; chỉ cập nhật staging đã tồn tại và bổ sung metadata.cleaning trong raw.crawl_runs. Hai view rà soát được tạo khi apply: `staging.job_quality_flags` và `staging.it_candidate_jobs`. View ứng viên IT dùng heuristic theo tiêu đề, cần rà soát ngành trước khi phân tích chính thức.
+Mặc định chỉ kiểm tra, không ghi. Apply chuyển bi sang analytics, bỏ ba cột và cập nhật view; không replay raw hay thay lại các bảng con. Khi model/từ điển không đổi, chạy lại không ghi. Nếu analytics đã tồn tại cùng bi hoặc có dependency ngoài các view quản lý, migration dừng để đối chiếu.
 
-Các snapshot và kiểm chứng của đợt làm sạch trước được giữ local. Bản báo cáo cập nhật để review trên GitHub nằm ở [báo cáo chuẩn hóa ngày 29/10/2026](reports/standardization-20261029/BAO_CAO_CHUAN_HOA_DU_LIEU.md). Database được kiểm tra có 20 lượt TopDev tương ứng 13 mã tin; chưa có dữ liệu ITviec thực. Kiểm thử ITviec dùng fixture riêng.
+Các schema SQL của hai nguồn dùng cho DB mới ở hợp đồng 1.2. DB 1.1 phải migration trước normalizer 1.2. tools/standardize_warehouse.py là entrypoint tương thích tới cấu hình mới, không chạy công cụ chuẩn hóa lại raw. Snapshot cũ 29/10 cần script cũ ở Git/bản lưu tương ứng.
 
+Analytics hiện là lớp view trên staging và bảng tham chiếu nhỏ, chưa phải DW vật lý có ETL/SCD. View analytics.role_skill_demand_latest có số job và phần trăm skill theo role, không lọc mức bắt buộc/ưu tiên. Dữ liệu mẫu chỉ có TopDev; các cờ ngoài IT và taxonomy domain còn cần duyệt.
 
-## Chuẩn hóa toàn diện và lớp BI nguyên tử ngày 29 tháng 10 năm 2026
-
-Quy tắc chung đã được mở rộng ngoài ngôn ngữ lập trình sang các nhóm dữ liệu có cơ sở ánh xạ. Schema 30 trường vẫn là 1.1; phiên bản quy tắc là 2026.10.29.1.
-
-Xem [tài liệu chuẩn hóa và mô hình Power BI](docs/CHUAN_HOA_VA_DU_LIEU_NGUYEN_TU.md). Công cụ `tools/standardize_warehouse.py` có dry-run, apply và rollback có snapshot; `data_preprocessing/bi_atomic.sql` tạo fact và bridge scalar phục vụ BI. Không crawl thêm dữ liệu và không tự suy diễn giá trị thiếu.
-
-### Leader review
-
-- Đọc [báo cáo Markdown và số liệu trước sau](reports/standardization-20261029/BAO_CAO_CHUAN_HOA_DU_LIEU.md).
-- Đọc [quy tắc chuẩn hóa và cấu trúc nguyên tử](docs/CHUAN_HOA_VA_DU_LIEU_NGUYEN_TU.md).
-- Kiểm tra `data_preprocessing/standardization_catalog.json`, `data_preprocessing/bi_atomic.sql` và `tests/test_canonical_atomic.py`.
-- Chạy `python -m unittest discover -s tests -v`. Kiểm thử PostgreSQL tùy chọn dùng `ITVIEC_TEST_DSN` trỏ tới database kiểm thử riêng.
-- Chạy dry-run bằng `python tools/standardize_warehouse.py --out reports/review/dry-run` sau khi cấu hình `DATABASE_URL` hoặc các biến `PG*`. Chỉ thêm `--apply` khi chủ động cập nhật staging và tạo lớp `bi`; công cụ không nạp DWH vật lý.
-
-Snapshot database, cookie, thông tin kết nối và báo cáo Word/PDF được giữ local. Nhánh chỉ bàn giao code, test và tài liệu cần review.
+Báo cáo 29/10 trong reports/ là lịch sử trước thay đổi hợp đồng. Snapshot DB, cookie, thông tin kết nối và báo cáo nhị phân giữ local. Code 1.2 và tài liệu kiến trúc được bàn giao trên nhánh review hiện có theo yêu cầu ngày 30/10.

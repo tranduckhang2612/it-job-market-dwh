@@ -41,7 +41,7 @@ class CommonContractTests(unittest.TestCase):
     def test_exact_thirty_fields_and_nested_shapes(self):
         self.assertEqual(tuple(self.record), normalizer.NORMALIZED_FIELDS)
         self.assertEqual(len(self.record), 30)
-        self.assertEqual(set(self.record["skills"][0]), {"name", "category", "requirement_type"})
+        self.assertEqual(set(self.record["skills"][0]), {"name", "category"})
         self.assertIn("\n", self.record["description"])
         self.assertEqual(self.record["observed_at"], "2026-10-09T03:00:00+07:00")
 
@@ -80,9 +80,9 @@ class CommonContractTests(unittest.TestCase):
                     self.rejected(field, value)
 
     def test_nested_lists_reject_duplicates_and_empty_names(self):
-        skill = {"name": "Python", "category": "programming_language", "requirement_type": "required"}
-        language = {"language": "English", "level_text": None, "requirement_type": "required"}
-        education = {"degree": "bachelor", "majors": ["Computer Science"], "requirement_type": "required"}
+        skill = {"name": "Python", "category": "programming_language"}
+        language = {"language": "English", "level_text": None}
+        education = {"degree": "bachelor", "majors": ["Computer Science"]}
         cases = [("skills", [skill, copy.deepcopy(skill)]), ("skills", [{**skill, "name": " "}]),
                  ("skills", [{**skill, "category": " "}]),
                  ("foreign_languages", [language, copy.deepcopy(language)]),
@@ -113,20 +113,19 @@ class CommonContractTests(unittest.TestCase):
         with self.assertRaises(normalizer.CrawlError):
             normalizer.validate_normalized_job(record)
 
-    def test_required_preferred_are_scoped_to_each_skill(self):
+    def test_both_required_and_preferred_mentions_publish_without_labels(self):
         raw = raw_example()
         raw["your_skills_and_experience"] = "Python is mandatory, Docker preferred."
-        types = {item["name"]: item["requirement_type"]
-                 for item in normalizer.normalize_job(raw, "fixture_run")["skills"]}
-        self.assertEqual(types["Python"], "required")
-        self.assertEqual(types["Docker"], "preferred")
+        skills = {item["name"]: item for item in normalizer.normalize_job(raw, "fixture_run")["skills"]}
+        self.assertEqual(set(skills["Python"]), {"name", "category"})
+        self.assertEqual(set(skills["Docker"]), {"name", "category"})
 
     def test_bare_language_requirement_is_not_lost(self):
         raw = raw_example()
         raw["your_skills_and_experience"] = "English required."
         languages = normalizer.normalize_job(raw, "fixture_run")["foreign_languages"]
         english = next(item for item in languages if item["language"] == "English")
-        self.assertEqual(english["requirement_type"], "required")
+        self.assertNotIn("requirement_type", english)
         self.assertNotIn("IELTS", english["level_text"] or "")
         self.assertNotIn("CEFR", english["level_text"] or "")
 

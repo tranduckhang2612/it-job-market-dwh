@@ -98,7 +98,7 @@ CREATE TABLE IF NOT EXISTS staging.job_observations (
     salary_basis          TEXT CHECK (salary_basis IN ('gross', 'net')),
     salary_status         TEXT NOT NULL
                           CHECK (salary_status IN ('disclosed', 'negotiable', 'not_disclosed', 'unknown')),
-    normalization_version TEXT NOT NULL DEFAULT '1.1' CHECK (btrim(normalization_version) <> ''),
+    normalization_version TEXT NOT NULL DEFAULT '1.2' CHECK (btrim(normalization_version) <> ''),
     normalized_at         TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     UNIQUE (job_id, crawl_run_id),
@@ -214,8 +214,6 @@ CREATE TABLE IF NOT EXISTS staging.job_skills (
     item_order     INTEGER NOT NULL CHECK (item_order > 0),
     name           TEXT NOT NULL CHECK (btrim(name) <> ''),
     category       TEXT NOT NULL CHECK (btrim(category) <> ''),
-    requirement_type TEXT NOT NULL
-                     CHECK (requirement_type IN ('required', 'preferred', 'unspecified')),
     PRIMARY KEY (observation_id, name),
     UNIQUE (observation_id, item_order)
 );
@@ -232,8 +230,6 @@ CREATE TABLE IF NOT EXISTS staging.job_education_requirements (
     observation_id BIGINT NOT NULL REFERENCES staging.job_observations ON DELETE CASCADE,
     item_order     INTEGER NOT NULL CHECK (item_order > 0),
     degree         TEXT CHECK (btrim(degree) <> ''),
-    requirement_type TEXT NOT NULL
-                     CHECK (requirement_type IN ('required', 'preferred', 'unspecified')),
     PRIMARY KEY (observation_id, item_order)
 );
 
@@ -253,8 +249,6 @@ CREATE TABLE IF NOT EXISTS staging.job_foreign_languages (
     item_order     INTEGER NOT NULL CHECK (item_order > 0),
     language       TEXT NOT NULL CHECK (btrim(language) <> ''),
     level_text     TEXT,
-    requirement_type TEXT NOT NULL
-                     CHECK (requirement_type IN ('required', 'preferred', 'unspecified')),
     PRIMARY KEY (observation_id, language),
     UNIQUE (observation_id, item_order)
 );
@@ -293,7 +287,7 @@ SELECT
               FROM staging.job_cities x WHERE x.observation_id = j.observation_id), '[]'::jsonb) AS cities,
     j.work_mode,
     COALESCE((SELECT jsonb_agg(jsonb_build_object(
-                  'name', x.name, 'category', x.category, 'requirement_type', x.requirement_type)
+                  'name', x.name, 'category', x.category)
                   ORDER BY x.item_order)
               FROM staging.job_skills x WHERE x.observation_id = j.observation_id), '[]'::jsonb) AS skills,
     COALESCE((SELECT jsonb_agg(x.knowledge ORDER BY x.item_order)
@@ -306,12 +300,11 @@ SELECT
                   'majors', COALESCE((SELECT jsonb_agg(m.major ORDER BY m.item_order)
                                       FROM staging.job_education_majors m
                                       WHERE m.observation_id = e.observation_id
-                                        AND m.education_order = e.item_order), '[]'::jsonb),
-                  'requirement_type', e.requirement_type) ORDER BY e.item_order)
+                                        AND m.education_order = e.item_order), '[]'::jsonb)) ORDER BY e.item_order)
               FROM staging.job_education_requirements e
               WHERE e.observation_id = j.observation_id), '[]'::jsonb) AS education_requirements,
     COALESCE((SELECT jsonb_agg(jsonb_build_object(
-                  'language', x.language, 'level_text', x.level_text, 'requirement_type', x.requirement_type)
+                  'language', x.language, 'level_text', x.level_text)
                   ORDER BY x.item_order)
               FROM staging.job_foreign_languages x WHERE x.observation_id = j.observation_id), '[]'::jsonb) AS foreign_languages,
     COALESCE((SELECT jsonb_agg(x.soft_skill ORDER BY x.item_order)
@@ -344,7 +337,7 @@ WHERE c.status <> 'running'
   AND c.metadata->'staging'->>'status' = 'succeeded'
   AND c.metadata->'staging'->>'ready_for_dwh' = 'true'
   AND c.metadata->'staging'->>'version' = o.normalization_version
-  AND o.normalization_version = '1.1'
+  AND o.normalization_version = '1.2'
   AND c.metadata->'staging'->'quality'->>'error_count' = '0'
   AND c.metadata->'staging'->'quality'->>'validated_count' = c.metadata->'staging'->>'raw_count'
   AND o.source_job_id IS NOT DISTINCT FROM r.source_job_id
@@ -359,6 +352,6 @@ ORDER BY job_id, observed_at DESC, crawl_run_id DESC;
 COMMENT ON VIEW staging.jobs IS
     'Exactly 30 common cleaned fields; one row per job_id/crawl_run_id.';
 COMMENT ON VIEW staging.dwh_ready_jobs IS
-    'DWH input: exactly 30 fields, complete validated staging batches at version 1.1; preserves observation history.';
+    'DWH input: exactly 30 fields, complete validated staging batches at version 1.2; preserves observation history.';
 
 COMMIT;

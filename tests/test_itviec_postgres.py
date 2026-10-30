@@ -154,8 +154,8 @@ def run_postgres_checks(connection_options):
             with db.transaction():
                 real_write(db, job)
                 db.execute("INSERT INTO staging.job_skills "
-                           "(observation_id,item_order,name,category,requirement_type) "
-                           "SELECT observation_id,999,'Python','programming_language','required' "
+                           "(observation_id,item_order,name,category) "
+                           "SELECT observation_id,999,'Python','programming_language' "
                            "FROM staging.job_observations WHERE job_id=%s AND crawl_run_id=%s",
                            (job["job_id"], run))
         with mock.patch.object(normalizer, "_database_write_job", side_effect=violate_child_constraint):

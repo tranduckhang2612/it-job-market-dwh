@@ -48,7 +48,7 @@ class StagingCleaningTests(unittest.TestCase):
         result = c.clean_record(job)
         self.assertEqual(job, original)
         self.assertEqual([s["name"] for s in result["skills"]], ["React", "Java", "JavaScript", ".NET"])
-        self.assertEqual(result["skills"][0]["requirement_type"], "required")
+        self.assertNotIn("requirement_type", result["skills"][0])
         self.assertEqual(c.clean_record(result), result)
 
     def test_all_addresses_retained(self):
@@ -133,8 +133,8 @@ class StagingCleaningTests(unittest.TestCase):
     def test_requirement_skills_and_korean(self):
         job = td.normalize_job(raw_topdev(requirements="Python required. Docker preferred. Korean communication required."), "run")
         skills = {s["name"]: s for s in job["skills"]}
-        self.assertEqual(skills["Python"]["requirement_type"], "required")
-        self.assertEqual(skills["Docker"]["requirement_type"], "preferred")
+        self.assertNotIn("requirement_type", skills["Python"])
+        self.assertNotIn("requirement_type", skills["Docker"])
         self.assertIn("Korean", [f["language"] for f in job["foreign_languages"]])
 
     def test_negative_requirement_not_added(self):

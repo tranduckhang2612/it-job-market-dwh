@@ -3,7 +3,7 @@
 - Đọc và giữ nguyên thay đổi local hiện có; sao lưu mã, hash và PostgreSQL trước khi sửa.
 - Dùng chung từ điển alias cho hai nguồn; không chỉ chuẩn hóa ngôn ngữ lập trình.
 - Chuẩn hóa kỹ năng, vai trò, cấp bậc, địa danh, ngoại ngữ, học vấn, kỹ năng mềm, enum và kiểu số có bằng chứng.
-- Giữ schema 30 trường 1.1; mảng trong view tương thích không phải bảng vật lý đa trị. Lớp BI đọc fact và các bridge nguyên tử.
+- Từ 30/10 dùng hợp đồng 1.2 với 30 trường cấp cao và không requirement_type trong đầu ra; mảng trong view tương thích không phải bảng vật lý đa trị. Lớp analytics đọc fact và các bridge nguyên tử.
 - Không trộn Java với JavaScript, C với C++, công nghệ với ngoại ngữ hay tiền tệ khác nhau.
 - Chỉ tách nhãn ghép khi các thành phần có trong từ điển; giữ CI/CD, UI/UX và nhãn được định nghĩa là một khái niệm.
 - Nhãn chưa biết giữ để rà soát, không fuzzy match, không đoán dữ liệu thiếu hoặc hợp nhất công ty khác pháp nhân.

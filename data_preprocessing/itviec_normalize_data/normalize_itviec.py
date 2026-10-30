@@ -1165,7 +1165,7 @@ NORMALIZED_FIELDS = (
     "education_requirements", "foreign_languages", "soft_skills", "salary_text", "salary_min", "salary_max",
     "salary_currency", "salary_period", "salary_basis", "salary_status",
 )
-NORMALIZATION_VERSION = "1.1"
+NORMALIZATION_VERSION = "1.2"
 VIETNAM_TZ = timezone(timedelta(hours=7))
 NORMALIZATION_NOTES = [
     "Mỗi tin có đúng 30 trường. Trường đơn chưa xác định là null; danh sách chưa trích xuất được là [].",
@@ -1493,13 +1493,13 @@ def validate_normalized_job(job: dict):
             raise CrawlError("Trường phải là mảng string: " + field)
         if len(job[field]) != len({key(v) for v in job[field]}):
             raise CrawlError("Danh sách chứa giá trị trùng: " + field)
-    for field, names in (("skills", {"name", "category", "requirement_type"}),
-                         ("education_requirements", {"degree", "majors", "requirement_type"}),
-                         ("foreign_languages", {"language", "level_text", "requirement_type"})):
+    for field, names in (("skills", {"name", "category"}),
+                         ("education_requirements", {"degree", "majors"}),
+                         ("foreign_languages", {"language", "level_text"})):
         if not isinstance(job[field], list):
             raise CrawlError("Trường phải là mảng object: " + field)
         for item in job[field]:
-            if not isinstance(item, dict) or set(item) != names or item["requirement_type"] not in {"required", "preferred", "unspecified"}:
+            if not isinstance(item, dict) or set(item) != names:
                 raise CrawlError("Object không đúng schema: " + field)
             if field == "skills" and not all(isinstance(item[n], str) and item[n].strip() for n in ("name", "category")):
                 raise CrawlError("Kỹ năng thiếu tên hoặc nhóm.")
@@ -1514,7 +1514,7 @@ def validate_normalized_job(job: dict):
                     (item["level_text"] is not None and (not isinstance(item["level_text"], str) or not item["level_text"].strip()))):
                 raise CrawlError("Ngoại ngữ không đúng schema.")
         if field == "education_requirements":
-            signatures = [(item['degree'], tuple(sorted(key(v) for v in item['majors'])), item['requirement_type']) for item in job[field]]
+            signatures = [(item['degree'], tuple(sorted(key(v) for v in item['majors']))) for item in job[field]]
         else:
             name = "name" if field == "skills" else "language"
             signatures = [key(item[name]) for item in job[field]]
@@ -1701,10 +1701,10 @@ STAGING_CHILD_COLUMNS = {
     "job_roles": ("role",),
     "job_seniority_levels": ("seniority_level",),
     "job_cities": ("city",),
-    "job_skills": ("name", "category", "requirement_type"),
+    "job_skills": ("name", "category"),
     "job_required_knowledge": ("knowledge",),
-    "job_education_requirements": ("degree", "requirement_type"),
-    "job_foreign_languages": ("language", "level_text", "requirement_type"),
+    "job_education_requirements": ("degree",),
+    "job_foreign_languages": ("language", "level_text"),
     "job_soft_skills": ("soft_skill",),
 }
 _DB_INSERT_COLUMNS = DB_SCALAR_FIELDS + ("normalization_version",)

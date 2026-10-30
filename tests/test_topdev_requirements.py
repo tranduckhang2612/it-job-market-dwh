@@ -27,7 +27,7 @@ class TopDevRequirementsTests(unittest.TestCase):
 
         self.assertIn("Python", skills_by_name)
         self.assertEqual(skills_by_name["Python"]["category"], "programming_languages")
-        self.assertEqual(skills_by_name["Python"]["requirement_type"], "required")
+        self.assertNotIn("requirement_type", skills_by_name["Python"])
 
         self.assertIn("PostgreSQL", skills_by_name)
         self.assertEqual(skills_by_name["PostgreSQL"]["category"], "databases")
@@ -36,7 +36,7 @@ class TopDevRequirementsTests(unittest.TestCase):
         self.assertEqual(skills_by_name["FastAPI"]["category"], "frameworks_libraries")
 
         self.assertIn("Docker", skills_by_name)
-        self.assertEqual(skills_by_name["Docker"]["requirement_type"], "preferred")
+        self.assertNotIn("requirement_type", skills_by_name["Docker"])
 
         self.assertIn("OOP", job["required_knowledge"])
         self.assertIn("REST API", job["required_knowledge"])

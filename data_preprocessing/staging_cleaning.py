@@ -1,6 +1,6 @@
 """Shared, loss-aware finishing rules for the 30-field staging contract.
 
-Schema version stays 1.1; CLEANING_VERSION tracks these semantic rules separately.
+Schema version is 1.2; CLEANING_VERSION tracks these semantic rules separately.
 Raw text, IDs, URLs and observation timestamps are never rewritten here.
 """
 from __future__ import annotations
@@ -10,7 +10,7 @@ import re
 import unicodedata
 from html import unescape
 
-CLEANING_VERSION = "2026.10.29.1"
+CLEANING_VERSION = "2026.10.30.1"
 _EMPTY = {"n/a", "n.a.", "null", "none", "undefined", "-", "--"}
 _INVISIBLE = re.compile("[\u200b\u200c\u200d\u2060\ufeff]")
 
@@ -101,8 +101,8 @@ def clean_record(job):
         k = item["name"].casefold()
         if k not in skills:
             skills[k] = item
-        elif _PRIORITY[item["requirement_type"]] > _PRIORITY[skills[k]["requirement_type"]]:
-            skills[k]["requirement_type"] = item["requirement_type"]
+        elif _PRIORITY[item.get("requirement_type", "unspecified")] > _PRIORITY[skills[k].get("requirement_type", "unspecified")]:
+            skills[k]["requirement_type"] = item.get("requirement_type", "unspecified")
     result["skills"] = list(skills.values())
     for item in result.get("education_requirements", []):
         item["degree"] = clean_text(item.get("degree"))
@@ -118,13 +118,18 @@ def clean_record(job):
             languages[k] = item
         else:
             old = languages[k]
-            if _PRIORITY[item["requirement_type"]] > _PRIORITY[old["requirement_type"]]:
-                old["requirement_type"] = item["requirement_type"]
+            if _PRIORITY[item.get("requirement_type", "unspecified")] > _PRIORITY[old.get("requirement_type", "unspecified")]:
+                old["requirement_type"] = item.get("requirement_type", "unspecified")
             levels = _unique([old["level_text"], item["level_text"]])
             old["level_text"] = "; ".join(levels) or None
     result["foreign_languages"] = list(languages.values())
     from data_preprocessing.canonicalization import standardize_record
-    return standardize_record(result)
+    result = standardize_record(result)
+    # Contract 1.2 deliberately publishes presence, not inferred requirement labels.
+    for field in ("skills", "education_requirements", "foreign_languages"):
+        for item in result[field]:
+            item.pop("requirement_type", None)
+    return result
 
 
 def likely_non_it(job):

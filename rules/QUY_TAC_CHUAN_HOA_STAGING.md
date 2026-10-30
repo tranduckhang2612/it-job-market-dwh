@@ -1,3 +1,5 @@
+> Lịch sử quy ước 1.1. Từ 30/10/2026, cấu trúc lồng 1.2 bỏ requirement_type; xem [hướng dẫn hiện hành](../docs/KIEN_TRUC_DW_VA_ANALYTICS.md). Các ví dụ nhãn yêu cầu bên dưới không còn là hợp đồng đầu ra hiện tại.
+
 # Quy tắc chuẩn hóa dữ liệu tuyển dụng trong staging
 
 ## 1. Mục đích và phạm vi

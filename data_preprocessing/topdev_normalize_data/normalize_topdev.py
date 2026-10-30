@@ -51,7 +51,7 @@ NORMALIZED_FIELDS = (
     "education_requirements", "foreign_languages", "soft_skills", "salary_text", "salary_min", "salary_max",
     "salary_currency", "salary_period", "salary_basis", "salary_status",
 )
-NORMALIZATION_VERSION = "1.1"
+NORMALIZATION_VERSION = "1.2"
 VIETNAM_TZ = timezone(timedelta(hours=7))
 
 _DB_ARRAY_FIELDS = frozenset({"job_roles", "seniority_levels", "cities", "skills",
@@ -62,10 +62,10 @@ STAGING_CHILD_COLUMNS = {
     "job_roles": ("role",),
     "job_seniority_levels": ("seniority_level",),
     "job_cities": ("city",),
-    "job_skills": ("name", "category", "requirement_type"),
+    "job_skills": ("name", "category"),
     "job_required_knowledge": ("knowledge",),
-    "job_education_requirements": ("degree", "requirement_type"),
-    "job_foreign_languages": ("language", "level_text", "requirement_type"),
+    "job_education_requirements": ("degree",),
+    "job_foreign_languages": ("language", "level_text"),
     "job_soft_skills": ("soft_skill",),
 }
 _DB_INSERT_COLUMNS = DB_SCALAR_FIELDS + ("normalization_version",)
@@ -700,13 +700,13 @@ def validate_normalized_job(job: dict):
             raise CrawlError(f"Trường phải là mảng string: {field}")
         if len(job[field]) != len({key(v) for v in job[field]}):
             raise CrawlError(f"Danh sách chứa giá trị trùng: {field}")
-    for field, names in (("skills", {"name", "category", "requirement_type"}),
-                         ("education_requirements", {"degree", "majors", "requirement_type"}),
-                         ("foreign_languages", {"language", "level_text", "requirement_type"})):
+    for field, names in (("skills", {"name", "category"}),
+                         ("education_requirements", {"degree", "majors"}),
+                         ("foreign_languages", {"language", "level_text"})):
         if not isinstance(job[field], list):
             raise CrawlError(f"Trường phải là mảng object: {field}")
         for item in job[field]:
-            if not isinstance(item, dict) or set(item) != names or item["requirement_type"] not in {"required", "preferred", "unspecified"}:
+            if not isinstance(item, dict) or set(item) != names:
                 raise CrawlError(f"Object không đúng schema: {field}")
             if field == "skills" and not all(isinstance(item[n], str) and item[n].strip() for n in ("name", "category")):
                 raise CrawlError("Kỹ năng thiếu tên hoặc nhóm.")
@@ -836,20 +836,20 @@ def stage_database_run(crawl_run_id: str, args) -> int:
                         cur.execute("INSERT INTO staging.job_cities (observation_id, item_order, city) VALUES (%s, %s, %s)",
                                     (obs_id, i, city))
                     for i, sk in enumerate(job["skills"], 1):
-                        cur.execute("INSERT INTO staging.job_skills (observation_id, item_order, name, category, requirement_type) VALUES (%s, %s, %s, %s, %s)",
-                                    (obs_id, i, sk["name"], sk["category"], sk["requirement_type"]))
+                        cur.execute("INSERT INTO staging.job_skills (observation_id, item_order, name, category) VALUES (%s, %s, %s, %s)",
+                                    (obs_id, i, sk["name"], sk["category"]))
                     for i, kn in enumerate(job["required_knowledge"], 1):
                         cur.execute("INSERT INTO staging.job_required_knowledge (observation_id, item_order, knowledge) VALUES (%s, %s, %s)",
                                     (obs_id, i, kn))
                     for i, fl in enumerate(job["foreign_languages"], 1):
-                        cur.execute("INSERT INTO staging.job_foreign_languages (observation_id, item_order, language, level_text, requirement_type) VALUES (%s, %s, %s, %s, %s)",
-                                    (obs_id, i, fl["language"], fl.get("level_text"), fl["requirement_type"]))
+                        cur.execute("INSERT INTO staging.job_foreign_languages (observation_id, item_order, language, level_text) VALUES (%s, %s, %s, %s)",
+                                    (obs_id, i, fl["language"], fl.get("level_text")))
                     for i, ss in enumerate(job["soft_skills"], 1):
                         cur.execute("INSERT INTO staging.job_soft_skills (observation_id, item_order, soft_skill) VALUES (%s, %s, %s)",
                                     (obs_id, i, ss))
                     for i, edu in enumerate(job["education_requirements"], 1):
-                        cur.execute("INSERT INTO staging.job_education_requirements (observation_id, item_order, degree, requirement_type) VALUES (%s, %s, %s, %s)",
-                                    (obs_id, i, edu.get("degree"), edu["requirement_type"]))
+                        cur.execute("INSERT INTO staging.job_education_requirements (observation_id, item_order, degree) VALUES (%s, %s, %s)",
+                                    (obs_id, i, edu.get("degree")))
                         for j, maj in enumerate(edu.get("majors", []), 1):
                             cur.execute("INSERT INTO staging.job_education_majors (observation_id, education_order, item_order, major) VALUES (%s, %s, %s, %s)",
                                         (obs_id, i, j, maj))
