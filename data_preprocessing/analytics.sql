@@ -1,4 +1,4 @@
--- Additive atomic views. Contract 1.2: 30 top-level fields; no published requirement_type labels.
+-- Serving views over persisted step-3 analytics tables. Contract 1.2: 30 top-level fields; no published requirement_type labels.
 CREATE SCHEMA IF NOT EXISTS analytics;
 CREATE TABLE IF NOT EXISTS analytics.pipeline_state (
  singleton BOOLEAN PRIMARY KEY CHECK(singleton), model_sha256 TEXT NOT NULL);
@@ -19,22 +19,22 @@ SELECT o.observation_id,o.job_id,o.source,o.source_job_id,o.job_url,o.crawl_run_
  o.observed_at,o.published_at,(o.observed_at AT TIME ZONE 'Asia/Ho_Chi_Minh')::date AS observed_date,
  o.title,o.company_name,o.work_mode,o.experience_min_years,o.experience_max_years,
  o.salary_min,o.salary_max,o.salary_currency,o.salary_period,o.salary_basis,o.salary_status
-FROM staging.job_observations o JOIN staging.dwh_ready_jobs j USING(job_id,crawl_run_id);
+FROM analytics.job_observations o;
 CREATE OR REPLACE VIEW analytics.fact_job_latest AS
 SELECT DISTINCT ON(job_id) * FROM analytics.fact_job_observations
 ORDER BY job_id,observed_at DESC,crawl_run_id DESC,observation_id DESC;
 
 CREATE OR REPLACE VIEW analytics.attribute_source AS
-SELECT observation_id,'skill'::text AS domain,name AS source_value,category,NULL::integer AS education_order FROM staging.job_skills
-UNION ALL SELECT observation_id,'role',role,'role',NULL FROM staging.job_roles
-UNION ALL SELECT observation_id,'seniority',seniority_level,'seniority',NULL FROM staging.job_seniority_levels
-UNION ALL SELECT observation_id,'city',city,'city',NULL FROM staging.job_cities
-UNION ALL SELECT observation_id,'knowledge',knowledge,'knowledge',NULL FROM staging.job_required_knowledge
-UNION ALL SELECT observation_id,'soft_skill',soft_skill,'soft_skill',NULL FROM staging.job_soft_skills
-UNION ALL SELECT observation_id,'foreign_language',language,'foreign_language',NULL FROM staging.job_foreign_languages
-UNION ALL SELECT observation_id,'degree',degree,'degree',item_order FROM staging.job_education_requirements WHERE degree IS NOT NULL
+SELECT observation_id,'skill'::text AS domain,name AS source_value,category,NULL::integer AS education_order FROM analytics.job_skills
+UNION ALL SELECT observation_id,'role',role,'role',NULL FROM analytics.job_roles
+UNION ALL SELECT observation_id,'seniority',seniority_level,'seniority',NULL FROM analytics.job_seniority_levels
+UNION ALL SELECT observation_id,'city',city,'city',NULL FROM analytics.job_cities
+UNION ALL SELECT observation_id,'knowledge',knowledge,'knowledge',NULL FROM analytics.job_required_knowledge
+UNION ALL SELECT observation_id,'soft_skill',soft_skill,'soft_skill',NULL FROM analytics.job_soft_skills
+UNION ALL SELECT observation_id,'foreign_language',language,'foreign_language',NULL FROM analytics.job_foreign_languages
+UNION ALL SELECT observation_id,'degree',degree,'degree',item_order FROM analytics.job_education_requirements WHERE degree IS NOT NULL
 UNION ALL SELECT m.observation_id,'major',m.major,'major',m.education_order
- FROM staging.job_education_majors m JOIN staging.job_education_requirements e
+ FROM analytics.job_education_majors m JOIN analytics.job_education_requirements e
  ON e.observation_id=m.observation_id AND e.item_order=m.education_order;
 
 CREATE OR REPLACE VIEW analytics.attribute_resolved AS
@@ -70,12 +70,12 @@ CREATE OR REPLACE VIEW analytics.dim_roles AS SELECT value_key AS role_key,canon
 CREATE OR REPLACE VIEW analytics.bridge_job_roles_latest AS SELECT observation_id,job_id,value_key AS role_key FROM analytics.bridge_job_attributes_latest WHERE domain='role';
 CREATE OR REPLACE VIEW analytics.job_foreign_language_levels_latest AS
 SELECT f.observation_id,f.job_id,l.language,trim(level.value) AS level_text
-FROM analytics.fact_job_latest f JOIN staging.job_foreign_languages l USING(observation_id)
+FROM analytics.fact_job_latest f JOIN analytics.job_foreign_languages l USING(observation_id)
 CROSS JOIN LATERAL regexp_split_to_table(l.level_text,'\s*;\s*') AS level(value)
 WHERE l.level_text IS NOT NULL AND btrim(level.value)<>'';
 CREATE OR REPLACE VIEW analytics.job_addresses_latest AS
 SELECT f.observation_id,f.job_id,trim(a.value) AS address_text
-FROM analytics.fact_job_latest f JOIN staging.job_observations o USING(observation_id)
+FROM analytics.fact_job_latest f JOIN analytics.job_observations o USING(observation_id)
 CROSS JOIN LATERAL regexp_split_to_table(o.location_text,E'\n+') AS a(value)
 WHERE o.location_text IS NOT NULL AND btrim(a.value)<>'';
 CREATE OR REPLACE VIEW analytics.dim_observed_date AS

@@ -9,3 +9,5 @@
 - Chạy test từ bản export của Git index/commit, kiểm tra liên kết tài liệu và nội dung staged trước push.
 - Kiểm thử rollback bằng revert trên bản clone riêng; không rollback database thật hoặc nhánh đang bàn giao.
 - Push nhánh được chọn không force, xác minh hash remote trùng commit local và trả link nhánh cùng báo cáo.
+
+- Khi người dùng chỉ định commit message, giữ nguyên nội dung, dấu tiếng Việt và nhánh được chọn.

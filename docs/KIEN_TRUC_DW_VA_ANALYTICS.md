@@ -1,66 +1,108 @@
-# Kiến trúc DW và analytics cho dữ liệu tuyển dụng
+# Luồng staging → analytics vật lý → đầu vào DWH
 
-Cập nhật 30/10/2026. Hợp đồng **1.2** giữ 30 trường cấp cao, bỏ `requirement_type` ở kỹ năng, học vấn, ngoại ngữ trong đầu ra chuẩn hóa, bảng staging và mọi view analytics. Báo cáo 29/10 là lịch sử của hợp đồng 1.1.
+Cập nhật **01/11/2026 — phạm vi chỉ bước 3**. Tài liệu này thay thế thiết kế analytics chỉ gồm view ngày 30/10. Hợp đồng vẫn **1.2**, 30 trường chung, không `requirement_type` ở kỹ năng, học vấn hoặc ngoại ngữ.
 
-## 1 Luồng hiện đang triển khai
+## 1 Ranh giới ba bước xử lý
 
 ```mermaid
 flowchart TD
-    A[ITviec và TopDev] --> B[raw.job_postings — JSONB gốc]
-    B -->|Làm sạch và chuẩn hóa theo batch| C[staging — tin và bảng con nguyên tử]
-    C -->|View đọc staging, không chuẩn hóa lại raw| D[analytics — fact, dimension và bridge views]
-    D --> E[Power BI — số job phân biệt và tỷ lệ phần trăm]
+    A[ITviec và TopDev] --> R[raw: JSONB gốc]
+    R --> P[Bước 1: trích xuất và ánh xạ theo nguồn]
+    P --> C[Bước 2: xử lý đã hoàn tất]
+    C --> S[staging: kết quả hai bước đầu]
+    S --> N[Bước 3: chuẩn hóa toàn diện bằng từ điển]
+    N --> AN[analytics: bảng kết quả vật lý và bảng con]
+    AN --> V[View phân tích và đầu vào DWH]
+    V --> BI[Power BI]
+    AN -. Nhóm triển khai loader riêng .-> DW[dw: fact, dimension, bridge tương lai]
 ```
 
-- **Raw:** giữ bằng chứng gốc; không sửa payload khi bỏ nhãn yêu cầu.
-- **Staging:** lưu kết quả chuẩn hóa chung, một observation_id cho một job trong một lần crawl.
-- **Analytics:** tên mới của lớp bi, không phải bản copy toàn bộ staging. Alias/reference là bảng vật lý nhỏ, các fact/dimension/bridge phân tích là view.
-- **Power BI:** dùng latest để đếm tin phân biệt, history để phân tích lượt quan sát. Latest không chứng minh tin vẫn còn tuyển.
+- `raw` giữ nguyên dữ liệu gốc.
+- **Phần 1 và 2 đã làm xong, giữ nguyên mã và quy tắc hiện có.** Bước 3 nhận dữ liệu staging do hai phần này tạo; không chỉnh, tháo hoặc chuyển quy tắc của chúng. Nếu đầu vào đã chuẩn thì bước 3 giữ kết quả tương đương, không làm lại raw.
+- Bước 3 là lệnh riêng: `tools/configure_analytics.py`. Lệnh đọc staging đủ gate, gọi `analytics_transform.transform_record`, rồi ghi **bảng thật trong analytics**. Không ghi ngược raw/staging, không tạo schema normalize/normalized.
+- Các view fact/bridge/percentage nay đọc bảng analytics, không đọc staging trực tiếp. Thay đổi staging chỉ xuất hiện ở analytics sau lần load thành công tiếp theo.
+- Các bản ghi staging đã chuẩn hóa từ những lần chạy trước được giữ nguyên. Đợt sửa này không replay raw để khôi phục giả định một phiên bản staging cũ.
+- `topdev_normalize_data` và `itviec_normalize_data` là thư mục mã Python, không phải schema database.
 
-Migration này chỉ đổi schema, bỏ ba cột, cập nhật hợp đồng/view và metadata phiên bản. **Không chạy normalizer trên toàn bộ raw, không xóa/chèn lại bảng con.** Cấu hình lại khi model/từ điển không đổi sẽ không ghi. Tối ưu delta-write cho lệnh replay batch hiện có là hạng mục khác; đợt này không tự nhận đã tối ưu mọi writer.
+Ví dụ fixture đầu vào staging còn alias `cpp`, `Cplus`, `C/C++`, `English`: bước 3 đưa về hai skill `C++`, `C` và chuyển English sang bảng ngoại ngữ. Đây là fixture kiểm thử đầu vào còn cần chuẩn hóa, không phải khẳng định phần 1/2 hiện luôn xuất các alias này. Staging không bị sửa bởi bước 3.
 
-## 2 Các đối tượng dùng ngay
+### Mốc nguồn đối chiếu
 
-| Đối tượng | Một dòng là | Hiện có |
-|---|---|---:|
-| staging.job_observations | Một job trong một lần crawl | 20 |
-| analytics.fact_job_observations | Một quan sát đủ gate | 20 |
-| analytics.fact_job_latest | Quan sát đủ gate mới nhất của một job_id | 13 |
-| analytics.dim_skills | Một tên kỹ năng chuẩn | Theo từ điển và nhãn đơn đang gặp |
-| analytics.bridge_job_skills_latest | Một job latest và một skill | 51 |
-| analytics.bridge_job_attributes | Một observation, loại thuộc tính, giá trị và ngữ cảnh học vấn | 178 |
-| analytics.role_skill_demand_latest | Một role–skill với số tin và % | Tổng hợp latest |
-| analytics.skill_demand_latest | Một skill với số tin và % toàn bộ | Tổng hợp latest |
+GitHub main gốc `feff047` và nhánh TopDev `0f90fce` đã có crawl, ánh xạ/kiểm định 30 trường và ghi staging. Phần 1/2 trong đợt này được giữ nguyên **so với 884b1dc**, không phải khôi phục toàn bộ về hai commit gốc. Các sửa đổi 29–30/10 trước đó (kể cả lời gọi `clean_record → standardize_record` trong normalizer) vẫn còn ở mốc 884b1dc. Loader bước 3 mới chỉ ghi analytics; đợt này không tự gỡ hoặc replay các quy tắc upstream đã có. Phân biệt này tránh hiểu nhầm rằng toàn bộ code upstream hiện trùng bản GitHub đầu tiên.
 
-Cột `domain` trong bridge dùng chung nghĩa là **loại thuộc tính** (`skill`, `role`, `city`...), không phải lĩnh vực nghiệp vụ như ngân hàng. Taxonomy skill cũ có nhóm `domain` còn cần duyệt riêng; migration này không tự phân loại lại chúng.
+## 2 Đối tượng bàn giao cho phần load DWH
 
-## 3 Ví dụ dữ liệu nguyên tử
-
-Ví dụ minh họa, không phải số liệu thị trường:
-
-**FactJobLatest**
-
-| observation_id | job_id | title |
-|---:|---|---|
-| 101 | topdev:A | Backend Developer |
-| 102 | itviec:B | Backend Developer |
-
-**DimSkill**
-
-| skill_key | skill_name | category |
+| Đối tượng | Loại | Ý nghĩa |
 |---|---|---|
-| skill:java | Java | programming_languages |
-| skill:docker | Docker | cloud_devops |
+| analytics.job_observations | TABLE | Một job trong một lần crawl; giữ observation_id, job_id, crawl_run_id và trường đơn |
+| analytics.job_skills, job_roles, job_cities… | TABLE | Một giá trị trên mỗi dòng; FK nội bộ analytics, không FK sang staging |
+| analytics.job_education_requirements, job_education_majors | TABLE | Học vấn và chuyên ngành tách riêng, giữ ngữ cảnh liên kết |
+| analytics.load_state | TABLE | Hash đầu vào/đầu ra/transform và thời điểm load của từng observation |
+| analytics.jobs, analytics.dwh_ready_jobs | VIEW | Đủ 30 trường để kiểm tra/trao đổi; danh sách JSON được dựng từ bảng con |
+| analytics.fact_job_observations, fact_job_latest | VIEW | Lịch sử và quan sát mới nhất trên dữ liệu analytics đã lưu |
+| analytics.dim_skills, bridge_job_skills_latest | VIEW | Danh mục skill và liên kết nguyên tử dùng cho phân tích |
+| analytics.role_skill_demand_latest | VIEW | Số job và tỷ lệ nhắc tới skill theo role |
 
-**BridgeJobSkill**
+**Đầu vào vật lý cho DWH nằm ở `analytics.job_observations` và các bảng con**, không còn lấy đầu ra bước 3 từ staging. View 30 trường chỉ là cách biểu diễn tương thích; không phải lý do để nhét mảng vào cột fact DW.
 
-| observation_id | job_id | skill_key |
-|---:|---|---|
-| 101 | topdev:A | skill:java |
-| 101 | topdev:A | skill:docker |
-| 102 | itviec:B | skill:java |
+Khóa nghiệp vụ một quan sát: **(job_id, crawl_run_id)**. Không chỉ dùng job_id vì sẽ mất lịch sử crawl. observation_id giữ lineage từ staging nhưng analytics không phụ thuộc FK vào staging.
 
-Hai job cùng thuộc Backend: Java = 2/2 = 100%; Docker = 1/2 = 50%. Tổng 150% vẫn đúng vì một tin có nhiều skill. Mỗi job chỉ đếm một lần mỗi skill, không đếm lặp lịch sử crawl. Đây là tỷ lệ **nhắc đến kỹ năng**, không phải tỷ lệ yêu cầu bắt buộc.
+Bản local sau khi áp dụng: 20 quan sát, 13 job phân biệt; đó là mẫu hiện có, không phải quy mô toàn thị trường. `dw` vẫn là phần nhóm sẽ triển khai riêng, không được tạo trong đợt này.
+
+## 3 Lệnh chạy và cách load lần đầu/lần sau
+
+Chạy từ thư mục gốc project, với PostgreSQL đã có contract 1.2 và cấu hình kết nối qua `DATABASE_URL` hoặc `PGHOST/PGPORT/PGDATABASE/PGUSER/PGPASSWORD`. Không ghi thông tin đăng nhập vào repo.
+
+```bash
+# Xem trước, không ghi database
+python tools/configure_analytics.py --out reports/analytics-physical/check
+
+# Lần đầu: tạo cấu trúc analytics và nạp tất cả batch staging hợp lệ
+python tools/configure_analytics.py --apply --out reports/analytics-physical/load-01
+
+# Nạp batch mới, dùng một thư mục bằng chứng mới
+python tools/configure_analytics.py --apply --crawl-run-id CRAWL_RUN_ID --out reports/analytics-physical/load-02
+
+# Kiểm tra lại toàn bộ batch; dữ liệu/rule không đổi sẽ không ghi
+python tools/configure_analytics.py --apply --out reports/analytics-physical/recheck-01
+```
+
+`tools/standardize_warehouse.py` là tên lệnh tương thích, gọi cùng loader. `main_topdev.py` / `main_itviec.py` và mã xử lý phần 1/2 được giữ nguyên. Lệnh mới chỉ xử lý bước 3 trên staging đã có; người phụ trách phần 1/2 tiếp tục vận hành chúng như trước. `tools/clean_staging.py` là công cụ replay/sửa lớp staging, **không phải lệnh bước 3**; không chạy nó để chuyển dữ liệu sang analytics.
+
+| Trường hợp | Hành vi loader analytics |
+|---|---|
+| Lần đầu | Nạp mọi quan sát đủ gate và cấu hình serving views |
+| Chạy lại cùng batch, cùng dữ liệu/rule | written_observations=0; không thay loaded_at, không ghi lại bảng con |
+| Batch mới | Chỉ nạp quan sát mới; giữ lịch sử cũ |
+| Cùng khóa quan sát có thay đổi hợp lệ | Chỉ upsert quan sát đó và thay bảng con của nó trong analytics |
+| Từ điển/transform đổi | Tính lại đầu ra analytics cho các quan sát được chọn; không replay raw hoặc ghi staging |
+| Batch lỗi hoặc lineage không đầy đủ | Không xuất một phần batch; chỉ định batch lỗi sẽ báo lỗi |
+| Lỗi giữa lúc ghi | Rollback toàn bộ transaction |
+
+Loader hiện quét các quan sát staging đủ gate để so hash; **incremental ở phần ghi**, chưa phải CDC hoặc chỉ đọc delta. `--crawl-run-id` giới hạn batch nguồn.
+
+Dữ liệu analytics đã xuất là bản lưu độc lập: staging bị sửa/xóa không tự làm mất bản analytics cũ. Bản xuất cũ được giữ khi batch bị đánh lỗi; cần quy trình thu hồi riêng nếu nhóm muốn rút dữ liệu đã công bố, không tự xóa âm thầm.
+
+### Giao ước cho người làm loader DWH
+
+1. Lần đầu đọc toàn bộ bảng analytics, upsert dimension trước rồi fact/bridge trong transaction.
+2. Lần sau đọc các observation mới/đổi theo trạng thái load; upsert bằng (job_id,crawl_run_id), thay bridge chỉ cho quan sát đổi. Chạy lại cùng input không sinh bản ghi trùng.
+3. Chỉ ghi trạng thái đã nạp trong DW sau khi commit/đối soát thành công. Không sửa `analytics.load_state` vì bảng đó thuộc bước 3.
+4. Nếu dùng loaded_at làm watermark, cần cửa sổ đọc chồng và upsert theo khóa; không lấy MAX(timestamp) rồi giả định đã bắt hết các transaction commit muộn. Đây là giao ước thiết kế, chưa có loader DW trong đợt sửa.
+
+```sql
+SELECT count(*) FROM analytics.job_observations;
+SELECT count(DISTINCT job_id) FROM analytics.job_observations;
+SELECT o.job_id,o.crawl_run_id,s.name,s.category
+FROM analytics.job_observations o
+JOIN analytics.job_skills s USING(observation_id)
+ORDER BY o.job_id,o.crawl_run_id,s.item_order;
+
+SELECT o.job_id,o.crawl_run_id,l.loaded_at,l.source_sha256,l.output_sha256
+FROM analytics.job_observations o
+JOIN analytics.load_state l USING(observation_id)
+ORDER BY l.loaded_at,o.observation_id;
+```
 
 ## 4 Mô hình Power BI dùng ngay
 
@@ -107,63 +149,14 @@ Skill share in role = DIVIDE([Jobs with skill in role], [Jobs in role])
 
 Mẫu số giữ cả tin không có skill. Định dạng measure cuối là Percentage. Ví dụ DAX trên xử lý role và skill; slicer thành phố hoặc thuộc tính đa trị khác cần thêm phép lọc TREATAS tương ứng từ bridge đó sang fact. Ngày/nguồn/công ty cần quan hệ trực tiếp phù hợp tới fact. Measures là hướng dẫn cho model đặt đúng tên và quan hệ; chưa nghiệm thu tệp PBIX.
 
-## 5 DW vật lý đề xuất khi nhóm triển khai bước tiếp
+## 5 Kiểm định, khôi phục và giới hạn
 
-**Sơ đồ dưới là thiết kế đề xuất; đợt này chưa tạo schema dw hoặc nạp các bảng DW vật lý.**
-
-```mermaid
-flowchart TD
-    STG[staging — dữ liệu chuẩn hóa] --> LOAD[DW loader — ETL tăng dần theo batch]
-    LOAD --> F
-    LOAD --> SK
-    subgraph DW[dw — kho vật lý đề xuất]
-      F[FactJobObservation — 1 job trong 1 lần quan sát]
-      DT[DimDate] -->|1 tới nhiều| F
-      DS[DimSource] -->|1 tới nhiều| F
-      DC[DimCompany] -->|1 tới nhiều| F
-      F -->|1 tới nhiều| BS[BridgeObservationSkill]
-      SK[DimSkill] -->|1 tới nhiều| BS
-      F -->|1 tới nhiều| BR[BridgeObservationRole]
-      RO[DimRole] -->|1 tới nhiều| BR
-      F -->|1 tới nhiều| BX[Bridge City / Language / Education / SoftSkill]
-      DX[Dimension tương ứng] -->|1 tới nhiều| BX
-    end
-    F --> AN[analytics — view latest, tổng hợp và chỉ tiêu]
-    BS --> AN
-    BR --> AN
-    AN --> PBI[Power BI]
-```
-
-- Dimension có surrogate key do DW quản lý và business key ổn định. Ví dụ Java chỉ có một dòng trong DimSkill; bridge nối nhiều quan sát tới nó.
-- Fact giữ job_id, crawl_run_id, ngày quan sát và các số lương/kinh nghiệm có bằng chứng. Unique business key ngăn nạp trùng một quan sát.
-- Không nhét danh sách kỹ năng vào ô fact, không nối chéo tất cả bridge thành bảng đếm dòng.
-- Loader lưu watermark/batch, lookup/upsert dimension trước, rồi nạp fact/bridge trong transaction. Batch không đổi không nạp lại; quan sát mới ở lần crawl mới vẫn có thể là lịch sử cần giữ.
-- Chốt SCD cho công ty/thuộc tính cần lịch sử theo nghiệp vụ, không tự gộp pháp nhân tên gần giống.
-- Khi DW đối soát xong, đổi nguồn view analytics từ staging sang DW. Power BI tiếp tục đọc analytics.
-
-## 6 Vận hành và tương thích
-
-Kết nối cấu hình bên ngoài bằng DATABASE_URL hoặc PG*. Chạy từ thư mục dự án:
-
-```powershell
-python -m unittest discover -s tests -v
-python tools/configure_analytics.py --out reports/analytics-next/check
-python tools/configure_analytics.py --apply --out reports/analytics-next/applied
-python tools/configure_analytics.py --rollback reports/analytics-next/applied
-```
-
-Mặc định chỉ kiểm tra, không ghi. Mỗi apply dùng thư mục mới. Nếu cả bi và analytics tồn tại thì dừng, không tự nhập hai thiết kế. View ngoài lớp quản lý có dependency sẽ chặn migration, không DROP CASCADE. Rollback có kiểm tra snapshot chống ghi đè cập nhật mới.
-
-DB mới dùng các schema SQL 1.2. DB 1.1 đang chạy cần migration trước normalizer 1.2. Đây là breaking change ở cấu trúc lồng; consumer cũ đọc requirement_type phải cập nhật. Snapshot 29/10 cần script cũ trong bản lưu, không dùng lẫn với snapshot mới.
-
-Các parser nội bộ còn dùng ngữ cảnh bắt buộc/ưu tiên để xử lý phủ định và bằng chứng kinh nghiệm; nhãn tạm đó bị loại ở ranh giới đầu ra, không xuất sang staging/analytics.
-
-## 7 Giới hạn dữ liệu
-
-Mẫu thực tế chỉ có 20 lượt TopDev của 13 tin, chưa có ITviec thực trong DB. 7/13 tin có dấu hiệu ngoài IT theo heuristic cần duyệt. Dữ liệu thiếu giữ NULL; không diễn giải tỷ lệ mẫu nhỏ thành tỷ lệ thị trường. Đổi schema và bỏ nhãn không tự sửa vấn đề phân loại domain nghiệp vụ.
-
-## 8 Tài liệu phương pháp
-
-- [Microsoft Learn — Star schema](https://learn.microsoft.com/en-us/power-bi/guidance/star-schema)
-- [Microsoft Learn — Many-to-many relationships](https://learn.microsoft.com/en-us/power-bi/guidance/relationships-many-to-many)
-- [Microsoft Learn — TREATAS](https://learn.microsoft.com/en-us/dax/treatas-function-dax)
+- Test bao gồm: lần đầu, lặp không ghi (kể cả xmin/loaded_at), batch mới, sửa một quan sát, lỗi giữa transaction, batch lỗi/lineage thiếu, tỷ lệ có job không skill, rollback và chặn rollback cũ.
+- Loader đã được chạy bằng role chỉ có SELECT trên raw/staging; quyền ghi chỉ nằm ở analytics. Kiểm thử này chứng minh bước 3 không cần quyền ghi lớp trước.
+- Mỗi lần `--apply` lưu before.snapshot.json, after.snapshot.json, metrics.json ở thư mục --out. Snapshot chứa dữ liệu local, không commit các file này.
+- Khôi phục database bằng `python tools/configure_analytics.py --rollback THU_MUC_APPLY`. Lệnh kiểm tra đúng trạng thái sau load; thay đổi phát sinh sau đó sẽ chặn rollback. Chỉ lớp analytics được khôi phục, raw/staging giữ nguyên. Gói bàn giao ROLLBACK.sh còn khôi phục mã nguồn đúng preimage đã lưu.
+- Không `DROP ... CASCADE` để xóa consumer của người khác. Đối tượng analytics ngoài danh sách quản lý sẽ được giữ và chặn migration khi cần xem xét.
+- Từ điển chưa bao phủ mọi nhãn: giữ giá trị chưa rõ để rà soát, không fuzzy-match hoặc đoán dữ liệu thiếu. Nhãn ghép không nhận diện đủ không bị tự tách bừa.
+- Taxonomy skill có category=domain vẫn cần duyệt riêng để phân biệt chuyên môn kỹ thuật/lĩnh vực nghiệp vụ; đợt sửa luồng không tự xác nhận taxonomy này đã hoàn chỉnh.
+- `job_pct` là tỷ lệ nhắc đến skill, không phải mức bắt buộc; tổng tỷ lệ các skill có thể vượt 100%. Latest không chứng minh tin vẫn còn tuyển.
+- Chưa có PBIX hoặc bảng DW vật lý riêng được nghiệm thu trong đợt sửa.

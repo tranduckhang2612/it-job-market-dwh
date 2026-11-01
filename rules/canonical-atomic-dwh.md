@@ -1,3 +1,5 @@
+> Từ 01/11/2026, phần ranh giới xử lý và lưu trữ được thay thế bởi [analytics-physical-output.md](analytics-physical-output.md). Hợp đồng 30 trường, bỏ requirement_type vẫn giữ nguyên.
+
 # Quy tắc chuẩn hóa toàn diện và dữ liệu nguyên tử
 
 - Đọc và giữ nguyên thay đổi local hiện có; sao lưu mã, hash và PostgreSQL trước khi sửa.

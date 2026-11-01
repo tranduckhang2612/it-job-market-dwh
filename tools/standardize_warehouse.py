@@ -1,4 +1,4 @@
-"""Compatibility entrypoint: contract 1.2 analytics configuration, without raw replay.
+"""Compatibility entrypoint: persistent step-3 analytics loader, without raw replay.
 
 Historical 2026-10-29 snapshots require the archived matching script.
 New apply/rollback snapshots are produced by configure_analytics.py.

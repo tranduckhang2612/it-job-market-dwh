@@ -1,3 +1,5 @@
+> Từ 01/11/2026, phần ranh giới xử lý và lưu trữ được thay thế bởi [analytics-physical-output.md](analytics-physical-output.md). Hợp đồng 30 trường, bỏ requirement_type vẫn giữ nguyên.
+
 # Hợp đồng analytics phiên bản 1.2
 
 - Yêu cầu mới ngày 30/10 thay thế quy tắc giữ nguyên cấu trúc lồng 1.1: vẫn 30 trường cấp cao, bỏ requirement_type ở kỹ năng, học vấn và ngoại ngữ.

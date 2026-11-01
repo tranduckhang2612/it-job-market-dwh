@@ -1,8 +1,22 @@
 # IT Job Market DWH
 
-Project thu thập tin tuyển dụng việc làm IT (ITviec, TopDev), lưu dữ liệu thô vào PostgreSQL, sau đó làm sạch và ánh xạ về cấu trúc chung gồm 30 trường chuẩn hóa (Schema 1.1).
+## Luồng hiện hành — 01/11/2026
 
-**Luồng dữ liệu:** crawl → JSON thô trong PostgreSQL (`raw`) → chuẩn hóa 30 trường (`staging`) → kiểm định đối chiếu chất lượng → view đầu vào DWH (`staging.dwh_ready_jobs`).
+**raw → phần 1 + 2 đã hoàn tất → staging → bước 3 chuẩn hóa toàn diện → bảng thật analytics → đầu vào DWH / Power BI.**
+
+Chỉ bổ sung bước 3; giữ nguyên code/quy tắc phần 1 và 2. Bước 3 không ghi ngược staging. Folder `topdev_normalize_data` / `itviec_normalize_data` chứa code, không phải schema normalize.
+
+```bash
+python tools/configure_analytics.py --out reports/analytics-physical/check
+python tools/configure_analytics.py --apply --out reports/analytics-physical/load-01
+```
+
+Kết nối qua DATABASE_URL hoặc PG*. Chọn thư mục --out mới cho mỗi lần apply. Xem [cấu trúc bảng, load lần đầu/lần sau và rollback](docs/KIEN_TRUC_DW_VA_ANALYTICS.md). Contract hiện hành là **1.2**, 30 trường, không requirement_type ở kỹ năng/học vấn/ngoại ngữ. Các báo cáo 29–30/10 giữ làm lịch sử, không thay thế hướng dẫn này.
+
+
+Project thu thập tin tuyển dụng việc làm IT (ITviec, TopDev), lưu dữ liệu thô vào PostgreSQL, sau đó làm sạch và ánh xạ về cấu trúc chung gồm 30 trường chuẩn hóa (Schema 1.2).
+
+**Luồng thu thập và tiền xử lý (hai bước đầu):** crawl → JSON thô trong PostgreSQL (`raw`) → chuẩn hóa 30 trường (`staging`) → kiểm định đối chiếu chất lượng → view đầu vào DWH (`staging.dwh_ready_jobs`).
 
 Entry points:
 * **ITviec**: `python main_itviec.py`
@@ -308,7 +322,7 @@ Database đích cũng cần áp dụng schema ở bước 6. `--db-*`, `DATABASE
 
 Các trường chung bao gồm định danh/thời gian, công ty/vị trí, mô tả, vai trò/cấp bậc, địa điểm/hình thức làm việc, kỹ năng, kinh nghiệm, học vấn, ngoại ngữ và lương. Trường đơn chưa biết là `NULL`; danh sách chưa trích xuất được là `[]`. Dữ liệu raw được giữ làm nguồn đối chiếu.
 
-Bộ chuẩn hóa phiên bản `1.1` kiểm tra trường bắt buộc, URL/ID, datetime có múi giờ, kiểu dữ liệu, enum, số hữu hạn, cận min/max, trạng thái lương và phần tử trùng. Sau khi ghi, pipeline đọc lại đủ 30 trường để so sánh với kết quả ánh xạ và thông tin nguồn. Khi xử lý lại, batch tạm ngừng được công bố qua view DWH; nếu có lỗi, cả batch chưa được công bố qua view này. Lỗi nằm trong `raw.crawl_runs.metadata -> 'staging'`.
+Bộ chuẩn hóa phiên bản `1.2` kiểm tra trường bắt buộc, URL/ID, datetime có múi giờ, kiểu dữ liệu, enum, số hữu hạn, cận min/max, trạng thái lương và phần tử trùng. Sau khi ghi, pipeline đọc lại đủ 30 trường để so sánh với kết quả ánh xạ và thông tin nguồn. Khi xử lý lại, batch tạm ngừng được công bố qua view DWH; nếu có lỗi, cả batch chưa được công bố qua view này. Lỗi nằm trong `raw.crawl_runs.metadata -> 'staging'`.
 
 Kiểm định cấu trúc không chứng minh mọi cách diễn đạt tự nhiên đã được trích xuất đầy đủ. Thông tin nguồn không rõ vẫn giữ ở văn bản gốc; các trường số/nhãn tương ứng có thể để trống. Khi so sánh lương, cần cùng `salary_currency`, `salary_period`, `salary_basis` và `salary_status='disclosed'`. Với lịch sử DWH, dùng khóa `(job_id, crawl_run_id)`; khi đếm tin trong kỳ, dùng `COUNT(DISTINCT job_id)`.
 
@@ -320,7 +334,7 @@ Thư mục `tests/` kiểm tra ánh xạ lương/kinh nghiệm/kỹ năng, cấu
 python -m unittest discover -s tests -v
 ```
 
-Mặc định kiểm thử PostgreSQL được bỏ qua. Muốn chạy phần này, đặt biến môi trường `ITVIEC_TEST_DSN` trỏ đến tài khoản test có quyền tạo database. Harness tạo database riêng mang UUID và tự xóa sau kiểm tra. Không dùng DSN/mật khẩu trong source code hoặc commit vào Git.
+Mặc định kiểm thử PostgreSQL được bỏ qua. Muốn chạy phần này, đặt biến môi trường `ITVIEC_TEST_DSN` trỏ đến tài khoản test có quyền tạo database và role (`CREATEDB`, `CREATEROLE`), vì kiểm thử bước 3 xác nhận quyền chỉ đọc raw/staging bằng một role tạm. Harness tạo database riêng mang UUID và tự xóa sau kiểm tra. Không dùng DSN/mật khẩu trong source code hoặc commit vào Git.
 
 ## Xử lý lỗi thường gặp
 
@@ -354,25 +368,6 @@ Mã thoát của chương trình: `0` hoàn thành, `1` thiếu cookie mặc đ�
 
 ## Analytics và hợp đồng dữ liệu 1.2
 
-Từ 30/10/2026: bỏ `requirement_type` khỏi kỹ năng, học vấn và ngoại ngữ trong dữ liệu chuẩn hóa và DB. Vẫn 30 trường cấp cao; cấu trúc lồng thay đổi nên consumer cũ cần cập nhật. Phiên bản quy tắc `2026.10.30.1`.
+Bỏ requirement_type ở cả kỹ năng, học vấn và ngoại ngữ. Từ 01/11/2026, bước 3 ghi bảng thật trong analytics và không ghi lại staging. [Hướng dẫn hiện hành](docs/KIEN_TRUC_DW_VA_ANALYTICS.md) có cấu trúc bảng, lệnh load lần đầu/lần sau, SQL cho người làm DWH và rollback.
 
-- [Kiến trúc trực quan raw → staging → analytics → Power BI và DW vật lý đề xuất](docs/KIEN_TRUC_DW_VA_ANALYTICS.md).
-- [Quy tắc alias dùng chung](data_preprocessing/standardization_catalog.json).
-- [SQL analytics hiện hành](data_preprocessing/analytics.sql).
-- [Migration và rollback](tools/configure_analytics.py).
-
-```powershell
-# Cấu hình DATABASE_URL hoặc PG* bên ngoài trước khi chạy DB.
-python -m unittest discover -s tests -v
-python tools/configure_analytics.py --out reports/analytics-next/check
-python tools/configure_analytics.py --apply --out reports/analytics-next/applied
-python tools/configure_analytics.py --rollback reports/analytics-next/applied
-```
-
-Mặc định chỉ kiểm tra, không ghi. Apply chuyển bi sang analytics, bỏ ba cột và cập nhật view; không replay raw hay thay lại các bảng con. Khi model/từ điển không đổi, chạy lại không ghi. Nếu analytics đã tồn tại cùng bi hoặc có dependency ngoài các view quản lý, migration dừng để đối chiếu.
-
-Các schema SQL của hai nguồn dùng cho DB mới ở hợp đồng 1.2. DB 1.1 phải migration trước normalizer 1.2. tools/standardize_warehouse.py là entrypoint tương thích tới cấu hình mới, không chạy công cụ chuẩn hóa lại raw. Snapshot cũ 29/10 cần script cũ ở Git/bản lưu tương ứng.
-
-Analytics hiện là lớp view trên staging và bảng tham chiếu nhỏ, chưa phải DW vật lý có ETL/SCD. View analytics.role_skill_demand_latest có số job và phần trăm skill theo role, không lọc mức bắt buộc/ưu tiên. Dữ liệu mẫu chỉ có TopDev; các cờ ngoài IT và taxonomy domain còn cần duyệt.
-
-Báo cáo 29/10 trong reports/ là lịch sử trước thay đổi hợp đồng. Snapshot DB, cookie, thông tin kết nối và báo cáo nhị phân giữ local. Code 1.2 và tài liệu kiến trúc được bàn giao trên nhánh review hiện có theo yêu cầu ngày 30/10.
+Báo cáo/snapshot 29–30/10 là lịch sử. Database contract 1.1 cần migration bằng phiên bản script tương ứng trước khi dùng normalizer/loader 1.2; script hiện tại không tự đổi cấu trúc staging. Không commit snapshot DB, cookie hoặc cấu hình đăng nhập.
