@@ -18,7 +18,7 @@ ITviec / TopDev
                      PostgreSQL normalize_data
                                   │
                                   ▼
-                        staging / DWH sau này
+                        analytics nguyên tử → DWH
 ```
 
 ## Ranh giới module
@@ -29,6 +29,7 @@ ITviec / TopDev
 | `data_preprocessing.normalization.role_gate` | Quyết định tin có đúng role và ngôn ngữ được hỗ trợ | SQL hoặc ghi database |
 | `data_preprocessing.normalization.contracts` | Field, version và validation của output | Rule suy luận dữ liệu |
 | `data_preprocessing.normalization.normalizer` | Ánh xạ hai nguồn về hợp đồng chung và tạo metadata bằng chứng | HTTP, transaction hoặc CLI |
+| `data_preprocessing.analytics` | Đọc output normalize_data, tạo fact/dim/bridge, sync và rollback analytics | Gọi lại crawler, role gate, normalizer hoặc ghi ngược nguồn |
 | `data_preprocessing.storage` | Schema/hợp đồng lưu trữ dùng chung | Rule nghiệp vụ theo nguồn |
 | `data_preprocessing.cli` | Parse tham số, kết nối các module, log và exit code | Rule chuẩn hóa chi tiết |
 | `data_preprocessing.sql` | DDL hiện tại và migration theo version | Logic crawler |
@@ -79,3 +80,7 @@ python load_normalize_data.py --dry-run
 
 Không commit cookie, browser session, `.env` hoặc password database. Các file đó
 đã được loại bởi `.gitignore`.
+
+## Lớp analytics nguyên tử mới
+
+[Hợp đồng, 8 nhóm bảng và hướng dẫn load](ANALYTICS_ATOMIC.md) mô tả phần mới ngày 02/11. Nguồn là normalize_data.normalized_jobs 5.1; benefit đã bỏ. Gate/normalizer/crawler/DDL upstream được giữ nguyên tại main e0dc1d4. Loader analytics mặc định chỉ kiểm tra, --apply nạp và thu hồi trong phạm vi chọn; không tự chạy lại raw. Không dùng các gói staging→analytics của nhánh cũ.

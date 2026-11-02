@@ -1,11 +1,25 @@
 # IT Job Market Crawl and Normalization Pipeline
 
+## Bổ sung analytics nguyên tử — 02/11/2026
+
+**Trạng thái DW:** nhóm dùng SQL Server. Bản này hoàn thành normalize_data → analytics trên PostgreSQL; loader/kết nối sang SQL Server DW đang chờ cấu hình, chưa chạy end-to-end.
+
+Luồng mới: **raw → check/chuẩn hóa đã có → normalize_data (5.1) → analytics nguyên tử → load DWH/phân tích**. Không sửa hoặc chạy lại rule upstream trong loader analytics. Bỏ benefit theo yêu cầu. Xem [bảng, cách nạp, SQL và kết quả kiểm thử](docs/ANALYTICS_ATOMIC.md).
+
+```bash
+python load_analytics.py --dry-run
+python load_analytics.py --apply --out reports/analytics/run-001
+```
+
+Chọn đúng DB bằng PG*/DATABASE_URL/--db-*. DB demo thật của đợt này là **it_job_market_v5**; dữ liệu PostgreSQL không đi kèm khi clone repo. --apply đồng bộ cả xóa các observation đã bị rút khỏi nguồn trong phạm vi đã chọn.
+
+
 Luồng dữ liệu hiện tại:
 
 ```text
 ITviec / TopDev → crawler → raw → role/language gate → chuẩn hóa → normalize_data
                                                                ↓
-                                                    staging / DWH (sau này)
+                                                    analytics nguyên tử → DWH (loader riêng)
 ```
 
 JSON lấy từ nguồn được giữ nguyên trong `raw.job_postings.raw_payload`; trạng thái
@@ -163,9 +177,7 @@ rule thay đổi, loader xóa dòng `normalize_data` cũ không còn hợp lệ.
 code `2` nếu có lỗi chuẩn hóa/ghi, `4` nếu lỗi database; việc loại bởi gate là hành
 vi bình thường.
 
-`staging.normalized_jobs` cũ không bị xóa hoặc cập nhật bởi lệnh trên. Khi xây luồng
-SQL Server/DWH, nên tạo một loader riêng chỉ đọc từ `normalize_data` và ghi staging
-hoặc DWH; không chạy lại logic làm sạch ở bước đó.
+`staging.normalized_jobs` cũ không bị xóa hoặc cập nhật bởi lệnh trên. Loader analytics mới chỉ đọc `normalize_data` và ghi các bảng nguyên tử trong `analytics`. Loader DWH tiếp theo đọc fact/dimension/bridge từ analytics; không chạy lại crawler/gate/normalizer ở bước đó.
 
 Kiểm tra dữ liệu:
 
@@ -220,7 +232,7 @@ database project đang dùng.
 ## Tổ chức source code
 
 Đọc [tài liệu kiến trúc](docs/ARCHITECTURE.md) trước khi thêm nguồn hoặc thay đổi
-hợp đồng dữ liệu. Bốn file Python ở root chỉ giữ lại để tương thích với lệnh vận
+hợp đồng dữ liệu. Các file Python ở root chỉ giữ lại để tương thích với lệnh vận
 hành cũ; logic thật nằm trong package `data_preprocessing`.
 
 ```text
@@ -228,7 +240,9 @@ main_itviec.py
 main_topdev.py
 load_staging.py
 load_normalize_data.py
+load_analytics.py
 data_preprocessing/
+├── analytics/              # tách nguyên tử và đồng bộ analytics mới
 ├── cli/                    # orchestration và command-line interface
 ├── crawlers/               # logic lấy dữ liệu theo nguồn
 │   ├── itviec.py

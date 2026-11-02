@@ -25,3 +25,6 @@ cookies*.json
 topdev_cookie*.txt
 topdev_sample.json
 *_sample.json
+
+# Local analytics snapshots contain observed source records; keep them out of Git.
+reports/analytics/
