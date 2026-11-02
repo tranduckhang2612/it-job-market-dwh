@@ -79,4 +79,3 @@ python load_normalize_data.py --dry-run
 
 Không commit cookie, browser session, `.env` hoặc password database. Các file đó
 đã được loại bởi `.gitignore`.
-

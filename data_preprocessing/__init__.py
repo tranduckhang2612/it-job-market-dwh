@@ -4,4 +4,3 @@ Các package con được tách theo trách nhiệm: ``crawlers`` lấy dữ li�
 ``normalization`` xử lý dữ liệu, ``storage`` quản lý PostgreSQL và ``cli``
 cung cấp các lệnh vận hành.
 """
-

@@ -126,4 +126,3 @@ def validate_normalized_storage_job(job: dict) -> None:
     }
     if set(metadata["fields"]) != expected_meta_fields:
         raise NormalizationError("normalization_meta.fields không đúng hợp đồng lưu trữ.")
-

@@ -23,4 +23,3 @@ __all__ = (
     "normalize_raw_record_for_storage",
     "normalize_raw_record_with_meta",
 )
-
