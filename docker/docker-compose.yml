@@ -20,21 +20,5 @@ services:
       retries: 20
       start_period: 10s
 
-  pgadmin:
-    image: dpage/pgadmin4:9.5
-    restart: unless-stopped
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@gmail.com}
-      PGADMIN_DEFAULT_PASSWORD: "12345678"
-      PGADMIN_DISABLE_POSTFIX: "1"
-    ports:
-      - "${PGADMIN_BIND_ADDRESS:-127.0.0.1}:${PGADMIN_PORT:-5050}:80"
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin
-    depends_on:
-      postgres:
-        condition: service_healthy
-
 volumes:
   postgres_data:
-  pgadmin_data:

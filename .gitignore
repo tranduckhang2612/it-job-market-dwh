@@ -21,15 +21,7 @@ cookies*.json
 .itviec_auth*.json
 .itviec_auth_*.tmp
 
-# TopDev login cookies and local dump files
+# TopDev login cookies and optional local raw dumps
 topdev_cookie*.txt
 topdev_sample.json
-topdev_normalized.json
 *_sample.json
-*_normalized.json
-
-# Keep generated database snapshots, dumps and binary reports local.
-# Only Markdown review documents belong in version control under reports/.
-reports/**
-!reports/**/
-!reports/**/*.md
