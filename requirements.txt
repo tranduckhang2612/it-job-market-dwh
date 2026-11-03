@@ -7,3 +7,4 @@ psycopg[binary]==3.3.6
 # Used by --browser / --login; requests mode does not need Chromium.
 # Install the browser separately when needed: python -m playwright install chromium
 playwright==1.63.0
+pyodbc==5.3.0

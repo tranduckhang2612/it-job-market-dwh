@@ -1,1 +1,1 @@
-"""Namespace tương thích; crawler thật nằm trong ``data_preprocessing.crawlers``."""
+"""Namespace tương thích; crawler nằm trong ``it_job_market_dwh.ingestion``."""

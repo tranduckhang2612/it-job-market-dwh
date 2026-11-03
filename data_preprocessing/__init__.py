@@ -1,6 +1,8 @@
-"""Pipeline crawl và chuẩn hóa dữ liệu tuyển dụng IT.
+"""Compatibility imports for the package now located under ``src``."""
 
-Các package con được tách theo trách nhiệm: ``crawlers`` lấy dữ liệu,
-``normalization`` xử lý dữ liệu, ``storage`` quản lý PostgreSQL và ``cli``
-cung cấp các lệnh vận hành.
-"""
+from pathlib import Path
+import sys
+
+_SOURCE_ROOT = Path(__file__).resolve().parent.parent / "src"
+if str(_SOURCE_ROOT) not in sys.path:
+    sys.path.insert(0, str(_SOURCE_ROOT))

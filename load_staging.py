@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Entrypoint legacy tương thích; logic nằm trong ``data_preprocessing.cli``."""
+"""Entrypoint legacy tương thích; logic nằm trong ``it_job_market_dwh.loaders``."""
 
 from data_preprocessing.cli.load_staging import main
 

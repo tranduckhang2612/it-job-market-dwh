@@ -1,2 +1,0 @@
--r requirements.txt
-pyodbc==5.3.0
