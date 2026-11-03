@@ -349,7 +349,7 @@ python load_dw_job_values.py --apply
 
 - `--out` của analytics phải là thư mục mới mỗi lần apply; đổi `run-001` cho lần sau.
 - Trên máy nhóm, thay connection string bằng đích được nhóm cấp; không đưa mật khẩu vào Git. `Read-Host -MaskInput` dùng PowerShell 7.
-- [Loader DW hiện tại](load_dw_job_values.py) chứa DDL và logic nạp. Lệnh `--apply` đồng bộ toàn bộ snapshot mới nhất; tin/liên kết không còn trong snapshot sẽ bị gỡ khỏi DW. Chạy lại cùng dữ liệu không thêm dòng trùng. `load_dw_dimensions.py` chỉ dành cho luồng cũ.
+- [Loader DW hiện tại](load_dw_job_values.py) đọc DDL từ [dw.sql](data_preprocessing/sql/dw.sql) và nạp dữ liệu. Muốn chỉ tạo cấu trúc, mở dw.sql trong SSMS, chọn đúng database đích rồi Execute; script SQL không nạp dữ liệu. Lệnh `--apply` đồng bộ toàn bộ snapshot mới nhất; tin/liên kết không còn trong snapshot sẽ bị gỡ khỏi DW. Chạy lại cùng dữ liệu không thêm dòng trùng. `load_dw_dimensions.py` chỉ dành cho luồng cũ.
 
 ### Kiểm tra tay trong pgAdmin và SSMS
 

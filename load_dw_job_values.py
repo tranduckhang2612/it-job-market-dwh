@@ -3,12 +3,14 @@ import argparse
 import json
 import os
 from datetime import timezone
+from pathlib import Path
 
 import psycopg
 import pyodbc
 
 from data_preprocessing.warehouse import dimensions as legacy
 
+DW_DDL = Path(__file__).resolve().parent / 'data_preprocessing/sql/dw.sql'
 GROUPS = legacy.GROUPS
 JOB_FIELDS = ("source", "title", "company_name", "job_url", "crawl_run_id", "observed_at_utc")
 
@@ -45,31 +47,7 @@ def read_source():
 
 
 def setup(c):
-    c.execute("IF SCHEMA_ID('dw') IS NULL EXEC('CREATE SCHEMA dw')")
-    c.execute("""IF OBJECT_ID('dw.fact_job','U') IS NULL CREATE TABLE dw.fact_job(
-        job_key int IDENTITY PRIMARY KEY, job_id nvarchar(256) COLLATE Latin1_General_100_BIN2 NOT NULL UNIQUE,
-        source nvarchar(128) NOT NULL, title nvarchar(max), company_name nvarchar(max),
-        job_url nvarchar(max), crawl_run_id nvarchar(256), observed_at_utc datetime2(6) NOT NULL)""")
-    for g in GROUPS:
-        dim, bridge = f"dw.dim_{g}", f"dw.bridge_job_{g}"
-        c.execute(f"""IF OBJECT_ID('{dim}','U') IS NULL CREATE TABLE {dim}(
-            dim_id int IDENTITY PRIMARY KEY,
-            name nvarchar(512) COLLATE Latin1_General_100_BIN2 NOT NULL,
-            category nvarchar(128) COLLATE Latin1_General_100_BIN2 NOT NULL,
-            created_at_utc datetime2(6) NOT NULL, updated_at_utc datetime2(6) NOT NULL,
-            CONSTRAINT UQ_dim_{g}_natural UNIQUE(name,category))""")
-        if c.execute(f"SELECT COL_LENGTH('{dim}','row_sha256')").fetchval() is not None:
-            c.execute(f"ALTER TABLE {dim} DROP CONSTRAINT CK_dim_{g}_hash, CK_dim_{g}_key, UQ_dim_{g}_analytics")
-            c.execute(f"ALTER TABLE {dim} DROP COLUMN row_sha256, analytics_key")
-        c.execute(f"""IF OBJECT_ID('{bridge}','U') IS NULL CREATE TABLE {bridge}(
-            job_key int NOT NULL REFERENCES dw.fact_job(job_key) ON DELETE CASCADE,
-            dim_id int NOT NULL REFERENCES {dim}(dim_id), context_no int NOT NULL,
-            level_text nvarchar(max), PRIMARY KEY(job_key, dim_id, context_no))""")
-        c.execute(f"""CREATE OR ALTER VIEW dw.job_{g} AS
-            SELECT j.job_id,j.source,j.title,j.company_name,j.observed_at_utc,
-                   d.name,d.category,b.level_text
-            FROM {bridge} b JOIN dw.fact_job j ON j.job_key=b.job_key
-            JOIN {dim} d ON d.dim_id=b.dim_id""")
+    c.execute(DW_DDL.read_text(encoding="utf-8"))
 
 
 def apply(conn, data):
