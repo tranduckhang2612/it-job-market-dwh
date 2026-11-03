@@ -1,11 +1,25 @@
 # IT Job Market Crawl and Normalization Pipeline
 
+## Bổ sung analytics nguyên tử — 02/11/2026
+
+**Trạng thái DW:** đã chạy thử luồng normalize_data → analytics → SQL Server DW trên máy local. Xem [data dictionary và lệnh chạy tay](#từ-normalize-đến-sql-server-dw).
+
+Luồng mới: **raw → check/chuẩn hóa đã có → normalize_data (5.1) → analytics nguyên tử → load DWH/phân tích**. Không sửa hoặc chạy lại rule upstream trong loader analytics. Bỏ benefit theo yêu cầu. Xem [bảng, cách nạp, SQL và kết quả kiểm thử](docs/ANALYTICS_ATOMIC.md).
+
+```bash
+python load_analytics.py --dry-run
+python load_analytics.py --apply --out reports/analytics/run-001
+```
+
+Chọn đúng DB bằng PG*/DATABASE_URL/--db-*. DB demo thật của đợt này là **it_job_market_v5**; dữ liệu PostgreSQL không đi kèm khi clone repo. --apply đồng bộ cả xóa các observation đã bị rút khỏi nguồn trong phạm vi đã chọn.
+
+
 Luồng dữ liệu hiện tại:
 
 ```text
 ITviec / TopDev → crawler → raw → role/language gate → chuẩn hóa → normalize_data
                                                                ↓
-                                                    staging / DWH (sau này)
+                                                    analytics nguyên tử → DWH (loader riêng)
 ```
 
 JSON lấy từ nguồn được giữ nguyên trong `raw.job_postings.raw_payload`; trạng thái
@@ -163,9 +177,7 @@ rule thay đổi, loader xóa dòng `normalize_data` cũ không còn hợp lệ.
 code `2` nếu có lỗi chuẩn hóa/ghi, `4` nếu lỗi database; việc loại bởi gate là hành
 vi bình thường.
 
-`staging.normalized_jobs` cũ không bị xóa hoặc cập nhật bởi lệnh trên. Khi xây luồng
-SQL Server/DWH, nên tạo một loader riêng chỉ đọc từ `normalize_data` và ghi staging
-hoặc DWH; không chạy lại logic làm sạch ở bước đó.
+`staging.normalized_jobs` cũ không bị xóa hoặc cập nhật bởi lệnh trên. Loader analytics mới chỉ đọc `normalize_data` và ghi các bảng nguyên tử trong `analytics`. Loader DWH tiếp theo đọc fact/dimension/bridge từ analytics; không chạy lại crawler/gate/normalizer ở bước đó.
 
 Kiểm tra dữ liệu:
 
@@ -220,7 +232,7 @@ database project đang dùng.
 ## Tổ chức source code
 
 Đọc [tài liệu kiến trúc](docs/ARCHITECTURE.md) trước khi thêm nguồn hoặc thay đổi
-hợp đồng dữ liệu. Bốn file Python ở root chỉ giữ lại để tương thích với lệnh vận
+hợp đồng dữ liệu. Các file Python ở root chỉ giữ lại để tương thích với lệnh vận
 hành cũ; logic thật nằm trong package `data_preprocessing`.
 
 ```text
@@ -228,7 +240,9 @@ main_itviec.py
 main_topdev.py
 load_staging.py
 load_normalize_data.py
+load_analytics.py
 data_preprocessing/
+├── analytics/              # tách nguyên tử và đồng bộ analytics mới
 ├── cli/                    # orchestration và command-line interface
 ├── crawlers/               # logic lấy dữ liệu theo nguồn
 │   ├── itviec.py
@@ -247,3 +261,122 @@ data_preprocessing/
 docker/docker-compose.yml
 tests/
 ```
+
+
+## Từ normalize đến SQL Server DW
+
+`raw → normalize_data → analytics (PostgreSQL) → dw (SQL Server) → Power BI`
+
+`staging` là luồng cũ, có thể không tồn tại ở DB mới. Hai loader hiện tại không ghi vào staging. Dữ liệu demo không đi kèm khi clone repo.
+
+### Data dictionary — PostgreSQL
+
+| Bảng | Một dòng là gì / Khóa chính | Các trường chính |
+|---|---|---|
+| `raw.crawl_runs` | Một lần crawl; `crawl_run_id` | `source`: nguồn; `started_at`, `finished_at`: thời điểm chạy; `requested_count`, `collected_count`: số tin yêu cầu/thu được; `status`, `metadata`, `errors`: trạng thái, thông tin và lỗi; `ingested_at`: lúc ghi DB. |
+| `raw.job_postings` | Một tin trong một lần crawl; `(job_id, crawl_run_id)` | `job_id` có tiền tố nguồn, `source_job_id` là ID tại nguồn, `job_url` là URL; `observed_at` là lúc quan sát, `ingested_at` là lúc ghi; `raw_payload` là JSONB gốc. |
+| `normalize_data.normalized_jobs` | Một bản tin đã qua lọc và chuẩn hóa; `(job_id, crawl_run_id)` nối về raw | `source`, `source_job_id`, `job_url`, `observed_at`: truy xuất nguồn; `title`, `company_name`, `description`: nội dung; `location_text`, `work_mode`: địa điểm gốc/hình thức làm; `job_roles`, `seniority_levels`, `cities`, `skills`, `foreign_languages`, `soft_skills`: mảng JSONB; `normalization_meta`, `normalization_version`, `normalized_at`: dấu vết xử lý. |
+| `staging.normalized_jobs` (legacy, nếu có) | Một tin chuẩn hóa theo hợp đồng cũ; `(job_id, crawl_run_id)` | Nhóm ID, nội dung, vai trò, cấp bậc, địa điểm, kỹ năng; thêm `published_at`, `required_knowledge`, `experience_*`, `education_requirements`, `salary_*` và metadata phiên bản. Xem [DDL staging](data_preprocessing/sql/staging_schema.sql). |
+| `analytics.job_observations` | Một lần quan sát tin đã tách nguyên tử; `observation_key`, duy nhất `(job_id, crawl_run_id)` | Giữ ID, nguồn, URL, lần crawl, thời điểm, tiêu đề, công ty, mô tả, địa điểm, hình thức làm; `foreign_language_status`: biết/chưa biết; `source_normalized_at`, `source_normalization_version`, `source_sha256`, `output_sha256`, `model_sha256`, `loaded_at`: theo dõi đồng bộ. |
+| `analytics.observation_issues` | Một mục cần rà soát của một lần quan sát; `(observation_key, issue_key)` | `field_name`, `source_value`, `reason`: trường, giá trị nguồn, lý do cần xem lại. |
+| `analytics.pipeline_state` | Một dòng trạng thái mô hình; `singleton` | `model_name`, `model_sha256`: định danh và dấu vết phiên bản mô hình. |
+
+`public` là schema mặc định của PostgreSQL; luồng này không dùng bảng nghiệp vụ ở đó. Xem [DDL analytics](data_preprocessing/sql/analytics_schema.sql) để tra kiểu dữ liệu, khóa và ràng buộc chính xác.
+
+Trong `analytics`, mỗi `dim_<nhóm>` có khóa `<nhóm>_key`, `name`, `category`; một dòng là một giá trị chuẩn. Mỗi `bridge_job_<nhóm>` lưu một cặp **lần quan sát–giá trị** theo khóa `(observation_key, <nhóm>_key, context_key)`. Ngoại ngữ có thể có thêm ngữ cảnh trình độ ở `level_text`.
+
+### Data dictionary — SQL Server DW
+
+| Bảng | Một dòng là gì / Khóa chính | Các trường chính |
+|---|---|---|
+| `dw.fact_job` | Bản quan sát mới nhất của một tin; `job_key` (INT IDENTITY), `job_id` duy nhất | `source`, `title`, `company_name`, `job_url`, `crawl_run_id`, `observed_at_utc` (UTC). Bảng này không lưu toàn bộ lịch sử crawl. |
+| Các bảng `dw.dim_<nhóm>` | Một giá trị danh mục; `dim_id` (INT IDENTITY), duy nhất `(name, category)` | `name`, `category`, `created_at_utc`, `updated_at_utc`. Bản hiện tại không dùng `row_sha256` hay `analytics_key` trong dim. |
+| Các bảng `dw.bridge_job_<nhóm>` | Một liên kết tin–giá trị–ngữ cảnh; `(job_key, dim_id, context_no)` | `job_key` nối fact, `dim_id` nối dim cùng nhóm, `context_no` phân biệt các trình độ nếu có, `level_text` ghi trình độ ngoại ngữ nếu có. |
+
+**Danh sách đủ 8 nhóm bảng** (tên bảng giống nhau ở hai schema; khóa và cấp độ dữ liệu khác nhau như trên):
+
+| Nhóm | Bảng danh mục | Bảng liên kết | View SQL Server đã nối sẵn |
+|---|---|---|---|
+| Ngôn ngữ lập trình | `dim_programming_language` | `bridge_job_programming_language` | `dw.job_programming_language` |
+| Framework | `dim_framework` | `bridge_job_framework` | `dw.job_framework` |
+| Kỹ năng chuyên môn | `dim_core_skill` | `bridge_job_core_skill` | `dw.job_core_skill` |
+| Vai trò | `dim_role` | `bridge_job_role` | `dw.job_role` |
+| Thành phố | `dim_city` | `bridge_job_city` | `dw.job_city` |
+| Ngoại ngữ | `dim_foreign_language` | `bridge_job_foreign_language` | `dw.job_foreign_language` |
+| Cấp bậc | `dim_level` | `bridge_job_level` | `dw.job_level` |
+| Kỹ năng mềm | `dim_soft_skill` | `bridge_job_soft_skill` | `dw.job_soft_skill` |
+
+**View PostgreSQL:** `analytics.fact_job_latest` chọn bản quan sát mới nhất mỗi tin; 8 view `bridge_job_<nhóm>_latest` giữ liên kết của bản đó; 8 view `<nhóm>_demand_latest` thống kê số/tỷ lệ tin theo giá trị. `job_skills_latest` gộp các nhóm kỹ năng để phân tích; `role_skill_demand_latest` thống kê kỹ năng theo vai trò; `review_queue` hiển thị mục cần rà soát.
+
+**Đếm cho Power BI:** dùng `DISTINCTCOUNT(job_id)` khi cần đếm tin trong view. Một tin ở hai thành phố được tính một lần ở mỗi thành phố nhưng chỉ một lần ở tổng. Tỷ lệ tin theo thành phố dùng số tin khác nhau làm mẫu số; các tỷ lệ có thể cộng quá 100%.
+
+### Lệnh chạy tay — PowerShell
+
+Chạy từng bước từ thư mục gốc. Nếu đã có `normalize_data.normalized_jobs`, bỏ qua crawl và normalize; nếu analytics đã cập nhật thì chỉ cần nạp DW.
+
+```powershell
+python -m pip install -r requirements-dw.txt
+docker compose -f docker/docker-compose.yml up -d postgres
+
+# Điền thông tin PostgreSQL của máy đang chạy; dùng DB có sẵn hoặc tạo trước.
+$env:PGHOST = '127.0.0.1'
+$env:PGPORT = '5432'
+$env:PGDATABASE = 'it_job_market_v5'
+$env:PGUSER = '<postgres-user>'
+$env:PGPASSWORD = Read-Host 'Mật khẩu PostgreSQL' -MaskInput
+# Nếu shell đang có DATABASE_URL trỏ DB khác, bỏ biến đó để dùng PG* nhất quán.
+Remove-Item Env:DATABASE_URL -ErrorAction SilentlyContinue
+
+# Chỉ khi cần lấy và xử lý dữ liệu đầu vào
+python main_topdev.py --limit 50
+python main_itviec.py --limit 50
+python load_normalize_data.py --dry-run
+python load_normalize_data.py
+
+# PostgreSQL: normalize_data -> analytics
+python load_analytics.py --dry-run
+python load_analytics.py --apply --out reports/analytics/run-001
+
+# SQL Server LocalDB: yêu cầu ODBC Driver 17 và instance ITJobMarketDW đã có
+SqlLocalDB start ITJobMarketDW
+sqlcmd -S '(localdb)\ITJobMarketDW' -E -d master -b -Q "IF DB_ID(N'it_job_market_dw') IS NULL CREATE DATABASE [it_job_market_dw];"
+$env:DW_SQLSERVER_CONNECTION_STRING = 'DRIVER={ODBC Driver 17 for SQL Server};SERVER=(localdb)\ITJobMarketDW;DATABASE=it_job_market_dw;Trusted_Connection=yes;Encrypt=no'
+
+# SQL Server: preview trước, xác nhận đúng nguồn và đích rồi mới nạp
+python load_dw_job_values.py
+python load_dw_job_values.py --apply
+```
+
+- `--out` của analytics phải là thư mục mới mỗi lần apply; đổi `run-001` cho lần sau.
+- Trên máy nhóm, thay connection string bằng đích được nhóm cấp; không đưa mật khẩu vào Git. `Read-Host -MaskInput` dùng PowerShell 7.
+- [Loader DW hiện tại](load_dw_job_values.py) chứa DDL và logic nạp. Lệnh `--apply` đồng bộ toàn bộ snapshot mới nhất; tin/liên kết không còn trong snapshot sẽ bị gỡ khỏi DW. Chạy lại cùng dữ liệu không thêm dòng trùng. `load_dw_dimensions.py` chỉ dành cho luồng cũ.
+
+### Kiểm tra tay trong pgAdmin và SSMS
+
+**pgAdmin — chọn database PostgreSQL đã cấu hình:**
+
+```sql
+SELECT source, COUNT(*) AS so_tin
+FROM analytics.fact_job_latest
+GROUP BY source;
+
+SELECT * FROM analytics.programming_language_demand_latest;
+```
+
+**SSMS — Database Engine → Windows Authentication → `(localdb)\ITJobMarketDW`.** Nếu tên instance báo lỗi, chạy `SqlLocalDB info ITJobMarketDW` và dán giá trị **Instance pipe name** hiện tại vào **Server name**.
+
+```sql
+USE it_job_market_dw;
+
+SELECT source, COUNT(*) AS so_tin FROM dw.fact_job GROUP BY source;
+SELECT name AS thanh_pho, COUNT(DISTINCT job_id) AS so_tin
+FROM dw.job_city
+GROUP BY name
+ORDER BY so_tin DESC;
+
+SELECT job_id, source, title, name
+FROM dw.job_programming_language
+WHERE name = N'Python';
+```
+
+Mốc demo để đối chiếu (không phải số cố định): **102 tin** (93 ITviec, 9 TopDev), **11 tên ngôn ngữ / 51 liên kết tin–ngôn ngữ**, **4 thành phố / 112 liên kết tin–thành phố**.

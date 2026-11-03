@@ -1,0 +1,865 @@
+{
+  "programming_language": [
+    {
+      "name": "Python",
+      "aliases": [],
+      "category": "programming_language"
+    },
+    {
+      "name": "Java",
+      "aliases": [],
+      "category": "programming_language"
+    },
+    {
+      "name": "C",
+      "aliases": [],
+      "category": "programming_language"
+    },
+    {
+      "name": "PHP",
+      "aliases": [],
+      "category": "programming_language"
+    },
+    {
+      "name": "Ruby",
+      "aliases": [],
+      "category": "programming_language"
+    },
+    {
+      "name": "Kotlin",
+      "aliases": [],
+      "category": "programming_language"
+    },
+    {
+      "name": "Swift",
+      "aliases": [],
+      "category": "programming_language"
+    },
+    {
+      "name": "Rust",
+      "aliases": [],
+      "category": "programming_language"
+    },
+    {
+      "name": "Scala",
+      "aliases": [],
+      "category": "programming_language"
+    },
+    {
+      "name": "Dart",
+      "aliases": [],
+      "category": "programming_language"
+    },
+    {
+      "name": "R",
+      "aliases": [],
+      "category": "programming_language"
+    },
+    {
+      "name": "Objective-C",
+      "aliases": [],
+      "category": "programming_language"
+    },
+    {
+      "name": "Perl",
+      "aliases": [],
+      "category": "programming_language"
+    },
+    {
+      "name": "Lua",
+      "aliases": [],
+      "category": "programming_language"
+    },
+    {
+      "name": "C++",
+      "aliases": [
+        "cpp",
+        "Cplus",
+        "CPlusPlus",
+        "C plus plus",
+        "C + +"
+      ],
+      "category": "programming_language"
+    },
+    {
+      "name": "C#",
+      "aliases": [
+        "Csharp",
+        "C sharp"
+      ],
+      "category": "programming_language"
+    },
+    {
+      "name": "JavaScript",
+      "aliases": [
+        "JS"
+      ],
+      "category": "programming_language"
+    },
+    {
+      "name": "TypeScript",
+      "aliases": [
+        "TS"
+      ],
+      "category": "programming_language"
+    },
+    {
+      "name": "Go",
+      "aliases": [
+        "Golang"
+      ],
+      "category": "programming_language"
+    }
+  ],
+  "framework": [
+    {
+      "name": "Angular",
+      "aliases": [],
+      "category": "framework_library"
+    },
+    {
+      "name": "Spring",
+      "aliases": [],
+      "category": "framework_library"
+    },
+    {
+      "name": "Spring Boot",
+      "aliases": [],
+      "category": "framework_library"
+    },
+    {
+      "name": "Django",
+      "aliases": [],
+      "category": "framework_library"
+    },
+    {
+      "name": "Flask",
+      "aliases": [],
+      "category": "framework_library"
+    },
+    {
+      "name": "FastAPI",
+      "aliases": [],
+      "category": "framework_library"
+    },
+    {
+      "name": "NestJS",
+      "aliases": [],
+      "category": "framework_library"
+    },
+    {
+      "name": "React Native",
+      "aliases": [],
+      "category": "framework_library"
+    },
+    {
+      "name": "Flutter",
+      "aliases": [],
+      "category": "framework_library"
+    },
+    {
+      "name": "Laravel",
+      "aliases": [],
+      "category": "framework_library"
+    },
+    {
+      "name": "Express",
+      "aliases": [],
+      "category": "framework_library"
+    },
+    {
+      "name": "Next.js",
+      "aliases": [],
+      "category": "framework_library"
+    },
+    {
+      "name": "PySpark",
+      "aliases": [],
+      "category": "framework_library"
+    },
+    {
+      "name": "TensorFlow",
+      "aliases": [],
+      "category": "framework_library"
+    },
+    {
+      "name": "PyTorch",
+      "aliases": [],
+      "category": "framework_library"
+    },
+    {
+      "name": "jQuery",
+      "aliases": [],
+      "category": "framework_library"
+    },
+    {
+      "name": "MVVM",
+      "aliases": [],
+      "category": "framework_library"
+    },
+    {
+      "name": "React",
+      "aliases": [
+        "ReactJS",
+        "React.js"
+      ],
+      "category": "framework_library"
+    },
+    {
+      "name": "Vue.js",
+      "aliases": [
+        "Vue",
+        "VueJS"
+      ],
+      "category": "framework_library"
+    },
+    {
+      "name": "Node.js",
+      "aliases": [
+        "NodeJS",
+        "Node JS"
+      ],
+      "category": "framework_library"
+    },
+    {
+      "name": ".NET",
+      "aliases": [
+        "dotnet"
+      ],
+      "category": "framework_library"
+    },
+    {
+      "name": ".NET Core",
+      "aliases": [
+        "dotnet core"
+      ],
+      "category": "framework_library"
+    }
+  ],
+  "core_skill": [
+    {
+      "name": "CI/CD",
+      "aliases": [
+        "ci cd"
+      ],
+      "category": "devops"
+    },
+    {
+      "name": "UI/UX",
+      "aliases": [
+        "ui ux"
+      ],
+      "category": "design"
+    },
+    {
+      "name": "QA/QC",
+      "aliases": [
+        "qa qc"
+      ],
+      "category": "testing"
+    },
+    {
+      "name": "SQL",
+      "aliases": [],
+      "category": "database"
+    },
+    {
+      "name": "PostgreSQL",
+      "aliases": [
+        "Postgres"
+      ],
+      "category": "database"
+    },
+    {
+      "name": "MySQL",
+      "aliases": [],
+      "category": "database"
+    },
+    {
+      "name": "MongoDB",
+      "aliases": [],
+      "category": "database"
+    },
+    {
+      "name": "Redis",
+      "aliases": [],
+      "category": "database"
+    },
+    {
+      "name": "NoSQL",
+      "aliases": [],
+      "category": "database"
+    },
+    {
+      "name": "Docker",
+      "aliases": [],
+      "category": "devops"
+    },
+    {
+      "name": "Kubernetes",
+      "aliases": [
+        "k8s"
+      ],
+      "category": "devops"
+    },
+    {
+      "name": "Git",
+      "aliases": [],
+      "category": "tool"
+    },
+    {
+      "name": "AWS",
+      "aliases": [],
+      "category": "cloud"
+    },
+    {
+      "name": "Azure",
+      "aliases": [],
+      "category": "cloud"
+    },
+    {
+      "name": "GCP",
+      "aliases": [
+        "Google Cloud"
+      ],
+      "category": "cloud"
+    },
+    {
+      "name": "Agile",
+      "aliases": [],
+      "category": "methodology"
+    },
+    {
+      "name": "Scrum",
+      "aliases": [],
+      "category": "methodology"
+    },
+    {
+      "name": "Linux",
+      "aliases": [],
+      "category": "operating_system"
+    },
+    {
+      "name": "HTML",
+      "aliases": [],
+      "category": "markup_language"
+    },
+    {
+      "name": "CSS",
+      "aliases": [],
+      "category": "stylesheet_language"
+    }
+  ],
+  "role": [
+    {
+      "name": "Software Developer / Engineer",
+      "aliases": [
+        "Software Developer",
+        "Software Engineer"
+      ]
+    },
+    {
+      "name": "Front-end Developer",
+      "aliases": [
+        "Frontend Developer"
+      ]
+    },
+    {
+      "name": "Back-end Developer",
+      "aliases": [
+        "Backend Developer"
+      ]
+    },
+    {
+      "name": "Full-stack Developer",
+      "aliases": [
+        "Fullstack Developer",
+        "Full Stack Developer"
+      ]
+    },
+    {
+      "name": "Mobile Application Developer",
+      "aliases": []
+    },
+    {
+      "name": "iOS Developer",
+      "aliases": []
+    },
+    {
+      "name": "Android Developer",
+      "aliases": []
+    },
+    {
+      "name": "React Native Developer",
+      "aliases": []
+    },
+    {
+      "name": "Flutter Developer",
+      "aliases": []
+    },
+    {
+      "name": "Kotlin Developer",
+      "aliases": []
+    },
+    {
+      "name": "JavaScript Developer",
+      "aliases": []
+    },
+    {
+      "name": "API Developer",
+      "aliases": []
+    },
+    {
+      "name": "Integration Engineer",
+      "aliases": []
+    },
+    {
+      "name": "Firmware Developer",
+      "aliases": []
+    },
+    {
+      "name": "Blockchain Developer",
+      "aliases": []
+    },
+    {
+      "name": "Salesforce Developer",
+      "aliases": []
+    },
+    {
+      "name": "ERP Developer",
+      "aliases": []
+    },
+    {
+      "name": "SAP Developer",
+      "aliases": []
+    },
+    {
+      "name": "Oracle Developer",
+      "aliases": []
+    },
+    {
+      "name": "Low-Code / No-Code Developer",
+      "aliases": []
+    },
+    {
+      "name": "Algorithm Engineer",
+      "aliases": []
+    },
+    {
+      "name": "Unity Developer",
+      "aliases": []
+    },
+    {
+      "name": "HTML5 Developer",
+      "aliases": []
+    },
+    {
+      "name": "Cocos Developer",
+      "aliases": []
+    },
+    {
+      "name": "C++ Developer",
+      "aliases": []
+    },
+    {
+      "name": "Game Developer",
+      "aliases": []
+    },
+    {
+      "name": "Systems Engineer",
+      "aliases": []
+    },
+    {
+      "name": "Cloud Engineer",
+      "aliases": []
+    },
+    {
+      "name": "AWS Cloud Engineer",
+      "aliases": []
+    },
+    {
+      "name": "Azure Cloud Engineer",
+      "aliases": []
+    },
+    {
+      "name": "Google Cloud (GCP) Engineer",
+      "aliases": []
+    },
+    {
+      "name": "DevOps Engineer",
+      "aliases": []
+    },
+    {
+      "name": "Embedded Systems Developer",
+      "aliases": []
+    },
+    {
+      "name": "Software Architect",
+      "aliases": []
+    },
+    {
+      "name": "Solution Architect",
+      "aliases": []
+    },
+    {
+      "name": "Technical Architect",
+      "aliases": []
+    },
+    {
+      "name": "Data Architect",
+      "aliases": []
+    },
+    {
+      "name": "Staff Engineer",
+      "aliases": []
+    },
+    {
+      "name": "Principal Engineer",
+      "aliases": []
+    },
+    {
+      "name": "Data Engineer",
+      "aliases": []
+    },
+    {
+      "name": "Data Scientist",
+      "aliases": []
+    },
+    {
+      "name": "Data Analyst",
+      "aliases": []
+    },
+    {
+      "name": "Machine Learning Engineer",
+      "aliases": []
+    },
+    {
+      "name": "AI Engineer",
+      "aliases": []
+    },
+    {
+      "name": "Business Intelligence (BI) Developer",
+      "aliases": []
+    },
+    {
+      "name": "Big Data Engineer",
+      "aliases": []
+    },
+    {
+      "name": "Data Governance Specialist",
+      "aliases": []
+    },
+    {
+      "name": "Data Visualization Engineer",
+      "aliases": []
+    },
+    {
+      "name": "Database Administrator (DBA)",
+      "aliases": []
+    },
+    {
+      "name": "Data Warehouse Engineer",
+      "aliases": []
+    },
+    {
+      "name": "ETL Developer (Extract. Transform. Load)",
+      "aliases": []
+    },
+    {
+      "name": "Data Modeler",
+      "aliases": []
+    },
+    {
+      "name": "QC Engineer",
+      "aliases": []
+    },
+    {
+      "name": "QA Engineer",
+      "aliases": []
+    },
+    {
+      "name": "Tester",
+      "aliases": []
+    },
+    {
+      "name": "Automation Test Engineer",
+      "aliases": []
+    },
+    {
+      "name": "Manual Test Engineer",
+      "aliases": []
+    },
+    {
+      "name": "Security Test Engineer",
+      "aliases": []
+    },
+    {
+      "name": "Product Manager",
+      "aliases": []
+    },
+    {
+      "name": "Product Owner",
+      "aliases": []
+    },
+    {
+      "name": "Product Designer",
+      "aliases": []
+    },
+    {
+      "name": "Business Analyst",
+      "aliases": []
+    },
+    {
+      "name": "Project Manager",
+      "aliases": []
+    },
+    {
+      "name": "Scrum Master",
+      "aliases": []
+    },
+    {
+      "name": "Bridge Software Engineer (BrSE)",
+      "aliases": [
+        "BrSE"
+      ]
+    },
+    {
+      "name": "IT Communicator",
+      "aliases": [
+        "IT Comtor"
+      ]
+    },
+    {
+      "name": "IT Presales",
+      "aliases": []
+    },
+    {
+      "name": "IT Consultant",
+      "aliases": []
+    },
+    {
+      "name": "UI/UX Designer",
+      "aliases": []
+    },
+    {
+      "name": "UX Researcher",
+      "aliases": []
+    },
+    {
+      "name": "Game Artist",
+      "aliases": []
+    },
+    {
+      "name": "Game Designer",
+      "aliases": []
+    },
+    {
+      "name": "Site Reliability Engineer (SRE)",
+      "aliases": []
+    },
+    {
+      "name": "Technical Support Engineer",
+      "aliases": []
+    },
+    {
+      "name": "IT Helpdesk",
+      "aliases": []
+    },
+    {
+      "name": "Security Engineer",
+      "aliases": []
+    },
+    {
+      "name": "Penetration Tester",
+      "aliases": []
+    },
+    {
+      "name": "Cybersecurity Engineer",
+      "aliases": []
+    },
+    {
+      "name": "Vulnerability Analyst",
+      "aliases": []
+    },
+    {
+      "name": "DevSecOps Engineer",
+      "aliases": []
+    },
+    {
+      "name": "Virtual Reality (VR) Developer",
+      "aliases": []
+    },
+    {
+      "name": "Robotic Process Automation (RPA) Developer",
+      "aliases": []
+    },
+    {
+      "name": "Natural Language Processing (NLP) Engineer",
+      "aliases": []
+    },
+    {
+      "name": "Edge Computing Engineer",
+      "aliases": []
+    }
+  ],
+  "city": [
+    {
+      "name": "Hồ Chí Minh",
+      "aliases": [
+        "HCMC",
+        "Ho Chi Minh",
+        "TP.HCM"
+      ]
+    },
+    {
+      "name": "Hà Nội",
+      "aliases": [
+        "Ha Noi",
+        "Hanoi"
+      ]
+    },
+    {
+      "name": "Đà Nẵng",
+      "aliases": [
+        "Da Nang",
+        "Danang"
+      ]
+    }
+  ],
+  "foreign_language": [
+    {
+      "name": "English",
+      "aliases": [
+        "Tiếng Anh"
+      ]
+    },
+    {
+      "name": "Japanese",
+      "aliases": [
+        "Tiếng Nhật"
+      ]
+    },
+    {
+      "name": "Korean",
+      "aliases": [
+        "Tiếng Hàn"
+      ]
+    },
+    {
+      "name": "Chinese",
+      "aliases": [
+        "Tiếng Trung"
+      ]
+    },
+    {
+      "name": "French",
+      "aliases": [
+        "Tiếng Pháp"
+      ]
+    },
+    {
+      "name": "German",
+      "aliases": [
+        "Tiếng Đức"
+      ]
+    }
+  ],
+  "level": [
+    {
+      "name": "Intern",
+      "aliases": []
+    },
+    {
+      "name": "Fresher",
+      "aliases": []
+    },
+    {
+      "name": "Junior",
+      "aliases": []
+    },
+    {
+      "name": "Mid-level",
+      "aliases": []
+    },
+    {
+      "name": "Senior",
+      "aliases": []
+    },
+    {
+      "name": "Lead",
+      "aliases": []
+    },
+    {
+      "name": "Principal",
+      "aliases": []
+    },
+    {
+      "name": "Architect",
+      "aliases": []
+    },
+    {
+      "name": "Director",
+      "aliases": []
+    },
+    {
+      "name": "CTO",
+      "aliases": []
+    },
+    {
+      "name": "CIO",
+      "aliases": []
+    },
+    {
+      "name": "All levels",
+      "aliases": []
+    }
+  ],
+  "soft_skill": [
+    {
+      "name": "Teamwork",
+      "aliases": [
+        "Làm việc nhóm"
+      ]
+    },
+    {
+      "name": "Communication",
+      "aliases": [
+        "Giao tiếp"
+      ]
+    },
+    {
+      "name": "Problem Solving",
+      "aliases": [
+        "Giải quyết vấn đề"
+      ]
+    },
+    {
+      "name": "Leadership",
+      "aliases": [
+        "Lãnh đạo"
+      ]
+    }
+  ],
+  "business_domain": [
+    {
+      "name": "Banking & Finance",
+      "aliases": [
+        "Banking and Finance"
+      ]
+    },
+    {
+      "name": "E-commerce",
+      "aliases": [
+        "Ecommerce"
+      ]
+    },
+    {
+      "name": "Fintech",
+      "aliases": []
+    },
+    {
+      "name": "Insurance",
+      "aliases": []
+    }
+  ]
+}
