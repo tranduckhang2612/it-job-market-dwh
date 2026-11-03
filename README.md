@@ -263,11 +263,6 @@ tests/
 ```
 
 
-## Từ normalize đến SQL Server DW
-
-`raw → normalize_data → analytics (PostgreSQL) → dw (SQL Server) → Power BI`
-
-`staging` là luồng cũ, có thể không tồn tại ở DB mới. Hai loader hiện tại không ghi vào staging. Dữ liệu demo không đi kèm khi clone repo.
 
 ### Data dictionary — PostgreSQL
 
@@ -308,75 +303,3 @@ Trong `analytics`, mỗi `dim_<nhóm>` có khóa `<nhóm>_key`, `name`, `categor
 
 **View PostgreSQL:** `analytics.fact_job_latest` chọn bản quan sát mới nhất mỗi tin; 8 view `bridge_job_<nhóm>_latest` giữ liên kết của bản đó; 8 view `<nhóm>_demand_latest` thống kê số/tỷ lệ tin theo giá trị. `job_skills_latest` gộp các nhóm kỹ năng để phân tích; `role_skill_demand_latest` thống kê kỹ năng theo vai trò; `review_queue` hiển thị mục cần rà soát.
 
-**Đếm cho Power BI:** dùng `DISTINCTCOUNT(job_id)` khi cần đếm tin trong view. Một tin ở hai thành phố được tính một lần ở mỗi thành phố nhưng chỉ một lần ở tổng. Tỷ lệ tin theo thành phố dùng số tin khác nhau làm mẫu số; các tỷ lệ có thể cộng quá 100%.
-
-### Lệnh chạy tay — PowerShell
-
-Chạy từng bước từ thư mục gốc. Nếu đã có `normalize_data.normalized_jobs`, bỏ qua crawl và normalize; nếu analytics đã cập nhật thì chỉ cần nạp DW.
-
-```powershell
-python -m pip install -r requirements-dw.txt
-docker compose -f docker/docker-compose.yml up -d postgres
-
-# Điền thông tin PostgreSQL của máy đang chạy; dùng DB có sẵn hoặc tạo trước.
-$env:PGHOST = '127.0.0.1'
-$env:PGPORT = '5432'
-$env:PGDATABASE = 'it_job_market_v5'
-$env:PGUSER = '<postgres-user>'
-$env:PGPASSWORD = Read-Host 'Mật khẩu PostgreSQL' -MaskInput
-# Nếu shell đang có DATABASE_URL trỏ DB khác, bỏ biến đó để dùng PG* nhất quán.
-Remove-Item Env:DATABASE_URL -ErrorAction SilentlyContinue
-
-# Chỉ khi cần lấy và xử lý dữ liệu đầu vào
-python main_topdev.py --limit 50
-python main_itviec.py --limit 50
-python load_normalize_data.py --dry-run
-python load_normalize_data.py
-
-# PostgreSQL: normalize_data -> analytics
-python load_analytics.py --dry-run
-python load_analytics.py --apply --out reports/analytics/run-001
-
-# SQL Server LocalDB: yêu cầu ODBC Driver 17 và instance ITJobMarketDW đã có
-SqlLocalDB start ITJobMarketDW
-sqlcmd -S '(localdb)\ITJobMarketDW' -E -d master -b -Q "IF DB_ID(N'it_job_market_dw') IS NULL CREATE DATABASE [it_job_market_dw];"
-$env:DW_SQLSERVER_CONNECTION_STRING = 'DRIVER={ODBC Driver 17 for SQL Server};SERVER=(localdb)\ITJobMarketDW;DATABASE=it_job_market_dw;Trusted_Connection=yes;Encrypt=no'
-
-# SQL Server: preview trước, xác nhận đúng nguồn và đích rồi mới nạp
-python load_dw_job_values.py
-python load_dw_job_values.py --apply
-```
-
-- `--out` của analytics phải là thư mục mới mỗi lần apply; đổi `run-001` cho lần sau.
-- Trên máy nhóm, thay connection string bằng đích được nhóm cấp; không đưa mật khẩu vào Git. `Read-Host -MaskInput` dùng PowerShell 7.
-- [Loader DW hiện tại](load_dw_job_values.py) đọc DDL từ [dw.sql](data_preprocessing/sql/dw.sql) và nạp dữ liệu. Muốn chỉ tạo cấu trúc, mở dw.sql trong SSMS, chọn đúng database đích rồi Execute; script SQL không nạp dữ liệu. Lệnh `--apply` đồng bộ toàn bộ snapshot mới nhất; tin/liên kết không còn trong snapshot sẽ bị gỡ khỏi DW. Chạy lại cùng dữ liệu không thêm dòng trùng. `load_dw_dimensions.py` chỉ dành cho luồng cũ.
-
-### Kiểm tra tay trong pgAdmin và SSMS
-
-**pgAdmin — chọn database PostgreSQL đã cấu hình:**
-
-```sql
-SELECT source, COUNT(*) AS so_tin
-FROM analytics.fact_job_latest
-GROUP BY source;
-
-SELECT * FROM analytics.programming_language_demand_latest;
-```
-
-**SSMS — Database Engine → Windows Authentication → `(localdb)\ITJobMarketDW`.** Nếu tên instance báo lỗi, chạy `SqlLocalDB info ITJobMarketDW` và dán giá trị **Instance pipe name** hiện tại vào **Server name**.
-
-```sql
-USE it_job_market_dw;
-
-SELECT source, COUNT(*) AS so_tin FROM dw.fact_job GROUP BY source;
-SELECT name AS thanh_pho, COUNT(DISTINCT job_id) AS so_tin
-FROM dw.job_city
-GROUP BY name
-ORDER BY so_tin DESC;
-
-SELECT job_id, source, title, name
-FROM dw.job_programming_language
-WHERE name = N'Python';
-```
-
-Mốc demo để đối chiếu (không phải số cố định): **102 tin** (93 ITviec, 9 TopDev), **11 tên ngôn ngữ / 51 liên kết tin–ngôn ngữ**, **4 thành phố / 112 liên kết tin–thành phố**.
