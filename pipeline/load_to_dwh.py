@@ -1,4 +1,4 @@
-"""Load the published analytics snapshot into SQL Server DW."""
+"""Load existing normalize_data rows directly into SQL Server DW."""
 
 from __future__ import annotations
 
@@ -23,7 +23,7 @@ def main(argv: list[str] | None = None) -> int:
     except DatabaseConfigError as exc:
         print(f"Lỗi cấu hình PostgreSQL: {exc}", file=sys.stderr)
         return 4
-    print(f"Nguồn analytics PostgreSQL: {env.get('PGDATABASE') or 'PGSERVICE=' + env['PGSERVICE']}", flush=True)
+    print(f"Nguồn normalize_data PostgreSQL: {env.get('PGDATABASE') or 'PGSERVICE=' + env['PGSERVICE']}", flush=True)
     status = run_step(["load.py", "warehouse", *([] if args.preview else ["--apply"])], env)
     if status:
         print(f"Nạp SQL Server DW thất bại (exit {status}).", file=sys.stderr)

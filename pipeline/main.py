@@ -1,16 +1,14 @@
-"""Crawl job postings, normalize them, and publish analytics."""
+"""Crawl and normalize job postings, then load SQL Server DW directly."""
 
 from __future__ import annotations
 
 import argparse
-from datetime import datetime, timezone
 import json
 import os
 from pathlib import Path
 import shlex
 import subprocess
 import sys
-from uuid import uuid4
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -95,16 +93,16 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--limit", type=int, default=20, help="Số tin cần crawl ở mỗi nguồn.")
     parser.add_argument("--cookie-file", type=Path, help="File Cookie ITviec khác đường dẫn mặc định.")
     parser.add_argument("--itviec-login", action="store_true", help="Đăng nhập ITviec bằng trình duyệt có giao diện.")
-    parser.add_argument("--out", type=Path, help="Thư mục snapshot analytics mới.")
+    destination = parser.add_mutually_exclusive_group()
+    destination.add_argument("--normalize-only", action="store_true", help="Dừng sau bước chuẩn hóa PostgreSQL.")
+    destination.add_argument("--out", type=Path, help="Luồng cũ: ghi snapshot analytics vào thư mục này thay vì nạp DW.")
     args = parser.parse_args(argv)
     if args.limit < 1:
         parser.error("--limit phải lớn hơn 0.")
     if args.cookie_file and args.itviec_login:
         parser.error("Chọn --cookie-file hoặc --itviec-login.")
-    out = (args.out.expanduser().resolve() if args.out else
-           ROOT / "reports" / "analytics" /
-           (datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S") + "_" + uuid4().hex[:8]))
-    if out.exists():
+    out = args.out.expanduser().resolve() if args.out else None
+    if out is not None and out.exists():
         parser.error("--out phải là đường dẫn thư mục chưa tồn tại.")
 
     sources = ("itviec", "topdev") if args.source == "both" else (args.source,)
@@ -116,6 +114,8 @@ def main(argv: list[str] | None = None) -> int:
     except DatabaseConfigError as exc:
         print(f"Lỗi cấu hình PostgreSQL: {exc}", file=sys.stderr)
         return 4
+    if not args.normalize_only and out is None and not env.get("DW_SQLSERVER_CONNECTION_STRING"):
+        parser.error("Thiếu DW_SQLSERVER_CONNECTION_STRING; dùng --normalize-only nếu chỉ chuẩn hóa.")
     print(f"PostgreSQL: {env.get('PGDATABASE') or 'PGSERVICE=' + env['PGSERVICE']}", flush=True)
 
     for source in sources:
@@ -131,15 +131,23 @@ def main(argv: list[str] | None = None) -> int:
             return status
 
     scope = [] if args.source == "both" else ["--source", args.source]
-    for label, command in (
-        ("normalize", ["load.py", "normalize", *scope]),
-        ("analytics", ["load.py", "analytics", "--apply", "--out", str(out), *scope]),
-    ):
+    stages = [("normalize", ["load.py", "normalize", *scope])]
+    if out is not None:
+        stages.append(("analytics", ["load.py", "analytics", "--apply", "--out", str(out), *scope]))
+    elif not args.normalize_only:
+        # DW reconciles a complete snapshot, even when only one source was crawled.
+        stages.append(("warehouse", ["load.py", "warehouse", "--apply"]))
+    for label, command in stages:
         status = run_step(command, env)
         if status:
             print(f"Dừng tại bước {label} (exit {status}).", file=sys.stderr)
             return status
-    print(f"Đã nạp analytics. Snapshot: {out}")
+    if out is not None:
+        print(f"Đã nạp analytics. Snapshot: {out}")
+    elif args.normalize_only:
+        print("Đã chuẩn hóa dữ liệu PostgreSQL.")
+    else:
+        print("Đã nạp SQL Server DW trực tiếp từ normalize_data.")
     return 0
 
 

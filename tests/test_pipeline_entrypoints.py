@@ -11,25 +11,43 @@ from pipeline import load_to_dwh, main as pipeline_main
 
 
 class PipelineEntrypointTests(TestCase):
-    def test_full_pipeline_runs_crawlers_then_loaders(self):
+    def test_full_pipeline_bypasses_analytics(self):
         with TemporaryDirectory() as directory:
             cookie = Path(directory) / "cookie.txt"
             cookie.touch()
-            out = Path(directory) / "snapshot"
-            env = {"PGDATABASE": "it_job_market_v12"}
+            env = {"PGDATABASE": "it_job_market_v12", "DW_SQLSERVER_CONNECTION_STRING": "test"}
             with (patch.object(pipeline_main, "database_env", return_value=env),
                   patch.object(pipeline_main, "run_step", return_value=0) as run):
-                status = pipeline_main.main(["--cookie-file", str(cookie), "--out", str(out)])
+                status = pipeline_main.main(["--cookie-file", str(cookie)])
             self.assertEqual(status, 0)
             self.assertEqual(run.call_args_list, [
                 call(["main_itviec.py", "--limit", "20", "--cookie-file", str(cookie)], env),
                 call(["main_topdev.py", "--limit", "20"], env),
                 call(["load.py", "normalize"], env),
-                call(["load.py", "analytics", "--apply", "--out", str(out)], env),
+                call(["load.py", "warehouse", "--apply"], env),
             ])
 
-    def test_single_source_and_fail_fast(self):
+    def test_normalize_only_stops_after_postgres(self):
         env = {"PGDATABASE": "it_job_market_v12"}
+        with (patch.object(pipeline_main, "database_env", return_value=env),
+              patch.object(pipeline_main, "run_step", return_value=0) as run):
+            self.assertEqual(pipeline_main.main(["--source", "topdev", "--normalize-only"]), 0)
+        self.assertEqual(run.call_args_list, [
+            call(["main_topdev.py", "--limit", "20"], env),
+            call(["load.py", "normalize", "--source", "topdev"], env),
+        ])
+
+    def test_analytics_only_when_explicitly_requested(self):
+        env = {"PGDATABASE": "it_job_market_v12"}
+        with TemporaryDirectory() as directory:
+            out = Path(directory) / "snapshot"
+            with (patch.object(pipeline_main, "database_env", return_value=env),
+                  patch.object(pipeline_main, "run_step", return_value=0) as run):
+                self.assertEqual(pipeline_main.main(["--source", "topdev", "--out", str(out)]), 0)
+            run.assert_called_with(["load.py", "analytics", "--apply", "--out", str(out), "--source", "topdev"], env)
+
+    def test_single_source_and_fail_fast(self):
+        env = {"PGDATABASE": "it_job_market_v12", "DW_SQLSERVER_CONNECTION_STRING": "test"}
         with (patch.object(pipeline_main, "database_env", return_value=env),
               patch.object(pipeline_main, "run_step", side_effect=[0, 7]) as run):
             status = pipeline_main.main(["--source", "topdev", "--limit", "3"])
@@ -37,6 +55,16 @@ class PipelineEntrypointTests(TestCase):
         self.assertEqual(run.call_args_list, [
             call(["main_topdev.py", "--limit", "3"], env),
             call(["load.py", "normalize", "--source", "topdev"], env),
+        ])
+
+    def test_source_filter_does_not_narrow_the_warehouse_snapshot(self):
+        env = {"PGDATABASE": "it_job_market_v12", "DW_SQLSERVER_CONNECTION_STRING": "test"}
+        with (patch.object(pipeline_main, "database_env", return_value=env),
+              patch.object(pipeline_main, "run_step", return_value=0) as run):
+            self.assertEqual(pipeline_main.main(["--source", "topdev"]), 0)
+        self.assertEqual(run.call_args_list[-2:], [
+            call(["load.py", "normalize", "--source", "topdev"], env),
+            call(["load.py", "warehouse", "--apply"], env),
         ])
 
     def test_dwh_applies_by_default_and_previews_on_request(self):
