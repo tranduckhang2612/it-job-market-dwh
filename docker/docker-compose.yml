@@ -20,6 +20,24 @@ services:
       retries: 20
       start_period: 10s
 
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    restart: unless-stopped
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:?Set MSSQL_SA_PASSWORD in docker/.env}
+      MSSQL_PID: "Developer" # Hoặc "Developer", "Standard" tùy theo license của bạn
+    ports:
+      - "${SQLSERVER_BIND_ADDRESS:-127.0.0.1}:${SQLSERVER_PORT:-1433}:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$${MSSQL_SA_PASSWORD}\" -Q \"SELECT 1\" -C || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+
   pgadmin:
     image: dpage/pgadmin4:latest
     restart: unless-stopped
@@ -36,4 +54,5 @@ services:
 
 volumes:
   postgres_data:
+  sqlserver_data:
   pgadmin_data:

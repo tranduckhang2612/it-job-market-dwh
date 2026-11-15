@@ -173,6 +173,55 @@ BEGIN TRY
         SET @i += 1;
     END;
 
+    -- Replace the polymorphic four-FK table with an AdventureWorks-style
+    -- factless fact between a posting and one conformed skill dimension.
+    IF OBJECT_ID(N'dw.fact_necessary_skills', N'U') IS NOT NULL
+        DROP TABLE dw.fact_necessary_skills;
+
+    IF OBJECT_ID(N'dw.dim_necessary_skill', N'U') IS NULL
+        CREATE TABLE dw.dim_necessary_skill (
+            necessary_skill_key int IDENTITY CONSTRAINT PK_dim_necessary_skill PRIMARY KEY,
+            skill_type nvarchar(64) COLLATE Latin1_General_100_BIN2 NOT NULL,
+            name nvarchar(512) COLLATE Latin1_General_100_BIN2 NOT NULL,
+            category nvarchar(128) COLLATE Latin1_General_100_BIN2 NOT NULL,
+            created_at_utc datetime2(6) NOT NULL DEFAULT SYSUTCDATETIME(),
+            CONSTRAINT CK_dim_necessary_skill_type CHECK (
+                skill_type IN (N'core_skill',N'foreign_language',N'framework',N'programming_language')
+            ),
+            CONSTRAINT UQ_dim_necessary_skill_natural UNIQUE(skill_type,name,category)
+        );
+
+    IF OBJECT_ID(N'dw.fact_job_necessary_skill', N'U') IS NULL
+    BEGIN
+        CREATE TABLE dw.fact_job_necessary_skill (
+            fact_job_necessary_skill_key int IDENTITY
+                CONSTRAINT PK_fact_job_necessary_skill PRIMARY KEY,
+            fact_job_key int NOT NULL,
+            necessary_skill_key int NOT NULL,
+            context_no int NOT NULL,
+            level_text nvarchar(max) NULL,
+            skill_mention_count AS (CONVERT(int, 1)) PERSISTED,
+            CONSTRAINT FK_fact_job_necessary_skill_job FOREIGN KEY (fact_job_key)
+                REFERENCES dw.fact_job(fact_job_key) ON DELETE CASCADE,
+            CONSTRAINT FK_fact_job_necessary_skill_dim FOREIGN KEY (necessary_skill_key)
+                REFERENCES dw.dim_necessary_skill(necessary_skill_key),
+            CONSTRAINT UQ_fact_job_necessary_skill_context
+                UNIQUE(fact_job_key,necessary_skill_key,context_no)
+        );
+        CREATE INDEX IX_fact_job_necessary_skill_dim
+            ON dw.fact_job_necessary_skill(necessary_skill_key,fact_job_key);
+    END;
+
+    EXEC(N'CREATE OR ALTER VIEW dw.job_necessary_skill AS
+        SELECT f.fact_job_necessary_skill_key,f.fact_job_key,f.necessary_skill_key,
+               j.job_id,j.source,j.title,j.company_name,j.job_url,j.crawl_run_id,
+               j.observed_at_utc,j.observed_date_key,
+               d.skill_type,d.name AS skill_name,d.category,
+               f.context_no,f.level_text,f.skill_mention_count
+        FROM dw.fact_job_necessary_skill f
+        JOIN dw.fact_job j ON j.fact_job_key=f.fact_job_key
+        JOIN dw.dim_necessary_skill d ON d.necessary_skill_key=f.necessary_skill_key');
+
     COMMIT TRANSACTION;
 END TRY
 BEGIN CATCH

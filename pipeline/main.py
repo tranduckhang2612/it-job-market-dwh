@@ -91,6 +91,12 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source", choices=("both", "itviec", "topdev"), default="both")
     parser.add_argument("--limit", type=int, default=20, help="Số tin cần crawl ở mỗi nguồn.")
+    parser.add_argument(
+        "--itviec-max-pages",
+        type=int,
+        default=5,
+        help="Số trang danh sách ITviec tối đa cần duyệt (mặc định: 5).",
+    )
     parser.add_argument("--cookie-file", type=Path, help="File Cookie ITviec khác đường dẫn mặc định.")
     parser.add_argument("--itviec-login", action="store_true", help="Đăng nhập ITviec bằng trình duyệt có giao diện.")
     destination = parser.add_mutually_exclusive_group()
@@ -99,6 +105,8 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if args.limit < 1:
         parser.error("--limit phải lớn hơn 0.")
+    if args.itviec_max_pages < 1:
+        parser.error("--itviec-max-pages phải lớn hơn 0.")
     if args.cookie_file and args.itviec_login:
         parser.error("Chọn --cookie-file hoặc --itviec-login.")
     out = args.out.expanduser().resolve() if args.out else None
@@ -121,6 +129,7 @@ def main(argv: list[str] | None = None) -> int:
     for source in sources:
         command = [f"main_{source}.py", "--limit", str(args.limit)]
         if source == "itviec":
+            command.extend(("--max-pages", str(args.itviec_max_pages)))
             if args.itviec_login:
                 command.extend(("--login", "--headed"))
             elif args.cookie_file:

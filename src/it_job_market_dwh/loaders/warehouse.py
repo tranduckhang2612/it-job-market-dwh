@@ -35,6 +35,7 @@ DERIVED_FIELDS = {
     "role": ("category", lambda name, _: role_category(name)),
     "framework": ("programming_language", lambda name, _: framework_language(name)),
 }
+NECESSARY_GROUPS = ("core_skill", "foreign_language", "framework", "programming_language")
 
 
 def read_source():
@@ -123,6 +124,90 @@ def sync_dimension(cursor, group, wanted):
     return sum(checked.values()), writes
 
 
+def sync_necessary_skills(cursor):
+    """Sync the AdventureWorks-style job-to-skill factless fact."""
+    occurrences = []
+    for job_key, name, category in cursor.execute(
+        "SELECT fact_job_key,name,category FROM dw.dim_core_skill"
+    ):
+        occurrences.append((job_key, "core_skill", name, category, None))
+    for job_key, name, level_text in cursor.execute(
+        "SELECT fact_job_key,name,level_text FROM dw.dim_foreign_language"
+    ):
+        occurrences.append((job_key, "foreign_language", name, "", level_text))
+    for job_key, name, category in cursor.execute(
+        "SELECT fact_job_key,name,category FROM dw.dim_framework"
+    ):
+        occurrences.append((job_key, "framework", name, category, None))
+    for job_key, name, category in cursor.execute(
+        "SELECT fact_job_key,name,category FROM dw.dim_programming_language"
+    ):
+        occurrences.append((job_key, "programming_language", name, category, None))
+
+    catalog = {(skill_type, name, category)
+               for _, skill_type, name, category, _ in occurrences}
+    dim_columns = "skill_type,name,category"
+    actual_catalog = {
+        (skill_type, name, category): key
+        for key, skill_type, name, category in cursor.execute(
+            f"SELECT necessary_skill_key,{dim_columns} FROM dw.dim_necessary_skill"
+        )
+    }
+    writes = 0
+    for value in sorted(catalog - actual_catalog.keys()):
+        cursor.execute(
+            f"INSERT INTO dw.dim_necessary_skill({dim_columns}) VALUES(?,?,?)", *value
+        )
+        writes += 1
+    skill_keys = {
+        (skill_type, name, category): key
+        for key, skill_type, name, category in cursor.execute(
+            f"SELECT necessary_skill_key,{dim_columns} FROM dw.dim_necessary_skill"
+        )
+    }
+
+    grouped = defaultdict(list)
+    for job_key, skill_type, name, category, level_text in occurrences:
+        grouped[(job_key, skill_keys[(skill_type, name, category)])].append(level_text)
+    wanted = set()
+    for (job_key, skill_key), levels in grouped.items():
+        for context_no, level_text in enumerate(
+            sorted(levels, key=lambda value: (value is not None, value or ""))
+        ):
+            wanted.add((job_key, skill_key, context_no, level_text))
+
+    fact_columns = "fact_job_key,necessary_skill_key,context_no,level_text"
+    actual = {
+        tuple(row[1:]): row[0]
+        for row in cursor.execute(
+            f"SELECT fact_job_necessary_skill_key,{fact_columns} "
+            "FROM dw.fact_job_necessary_skill"
+        )
+    }
+    for row, fact_key in actual.items():
+        if row not in wanted:
+            cursor.execute(
+                "DELETE FROM dw.fact_job_necessary_skill "
+                "WHERE fact_job_necessary_skill_key=?", fact_key
+            )
+            writes += 1
+    for row in wanted - actual.keys():
+        cursor.execute(
+            f"INSERT INTO dw.fact_job_necessary_skill({fact_columns}) VALUES(?,?,?,?)",
+            *row,
+        )
+        writes += 1
+
+    checked = {
+        tuple(row) for row in cursor.execute(
+            f"SELECT {fact_columns} FROM dw.fact_job_necessary_skill"
+        )
+    }
+    if checked != wanted:
+        raise ValueError("DW reconciliation failed for necessary skills")
+    return len(checked), writes
+
+
 def apply(conn, data):
     jobs, groups = data
     if not jobs:
@@ -157,7 +242,7 @@ def apply(conn, data):
                 cursor.execute(f"UPDATE dw.fact_job SET {assignments} WHERE job_id=?", *values, job)
                 writes += 1
         for job in old.keys() - jobs.keys():
-            # Dimension occurrences are removed by their fact FK.
+            # Skill facts and per-job dimensions cascade from the posting fact.
             cursor.execute("DELETE FROM dw.fact_job WHERE job_id=?", job)
             writes += 1
 
@@ -170,8 +255,11 @@ def apply(conn, data):
             )
             counts[group], group_writes = sync_dimension(cursor, group, wanted)
             writes += group_writes
+        necessary_skills, skill_writes = sync_necessary_skills(cursor)
+        writes += skill_writes
         conn.commit()
-        return dict(jobs=len(ids), links=counts, data_writes=writes)
+        return dict(jobs=len(ids), links=counts, necessary_skills=necessary_skills,
+                    data_writes=writes)
     except BaseException:
         conn.rollback()
         raise

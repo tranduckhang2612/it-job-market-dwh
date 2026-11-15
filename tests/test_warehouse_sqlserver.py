@@ -67,7 +67,9 @@ class WarehouseSqlServerTests(unittest.TestCase):
         self.assertEqual(first["jobs"], 2)
         self.assertEqual(first["links"], {g: {"programming_language": 3, "foreign_language": 4}.get(g, 2)
                                           for g in warehouse.GROUPS})
-        self.assertEqual(self.table_names(), {"fact_job", "dim_date"} | {"dim_" + g for g in warehouse.GROUPS})
+        self.assertEqual(self.table_names(), {"fact_job", "fact_job_necessary_skill",
+                                              "dim_date", "dim_necessary_skill"}
+                         | {"dim_" + g for g in warehouse.GROUPS})
         for group in warehouse.GROUPS:
             ids = self.rows(f"SELECT {group}_key FROM dw.dim_{group}")
             self.assertEqual(len(set(ids)), first["links"][group])
@@ -93,6 +95,64 @@ class WarehouseSqlServerTests(unittest.TestCase):
         self.assertEqual({g: self.rows(f"SELECT * FROM dw.dim_{g} ORDER BY {g}_key") for g in warehouse.GROUPS}, before)
         self.assertEqual(self.rows("SELECT observed_date_key, SUM(job_posting_count) FROM dw.fact_job "
                                    "GROUP BY observed_date_key"), [(20201229, 2)])
+
+    def test_necessary_skills_use_one_conformed_dimension_and_stable_ids(self):
+        first = warehouse.apply(self.conn, sample())
+        self.assertEqual(first["necessary_skills"], 11)
+        self.assertEqual(self.rows(
+            "SELECT COUNT(*),SUM(skill_mention_count),COUNT(necessary_skill_key),"
+            "COUNT(fact_job_key) FROM dw.fact_job_necessary_skill"
+        ), [(11, 11, 11, 11)])
+        self.assertEqual(self.rows(
+            "SELECT skill_type,name,category FROM dw.dim_necessary_skill "
+            "ORDER BY skill_type,name"
+        ), [("core_skill", "Git", "tool"),
+            ("foreign_language", "English", ""),
+            ("framework", "Django", "framework_library"),
+            ("programming_language", "Python", "programming_language"),
+            ("programming_language", "SQL", "programming_language")])
+        self.assertEqual(self.rows(
+            "SELECT COUNT(*) FROM dw.fact_job_necessary_skill f "
+            "JOIN dw.fact_job j ON j.fact_job_key=f.fact_job_key "
+            "JOIN dw.dim_necessary_skill d ON d.necessary_skill_key=f.necessary_skill_key"
+        ), [(11,)])
+        self.assertEqual(self.columns("job_necessary_skill"), {
+            "fact_job_necessary_skill_key", "fact_job_key", "necessary_skill_key",
+            "job_id", "source", "title", "company_name", "job_url", "crawl_run_id",
+            "observed_at_utc", "observed_date_key", "skill_type", "skill_name",
+            "category", "context_no", "level_text", "skill_mention_count",
+        })
+        before = self.rows(
+            "SELECT fact_job_necessary_skill_key,fact_job_key,necessary_skill_key,"
+            "context_no,level_text FROM dw.fact_job_necessary_skill "
+            "ORDER BY fact_job_necessary_skill_key"
+        )
+        self.conn.commit()
+        self.assertEqual(warehouse.apply(self.conn, sample())["data_writes"], 0)
+        self.assertEqual(self.rows(
+            "SELECT fact_job_necessary_skill_key,fact_job_key,necessary_skill_key,"
+            "context_no,level_text FROM dw.fact_job_necessary_skill "
+            "ORDER BY fact_job_necessary_skill_key"
+        ), before)
+
+    def test_removed_skill_occurrence_removes_its_fact_row(self):
+        jobs, groups = sample()
+        warehouse.apply(self.conn, (jobs, groups))
+        self.conn.commit()
+        groups["programming_language"] = [
+            row for row in groups["programming_language"]
+            if row[:2] != ("topdev:1", "SQL")
+        ]
+        result = warehouse.apply(self.conn, (jobs, groups))
+        self.assertEqual(result["necessary_skills"], 10)
+        self.assertEqual(self.rows(
+            "SELECT COUNT(*) FROM dw.fact_job_necessary_skill f "
+            "JOIN dw.dim_necessary_skill d "
+            "ON d.necessary_skill_key=f.necessary_skill_key "
+            "WHERE d.skill_type=N'programming_language' AND d.name=N'SQL'"
+        ), [(0,)])
+        self.conn.commit()
+        self.assertEqual(warehouse.apply(self.conn, (jobs, groups))["data_writes"], 0)
 
     def test_fact_examples_return_one_sentence_each(self):
         warehouse.apply(self.conn, sample())
@@ -192,6 +252,12 @@ class WarehouseSqlServerTests(unittest.TestCase):
         self.assertEqual(self.rows("SELECT fact_job_key FROM dw.fact_job"), old)
         self.assertEqual(self.rows("SELECT level_text FROM dw.job_foreign_language ORDER BY level_text"),
                          [("B2",), ("C1",)])
+        self.assertEqual(result["necessary_skills"], 6)
+        self.assertEqual(self.rows(
+            "SELECT COUNT(*) FROM dw.fact_job_necessary_skill s "
+            "LEFT JOIN dw.fact_job f ON f.fact_job_key=s.fact_job_key "
+            "WHERE f.fact_job_key IS NULL"
+        ), [(0,)])
 
     def create_legacy_schema(self):
         c = self.conn.cursor()
@@ -240,7 +306,9 @@ class WarehouseSqlServerTests(unittest.TestCase):
         before = {group: self.rows(query) for group, query in queries.items()}
         warehouse.setup(self.conn.cursor())
         self.conn.commit()
-        self.assertEqual(self.table_names(), {"fact_job", "dim_date"} | {"dim_" + g for g in warehouse.GROUPS})
+        self.assertEqual(self.table_names(), {"fact_job", "fact_job_necessary_skill",
+                                              "dim_date", "dim_necessary_skill"}
+                         | {"dim_" + g for g in warehouse.GROUPS})
         self.assertEqual(self.rows("SELECT fact_job_key,observed_date_key,job_posting_count FROM dw.fact_job "
                                    "ORDER BY fact_job_key"), [(1, 20201229, 1), (2, 20201230, 1)])
         for group in warehouse.GROUPS:
