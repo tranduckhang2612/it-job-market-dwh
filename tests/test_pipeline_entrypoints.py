@@ -18,15 +18,10 @@ class PipelineEntrypointTests(TestCase):
             env = {"PGDATABASE": "it_job_market_v12", "DW_SQLSERVER_CONNECTION_STRING": "test"}
             with (patch.object(pipeline_main, "database_env", return_value=env),
                   patch.object(pipeline_main, "run_step", return_value=0) as run):
-<<<<<<< Updated upstream
-                status = pipeline_main.main(["--cookie-file", str(cookie)])
-=======
                 status = pipeline_main.main([
                     "--cookie-file", str(cookie),
                     "--itviec-max-pages", "12",
-                    "--out", str(out),
                 ])
->>>>>>> Stashed changes
             self.assertEqual(status, 0)
             self.assertEqual(run.call_args_list, [
                 call([

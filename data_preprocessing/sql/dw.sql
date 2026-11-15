@@ -222,6 +222,73 @@ BEGIN TRY
         JOIN dw.fact_job j ON j.fact_job_key=f.fact_job_key
         JOIN dw.dim_necessary_skill d ON d.necessary_skill_key=f.necessary_skill_key');
 
+    -- One posting x role occurrence x city occurrence. Names retained for compatibility.
+    -- Composite FKs prevent a dimension occurrence from another posting.
+    IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE object_id=OBJECT_ID(N'dw.dim_role')
+                   AND name=N'UX_dim_role_job_role')
+        CREATE UNIQUE INDEX UX_dim_role_job_role ON dw.dim_role(fact_job_key,role_key);
+    IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE object_id=OBJECT_ID(N'dw.dim_city')
+                   AND name=N'UX_dim_city_job_city')
+        CREATE UNIQUE INDEX UX_dim_city_job_city ON dw.dim_city(fact_job_key,city_key);
+
+    IF OBJECT_ID(N'dw.fact_job_role_level_city', N'U') IS NULL
+    BEGIN
+        CREATE TABLE dw.fact_job_role_level_city (
+            fact_job_role_level_city_key int IDENTITY
+                CONSTRAINT PK_fact_job_role_level_city PRIMARY KEY,
+            fact_job_key int NOT NULL,
+            role_key int NULL,
+            city_key int NULL,
+            combination_count AS (CONVERT(int, 1)) PERSISTED,
+            CONSTRAINT FK_fact_job_role_level_city_job FOREIGN KEY (fact_job_key)
+                REFERENCES dw.fact_job(fact_job_key) ON DELETE CASCADE,
+            CONSTRAINT FK_fact_job_role_level_city_role FOREIGN KEY (fact_job_key,role_key)
+                REFERENCES dw.dim_role(fact_job_key,role_key),
+            CONSTRAINT FK_fact_job_role_level_city_city FOREIGN KEY (fact_job_key,city_key)
+                REFERENCES dw.dim_city(fact_job_key,city_key),
+            CONSTRAINT UQ_fact_job_role_level_city_combination
+                UNIQUE(fact_job_key,role_key,city_key)
+        );
+        CREATE INDEX IX_fact_job_role_level_city_role
+            ON dw.fact_job_role_level_city(role_key,fact_job_key);
+        CREATE INDEX IX_fact_job_role_level_city_city
+            ON dw.fact_job_role_level_city(city_key,fact_job_key);
+    END;
+
+    IF COL_LENGTH(N'dw.fact_job_role_level_city', N'level_key') IS NOT NULL
+    BEGIN
+        -- Remove the old projection before dropping its source column.
+        IF OBJECT_ID(N'dw.job_role_level_city', N'V') IS NOT NULL
+            EXEC(N'DROP VIEW dw.job_role_level_city');
+        IF OBJECT_ID(N'dw.FK_fact_job_role_level_city_level', N'F') IS NOT NULL
+            EXEC(N'ALTER TABLE dw.fact_job_role_level_city DROP CONSTRAINT FK_fact_job_role_level_city_level');
+        IF OBJECT_ID(N'dw.UQ_fact_job_role_level_city_combination', N'UQ') IS NOT NULL
+            EXEC(N'ALTER TABLE dw.fact_job_role_level_city DROP CONSTRAINT UQ_fact_job_role_level_city_combination');
+        IF EXISTS (SELECT 1 FROM sys.indexes WHERE object_id=OBJECT_ID(N'dw.fact_job_role_level_city')
+                   AND name=N'IX_fact_job_role_level_city_level')
+            EXEC(N'DROP INDEX IX_fact_job_role_level_city_level ON dw.fact_job_role_level_city');
+        -- Former level-only variations now represent the same combination.
+        -- Preserve the lowest existing fact ID for each posting/role/city.
+        EXEC(N';WITH ranked AS (
+            SELECT fact_job_role_level_city_key,
+                   ROW_NUMBER() OVER (PARTITION BY fact_job_key,role_key,city_key
+                                      ORDER BY fact_job_role_level_city_key) AS occurrence_no
+            FROM dw.fact_job_role_level_city
+        ) DELETE FROM ranked WHERE occurrence_no > 1;');
+        EXEC(N'ALTER TABLE dw.fact_job_role_level_city DROP COLUMN level_key');
+        EXEC(N'ALTER TABLE dw.fact_job_role_level_city ADD CONSTRAINT UQ_fact_job_role_level_city_combination
+               UNIQUE(fact_job_key,role_key,city_key)');
+    END;
+
+    EXEC(N'CREATE OR ALTER VIEW dw.job_role_level_city AS
+        SELECT f.fact_job_role_level_city_key,f.fact_job_key,
+               f.role_key,f.city_key,
+               r.name AS role_name,r.category AS role_category,
+               c.name AS city_name,f.combination_count
+        FROM dw.fact_job_role_level_city f
+        LEFT JOIN dw.dim_role r ON r.role_key=f.role_key AND r.fact_job_key=f.fact_job_key
+        LEFT JOIN dw.dim_city c ON c.city_key=f.city_key AND c.fact_job_key=f.fact_job_key');
+
     COMMIT TRANSACTION;
 END TRY
 BEGIN CATCH
