@@ -68,7 +68,7 @@ class WarehouseSqlServerTests(unittest.TestCase):
         self.assertEqual(first["jobs"], 2)
         self.assertEqual(first["links"], {g: {"programming_language": 3, "foreign_language": 4}.get(g, 2)
                                           for g in warehouse.GROUPS})
-        self.assertEqual(self.table_names(), {"fact_job", "fact_job_necessary_skill", "fact_job_role_level_city",
+        self.assertEqual(self.table_names(), {"fact_job", "fact_job_necessary_skill", "fact_job_role_city",
                                               "dim_date", "dim_necessary_skill"}
                          | {"dim_" + g for g in warehouse.GROUPS})
         for group in warehouse.GROUPS:
@@ -96,7 +96,7 @@ class WarehouseSqlServerTests(unittest.TestCase):
         self.assertEqual({g: self.rows(f"SELECT * FROM dw.dim_{g} ORDER BY {g}_key") for g in warehouse.GROUPS}, before)
         self.assertEqual(self.rows("SELECT observed_date_key, SUM(job_posting_count) FROM dw.fact_job "
                                    "GROUP BY observed_date_key"), [(20201229, 2)])
-        self.assertEqual(first["role_level_city_combinations"], 2)
+        self.assertEqual(first["role_city_combinations"], 2)
 
     def profile_sample(self):
         jobs, groups = sample()
@@ -107,184 +107,210 @@ class WarehouseSqlServerTests(unittest.TestCase):
 
     def test_role_city_combines_only_within_a_job_without_level_or_metadata(self):
         result = warehouse.apply(self.conn, self.profile_sample())
-        self.assertEqual(result["role_level_city_combinations"], 5)
+        self.assertEqual(result["role_city_combinations"], 5)
         self.assertEqual(self.rows(
-            "SELECT j.job_id,COUNT(*) FROM dw.job_role_level_city v "
+            "SELECT j.job_id,COUNT(*) FROM dw.job_role_city v "
             "JOIN dw.fact_job j ON j.fact_job_key=v.fact_job_key "
             "GROUP BY j.job_id ORDER BY j.job_id"
         ), [("itviec:2", 1), ("topdev:1", 4)])
         expected = {(role, city) for role in ("Backend Developer", "Data Engineer")
                     for city in ("Hà Nội", "Hồ Chí Minh")}
         self.assertEqual(set(self.rows(
-            "SELECT role_name,city_name FROM dw.job_role_level_city "
+            "SELECT role_name,city_name FROM dw.job_role_city "
             "WHERE fact_job_key=(SELECT fact_job_key FROM dw.fact_job WHERE job_id=N'topdev:1')"
         )), expected)
         self.assertEqual(self.rows(
-            "SELECT SUM(combination_count),COUNT(DISTINCT fact_job_key) FROM dw.fact_job_role_level_city"
+            "SELECT SUM(combination_count),COUNT(DISTINCT fact_job_key) FROM dw.fact_job_role_city"
         ), [(5, 2)])
-        self.assertEqual(self.columns("fact_job_role_level_city"), {
-            "fact_job_role_level_city_key", "fact_job_key", "role_key", "city_key", "combination_count",
+        self.assertEqual(self.columns("fact_job_role_city"), {
+            "fact_job_role_city_key", "fact_job_key", "role_key", "city_key", "combination_count",
         })
-        self.assertEqual(self.columns("job_role_level_city"), {
-            "fact_job_role_level_city_key", "fact_job_key", "role_key", "city_key",
+        self.assertEqual(self.columns("job_role_city"), {
+            "fact_job_role_city_key", "fact_job_key", "role_key", "city_key",
             "role_name", "role_category", "city_name", "combination_count",
         })
         self.assertEqual(self.rows("SELECT COUNT(*) FROM dw.dim_level"), [(2,)])
-        before = self.rows("SELECT * FROM dw.fact_job_role_level_city ORDER BY fact_job_role_level_city_key")
+        before = self.rows("SELECT * FROM dw.fact_job_role_city ORDER BY fact_job_role_city_key")
         self.conn.commit()
         self.assertEqual(warehouse.apply(self.conn, self.profile_sample())["data_writes"], 0)
         self.assertEqual(self.rows(
-            "SELECT * FROM dw.fact_job_role_level_city ORDER BY fact_job_role_level_city_key"
+            "SELECT * FROM dw.fact_job_role_city ORDER BY fact_job_role_city_key"
         ), before)
 
-    def test_role_level_city_missing_all_dimensions_keeps_the_job(self):
+    def test_role_city_missing_all_dimensions_keeps_the_job(self):
         jobs, groups = sample()
         for group in warehouse.PROFILE_GROUPS:
             groups[group] = []
         result = warehouse.apply(self.conn, (jobs, groups))
-        self.assertEqual(result["role_level_city_combinations"], 2)
+        self.assertEqual(result["role_city_combinations"], 2)
         self.assertEqual(self.rows(
-            "SELECT role_key,city_key FROM dw.fact_job_role_level_city"
+            "SELECT role_key,city_key FROM dw.fact_job_role_city"
         ), [(None, None), (None, None)])
         self.conn.commit()
         self.assertEqual(warehouse.apply(self.conn, (jobs, groups))["data_writes"], 0)
 
-    def test_role_level_city_backfill_only_leaves_other_dw_tables_unchanged(self):
+    def test_role_city_backfill_only_leaves_other_dw_tables_unchanged(self):
         warehouse.apply(self.conn, self.profile_sample())
         before = self.rows("SELECT * FROM dw.dim_role ORDER BY role_key")
         before_skills = self.rows("SELECT * FROM dw.fact_job_necessary_skill ORDER BY fact_job_necessary_skill_key")
-        self.conn.execute("DELETE FROM dw.fact_job_role_level_city")
+        self.conn.execute("DELETE FROM dw.fact_job_role_city")
         self.conn.commit()
-        result = warehouse.refresh_role_level_city(self.conn)
-        self.assertEqual(result, {"jobs": 2, "role_level_city_combinations": 5, "data_writes": 5})
+        result = warehouse.refresh_role_city(self.conn)
+        self.assertEqual(result, {"jobs": 2, "role_city_combinations": 5, "data_writes": 5})
         self.assertEqual(self.rows("SELECT * FROM dw.dim_role ORDER BY role_key"), before)
         self.assertEqual(self.rows(
             "SELECT * FROM dw.fact_job_necessary_skill ORDER BY fact_job_necessary_skill_key"
         ), before_skills)
         self.conn.commit()
-        self.assertEqual(warehouse.refresh_role_level_city(self.conn)["data_writes"], 0)
+        self.assertEqual(warehouse.refresh_role_city(self.conn)["data_writes"], 0)
 
-    def test_role_level_city_removes_changed_occurrences_and_preserves_other_job_fact_ids(self):
+    def test_old_role_level_city_table_is_renamed_in_place(self):
+        warehouse.apply(self.conn, self.profile_sample())
+        before = self.rows(
+            "SELECT fact_job_role_city_key,fact_job_key,role_key,city_key "
+            "FROM dw.fact_job_role_city ORDER BY fact_job_role_city_key"
+        )
+        self.conn.execute("DROP VIEW dw.job_role_city")
+        self.conn.execute(
+            "EXEC sys.sp_rename N'dw.fact_job_role_city.fact_job_role_city_key', "
+            "N'fact_job_role_level_city_key', N'COLUMN'"
+        )
+        self.conn.execute(
+            "EXEC sys.sp_rename N'dw.fact_job_role_city', N'fact_job_role_level_city', N'OBJECT'"
+        )
+        self.conn.commit()
+
+        result = warehouse.refresh_role_city(self.conn)
+
+        self.assertEqual(result["role_city_combinations"], 5)
+        self.assertNotIn("fact_job_role_level_city", self.table_names())
+        self.assertIn("fact_job_role_city", self.table_names())
+        self.assertEqual(self.rows(
+            "SELECT fact_job_role_city_key,fact_job_key,role_key,city_key "
+            "FROM dw.fact_job_role_city ORDER BY fact_job_role_city_key"
+        ), before)
+
+    def test_role_city_removes_changed_occurrences_and_preserves_other_job_fact_ids(self):
         jobs, groups = self.profile_sample()
         warehouse.apply(self.conn, (jobs, groups))
         unchanged = self.rows(
-            "SELECT * FROM dw.fact_job_role_level_city WHERE fact_job_key="
+            "SELECT * FROM dw.fact_job_role_city WHERE fact_job_key="
             "(SELECT fact_job_key FROM dw.fact_job WHERE job_id=N'itviec:2')"
         )
         self.conn.commit()
         groups["city"] = [row for row in groups["city"] if row[:2] != ("topdev:1", "Hà Nội")]
         result = warehouse.apply(self.conn, (jobs, groups))
-        self.assertEqual(result["role_level_city_combinations"], 3)
+        self.assertEqual(result["role_city_combinations"], 3)
         self.assertEqual(self.rows(
-            "SELECT * FROM dw.fact_job_role_level_city WHERE fact_job_key="
+            "SELECT * FROM dw.fact_job_role_city WHERE fact_job_key="
             "(SELECT fact_job_key FROM dw.fact_job WHERE job_id=N'itviec:2')"
         ), unchanged)
         self.conn.commit()
         groups["city"].append(("topdev:1", "Đà Nẵng", "", None))
-        self.assertEqual(warehouse.apply(self.conn, (jobs, groups))["role_level_city_combinations"], 5)
+        self.assertEqual(warehouse.apply(self.conn, (jobs, groups))["role_city_combinations"], 5)
         self.conn.commit()
         del jobs["topdev:1"]
         groups = {group: [row for row in rows if row[0] != "topdev:1"] for group, rows in groups.items()}
-        self.assertEqual(warehouse.apply(self.conn, (jobs, groups))["role_level_city_combinations"], 1)
-        self.assertEqual(self.rows("SELECT * FROM dw.fact_job_role_level_city"), unchanged)
+        self.assertEqual(warehouse.apply(self.conn, (jobs, groups))["role_city_combinations"], 1)
+        self.assertEqual(self.rows("SELECT * FROM dw.fact_job_role_city"), unchanged)
 
-    def test_role_level_city_rejects_cross_job_keys_and_duplicate_combinations(self):
+    def test_role_city_rejects_cross_job_keys_and_duplicate_combinations(self):
         warehouse.apply(self.conn, sample())
         own = self.rows(
-            "SELECT fact_job_key,role_key,city_key FROM dw.job_role_level_city "
+            "SELECT fact_job_key,role_key,city_key FROM dw.job_role_city "
             "WHERE fact_job_key=(SELECT fact_job_key FROM dw.fact_job WHERE job_id=N'topdev:1')"
         )[0]
         foreign_role = self.rows(
-            "SELECT role_key FROM dw.job_role_level_city "
+            "SELECT role_key FROM dw.job_role_city "
             "WHERE fact_job_key=(SELECT fact_job_key FROM dw.fact_job WHERE job_id=N'itviec:2')"
         )[0][0]
         self.conn.commit()
-        query = "INSERT INTO dw.fact_job_role_level_city(fact_job_key,role_key,city_key) VALUES(?,?,?)"
+        query = "INSERT INTO dw.fact_job_role_city(fact_job_key,role_key,city_key) VALUES(?,?,?)"
         with self.assertRaises(self.pyodbc.IntegrityError):
             self.conn.execute(query, own[0], foreign_role, own[2])
         self.conn.rollback()
         with self.assertRaises(self.pyodbc.IntegrityError):
             self.conn.execute(query, *own)
         self.conn.rollback()
-        self.assertEqual(self.rows("SELECT COUNT(*) FROM dw.fact_job_role_level_city"), [(2,)])
+        self.assertEqual(self.rows("SELECT COUNT(*) FROM dw.fact_job_role_city"), [(2,)])
 
     def legacy_profile_fact(self):
         warehouse.apply(self.conn, self.profile_sample())
-        self.conn.execute("DROP VIEW dw.job_role_level_city")
-        self.conn.execute("ALTER TABLE dw.fact_job_role_level_city DROP CONSTRAINT UQ_fact_job_role_level_city_combination")
-        self.conn.execute("ALTER TABLE dw.fact_job_role_level_city ADD level_key int NULL")
+        self.conn.execute("DROP VIEW dw.job_role_city")
+        self.conn.execute("ALTER TABLE dw.fact_job_role_city DROP CONSTRAINT UQ_fact_job_role_city_combination")
+        self.conn.execute("ALTER TABLE dw.fact_job_role_city ADD level_key int NULL")
         self.conn.execute("CREATE UNIQUE INDEX UX_dim_level_job_level ON dw.dim_level(fact_job_key,level_key)")
-        self.conn.execute("ALTER TABLE dw.fact_job_role_level_city ADD CONSTRAINT FK_fact_job_role_level_city_level "
+        self.conn.execute("ALTER TABLE dw.fact_job_role_city ADD CONSTRAINT FK_fact_job_role_city_level "
                           "FOREIGN KEY (fact_job_key,level_key) REFERENCES dw.dim_level(fact_job_key,level_key)")
-        self.conn.execute("CREATE INDEX IX_fact_job_role_level_city_level ON dw.fact_job_role_level_city(level_key,fact_job_key)")
-        self.conn.execute("ALTER TABLE dw.fact_job_role_level_city ADD CONSTRAINT UQ_fact_job_role_level_city_combination "
+        self.conn.execute("CREATE INDEX IX_fact_job_role_city_level ON dw.fact_job_role_city(level_key,fact_job_key)")
+        self.conn.execute("ALTER TABLE dw.fact_job_role_city ADD CONSTRAINT UQ_fact_job_role_city_combination "
                           "UNIQUE(fact_job_key,role_key,level_key,city_key)")
         self.conn.execute("UPDATE f SET level_key=(SELECT MIN(level_key) FROM dw.dim_level l "
-                          "WHERE l.fact_job_key=f.fact_job_key) FROM dw.fact_job_role_level_city f")
-        self.conn.execute("INSERT INTO dw.fact_job_role_level_city(fact_job_key,role_key,city_key,level_key) "
+                          "WHERE l.fact_job_key=f.fact_job_key) FROM dw.fact_job_role_city f")
+        self.conn.execute("INSERT INTO dw.fact_job_role_city(fact_job_key,role_key,city_key,level_key) "
                           "SELECT f.fact_job_key,f.role_key,f.city_key,l.level_key "
-                          "FROM dw.fact_job_role_level_city f JOIN dw.dim_level l ON l.fact_job_key=f.fact_job_key "
+                          "FROM dw.fact_job_role_city f JOIN dw.dim_level l ON l.fact_job_key=f.fact_job_key "
                           "WHERE l.level_key<>f.level_key")
-        self.conn.execute("CREATE VIEW dw.job_role_level_city AS SELECT f.*,l.name AS level_name "
-                          "FROM dw.fact_job_role_level_city f LEFT JOIN dw.dim_level l "
+        self.conn.execute("CREATE VIEW dw.job_role_city AS SELECT f.*,l.name AS level_name "
+                          "FROM dw.fact_job_role_city f LEFT JOIN dw.dim_level l "
                           "ON l.fact_job_key=f.fact_job_key AND l.level_key=f.level_key")
         self.conn.commit()
-        self.assertEqual(self.rows("SELECT COUNT(*) FROM dw.fact_job_role_level_city"), [(9,)])
+        self.assertEqual(self.rows("SELECT COUNT(*) FROM dw.fact_job_role_city"), [(9,)])
 
     def test_remove_level_migration_keeps_lowest_fact_ids_and_dim_level(self):
         self.legacy_profile_fact()
-        kept = self.rows("SELECT MIN(fact_job_role_level_city_key),fact_job_key,role_key,city_key "
-                         "FROM dw.fact_job_role_level_city GROUP BY fact_job_key,role_key,city_key "
-                         "ORDER BY MIN(fact_job_role_level_city_key)")
+        kept = self.rows("SELECT MIN(fact_job_role_city_key),fact_job_key,role_key,city_key "
+                         "FROM dw.fact_job_role_city GROUP BY fact_job_key,role_key,city_key "
+                         "ORDER BY MIN(fact_job_role_city_key)")
         levels = self.rows("SELECT * FROM dw.dim_level ORDER BY level_key")
         self.conn.commit()
-        result = warehouse.refresh_role_level_city(self.conn)
-        self.assertEqual(result["role_level_city_combinations"], 5)
-        self.assertEqual(self.rows("SELECT fact_job_role_level_city_key,fact_job_key,role_key,city_key "
-                                   "FROM dw.fact_job_role_level_city ORDER BY fact_job_role_level_city_key"), kept)
+        result = warehouse.refresh_role_city(self.conn)
+        self.assertEqual(result["role_city_combinations"], 5)
+        self.assertEqual(self.rows("SELECT fact_job_role_city_key,fact_job_key,role_key,city_key "
+                                   "FROM dw.fact_job_role_city ORDER BY fact_job_role_city_key"), kept)
         self.assertEqual(self.rows("SELECT * FROM dw.dim_level ORDER BY level_key"), levels)
-        self.assertNotIn("level_key", self.columns("fact_job_role_level_city"))
-        self.assertNotIn("level_name", self.columns("job_role_level_city"))
+        self.assertNotIn("level_key", self.columns("fact_job_role_city"))
+        self.assertNotIn("level_name", self.columns("job_role_city"))
         self.assertEqual(self.rows("SELECT COUNT(*) FROM sys.foreign_keys WHERE parent_object_id="
-                                   "OBJECT_ID('dw.fact_job_role_level_city') AND name="
-                                   "'FK_fact_job_role_level_city_level'"), [(0,)])
+                                   "OBJECT_ID('dw.fact_job_role_city') AND name="
+                                   "'FK_fact_job_role_city_level'"), [(0,)])
         self.conn.commit()
-        self.assertEqual(warehouse.refresh_role_level_city(self.conn)["data_writes"], 0)
+        self.assertEqual(warehouse.refresh_role_city(self.conn)["data_writes"], 0)
 
     def test_remove_level_migration_failure_restores_column_duplicates_and_view(self):
         self.legacy_profile_fact()
-        before = self.rows("SELECT * FROM dw.fact_job_role_level_city ORDER BY fact_job_role_level_city_key")
-        definition = self.rows("SELECT OBJECT_DEFINITION(OBJECT_ID('dw.job_role_level_city'))")
+        before = self.rows("SELECT * FROM dw.fact_job_role_city ORDER BY fact_job_role_city_key")
+        definition = self.rows("SELECT OBJECT_DEFINITION(OBJECT_ID('dw.job_role_city'))")
         self.conn.commit()
-        with patch.object(warehouse, "sync_role_level_city", side_effect=RuntimeError("migration failure")):
+        with patch.object(warehouse, "sync_role_city", side_effect=RuntimeError("migration failure")):
             with self.assertRaisesRegex(RuntimeError, "migration failure"):
-                warehouse.refresh_role_level_city(self.conn)
-        self.assertIn("level_key", self.columns("fact_job_role_level_city"))
-        self.assertEqual(self.rows("SELECT * FROM dw.fact_job_role_level_city ORDER BY fact_job_role_level_city_key"), before)
-        self.assertEqual(self.rows("SELECT OBJECT_DEFINITION(OBJECT_ID('dw.job_role_level_city'))"), definition)
+                warehouse.refresh_role_city(self.conn)
+        self.assertIn("level_key", self.columns("fact_job_role_city"))
+        self.assertEqual(self.rows("SELECT * FROM dw.fact_job_role_city ORDER BY fact_job_role_city_key"), before)
+        self.assertEqual(self.rows("SELECT OBJECT_DEFINITION(OBJECT_ID('dw.job_role_city'))"), definition)
 
     def test_changing_level_occurrences_does_not_change_role_city_fact(self):
         jobs, groups = self.profile_sample()
         warehouse.apply(self.conn, (jobs, groups))
-        before = self.rows("SELECT * FROM dw.fact_job_role_level_city ORDER BY fact_job_role_level_city_key")
+        before = self.rows("SELECT * FROM dw.fact_job_role_city ORDER BY fact_job_role_city_key")
         self.conn.commit()
         groups["level"] = []
         warehouse.apply(self.conn, (jobs, groups))
-        self.assertEqual(self.rows("SELECT * FROM dw.fact_job_role_level_city ORDER BY fact_job_role_level_city_key"), before)
+        self.assertEqual(self.rows("SELECT * FROM dw.fact_job_role_city ORDER BY fact_job_role_city_key"), before)
         self.assertEqual(self.rows("SELECT COUNT(*) FROM dw.dim_level"), [(0,)])
 
-    def test_role_level_city_failure_rolls_back_existing_dimensions_and_facts(self):
+    def test_role_city_failure_rolls_back_existing_dimensions_and_facts(self):
         warehouse.apply(self.conn, self.profile_sample())
-        before = self.rows("SELECT * FROM dw.fact_job_role_level_city ORDER BY fact_job_role_level_city_key")
+        before = self.rows("SELECT * FROM dw.fact_job_role_city ORDER BY fact_job_role_city_key")
         old_cities = self.rows("SELECT * FROM dw.dim_city ORDER BY city_key")
         self.conn.commit()
         jobs, groups = self.profile_sample()
         groups["city"] = []
-        with patch.object(warehouse, "sync_role_level_city", side_effect=RuntimeError("injected_profile_failure")):
+        with patch.object(warehouse, "sync_role_city", side_effect=RuntimeError("injected_profile_failure")):
             with self.assertRaisesRegex(RuntimeError, "injected_profile_failure"):
                 warehouse.apply(self.conn, (jobs, groups))
         self.assertEqual(self.rows(
-            "SELECT * FROM dw.fact_job_role_level_city ORDER BY fact_job_role_level_city_key"
+            "SELECT * FROM dw.fact_job_role_city ORDER BY fact_job_role_city_key"
         ), before)
         self.assertEqual(self.rows("SELECT * FROM dw.dim_city ORDER BY city_key"), old_cities)
 
@@ -498,7 +524,7 @@ class WarehouseSqlServerTests(unittest.TestCase):
         before = {group: self.rows(query) for group, query in queries.items()}
         warehouse.setup(self.conn.cursor())
         self.conn.commit()
-        self.assertEqual(self.table_names(), {"fact_job", "fact_job_necessary_skill", "fact_job_role_level_city",
+        self.assertEqual(self.table_names(), {"fact_job", "fact_job_necessary_skill", "fact_job_role_city",
                                               "dim_date", "dim_necessary_skill"}
                          | {"dim_" + g for g in warehouse.GROUPS})
         self.assertEqual(self.rows("SELECT fact_job_key,observed_date_key,job_posting_count FROM dw.fact_job "

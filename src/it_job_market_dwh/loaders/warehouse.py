@@ -122,10 +122,10 @@ def sync_dimension(cursor, group, wanted):
             if group in PROFILE_GROUPS:
                 # Remove only affected combinations before the occurrence FK is deleted.
                 removed = cursor.execute(
-                    f"SELECT COUNT(*) FROM dw.fact_job_role_level_city WHERE {key}=?", excess
+                    f"SELECT COUNT(*) FROM dw.fact_job_role_city WHERE {key}=?", excess
                 ).fetchone()[0]
                 cursor.execute(
-                    f"DELETE FROM dw.fact_job_role_level_city WHERE {key}=?", excess
+                    f"DELETE FROM dw.fact_job_role_city WHERE {key}=?", excess
                 )
                 writes += removed
             cursor.execute(f"DELETE FROM {dim} WHERE {key}=?", excess)
@@ -224,31 +224,31 @@ def sync_necessary_skills(cursor):
     return len(checked), writes
 
 
-def sync_role_level_city(cursor):
-    """Sync posting/role/city combinations; retain the legacy API/table names."""
+def sync_role_city(cursor):
+    """Sync posting/role/city combinations."""
     columns = "fact_job_key,role_key,city_key"
     wanted = {tuple(row) for row in cursor.execute(PROFILE_QUERY)}
     actual = {
         tuple(row[1:]): row[0] for row in cursor.execute(
-            f"SELECT fact_job_role_level_city_key,{columns} FROM dw.fact_job_role_level_city"
+            f"SELECT fact_job_role_city_key,{columns} FROM dw.fact_job_role_city"
         )
     }
     writes = 0
     order = lambda item: tuple(-1 if key is None else key for key in item)
     for row in sorted(actual.keys() - wanted, key=order):
         cursor.execute(
-            "DELETE FROM dw.fact_job_role_level_city WHERE fact_job_role_level_city_key=?",
+            "DELETE FROM dw.fact_job_role_city WHERE fact_job_role_city_key=?",
             actual[row],
         )
         writes += 1
     for row in sorted(wanted - actual.keys(), key=order):
         cursor.execute(
-            f"INSERT INTO dw.fact_job_role_level_city({columns}) VALUES(?,?,?)", *row
+            f"INSERT INTO dw.fact_job_role_city({columns}) VALUES(?,?,?)", *row
         )
         writes += 1
     checked = {
         tuple(row) for row in cursor.execute(
-            f"SELECT {columns} FROM dw.fact_job_role_level_city"
+            f"SELECT {columns} FROM dw.fact_job_role_city"
         )
     }
     if checked != wanted:
@@ -256,16 +256,16 @@ def sync_role_level_city(cursor):
     return len(checked), writes
 
 
-def refresh_role_level_city(conn):
+def refresh_role_city(conn):
     """Backfill only the new fact from existing DW tables, without PostgreSQL."""
     try:
         _lock(conn)
         cursor = conn.cursor()
         setup(cursor)
-        combinations, writes = sync_role_level_city(cursor)
+        combinations, writes = sync_role_city(cursor)
         jobs = cursor.execute("SELECT COUNT(*) FROM dw.fact_job").fetchone()[0]
         conn.commit()
-        return dict(jobs=jobs, role_level_city_combinations=combinations, data_writes=writes)
+        return dict(jobs=jobs, role_city_combinations=combinations, data_writes=writes)
     except BaseException:
         conn.rollback()
         raise
@@ -320,11 +320,11 @@ def apply(conn, data):
             writes += group_writes
         necessary_skills, skill_writes = sync_necessary_skills(cursor)
         writes += skill_writes
-        role_level_city_combinations, profile_writes = sync_role_level_city(cursor)
+        role_city_combinations, profile_writes = sync_role_city(cursor)
         writes += profile_writes
         conn.commit()
         return dict(jobs=len(ids), links=counts, necessary_skills=necessary_skills,
-                    role_level_city_combinations=role_level_city_combinations,
+                    role_city_combinations=role_city_combinations,
                     data_writes=writes)
     except BaseException:
         conn.rollback()
@@ -334,21 +334,23 @@ def apply(conn, data):
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--apply", action="store_true", help="Replace the current DW snapshot; default only previews")
-    parser.add_argument("--role-level-city-only", action="store_true",
-                        help="Build only the role/city fact (legacy flag name); no PostgreSQL")
+    parser.add_argument("--role-city-only", action="store_true",
+                        help="Build only the role/city fact; no PostgreSQL")
+    parser.add_argument("--role-level-city-only", dest="role_city_only", action="store_true",
+                        help=argparse.SUPPRESS)
     args = parser.parse_args(argv)
-    if args.role_level_city_only:
+    if args.role_city_only:
         import pyodbc
 
         conn = pyodbc.connect(os.environ["DW_SQLSERVER_CONNECTION_STRING"], autocommit=False)
         try:
             if args.apply:
-                result = refresh_role_level_city(conn)
+                result = refresh_role_city(conn)
             else:
                 count = conn.cursor().execute(
                     f"SELECT COUNT_BIG(*) FROM ({PROFILE_QUERY}) combinations"
                 ).fetchone()[0]
-                result = dict(role_level_city_combinations=count)
+                result = dict(role_city_combinations=count)
         finally:
             conn.close()
     elif args.apply:

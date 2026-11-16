@@ -10,7 +10,7 @@ from test_analytics_atomic import sample
 
 
 class WarehouseTests(unittest.TestCase):
-    def test_role_level_city_only_preview_does_not_require_postgres_or_write(self):
+    def test_role_city_only_preview_does_not_require_postgres_or_write(self):
         conn = MagicMock()
         conn.cursor.return_value.execute.return_value.fetchone.return_value = (9,)
         output = io.StringIO()
@@ -18,8 +18,8 @@ class WarehouseTests(unittest.TestCase):
               patch.dict(warehouse.os.environ, {"DW_SQLSERVER_CONNECTION_STRING": "test"}),
               patch("pyodbc.connect", return_value=conn) as connect,
               redirect_stdout(output)):
-            self.assertEqual(warehouse.main(["--role-level-city-only"]), 0)
-        self.assertEqual(json.loads(output.getvalue()), {"role_level_city_combinations": 9})
+            self.assertEqual(warehouse.main(["--role-city-only"]), 0)
+        self.assertEqual(json.loads(output.getvalue()), {"role_city_combinations": 9})
         connect.assert_called_once_with("test", autocommit=False)
         conn.commit.assert_not_called()
         conn.close.assert_called_once()

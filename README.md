@@ -94,6 +94,7 @@ Tám `<nhóm>` trong analytics: `programming_language`, `framework`, `core_skill
 |---|---|---|
 | **FactJob** (`dw.fact_job`) | Bản quan sát mới nhất của **một tin tuyển dụng**, dù tin yêu cầu nhiều kỹ năng hoặc có nhiều địa điểm. | PK `fact_job_key`; `job_id` duy nhất; FK `observed_date_key`; chỉ số `job_posting_count = 1`; nguồn, tiêu đề, công ty, URL, lần crawl và thời điểm quan sát UTC. |
 | **FactJobNecessarySkill** (`dw.fact_job_necessary_skill`) | Một liên kết giữa một tin và một kỹ năng/ngoại ngữ, tương tự `FactInternetSalesReason` của AdventureWorks. | PK `fact_job_necessary_skill_key`; FK bắt buộc `fact_job_key`, `necessary_skill_key`; `context_no`, `level_text`; chỉ số `skill_mention_count = 1`. |
+| **FactJobRoleCity** (`dw.fact_job_role_city`) | Một tổ hợp giữa một tin, một role occurrence và một city occurrence của chính tin đó. | PK `fact_job_role_city_key`; FK `fact_job_key`, `role_key`, `city_key`; chỉ số `combination_count = 1`. Không chứa level. |
 | `dw.dim_necessary_skill` | Một kỹ năng hoặc ngoại ngữ chuẩn hóa dùng chung giữa các tin. | PK `necessary_skill_key`; duy nhất `(skill_type, name, category)`; `skill_type` phân biệt core skill, ngoại ngữ, framework và ngôn ngữ lập trình. |
 | `dw.dim_date` | Một ngày quan sát theo UTC. | PK `date_key` dạng `YYYYMMDD`; `calendar_date`. |
 | `dw.dim_<nhóm>` | Một lần xuất hiện của một giá trị trong **một tin**. | PK `<nhóm>_key` (ví dụ `programming_language_key`); FK `fact_job_key`; `name`, thời điểm tạo và thuộc tính riêng của từng nhóm. |
@@ -103,6 +104,8 @@ SQL Server `dw` không còn bảng bridge: `dw.fact_job` nối trực tiếp **1
 `dw.fact_job_necessary_skill` nối `dw.fact_job` với `dw.dim_necessary_skill`; cả hai FK luôn có giá trị. Bốn nhóm nguồn được hợp nhất bằng `skill_type`, nên không có bốn FK tùy chọn và không tạo tích Descartes. `SUM(skill_mention_count)` đếm số lần xuất hiện của nhãn; `COUNT(DISTINCT fact_job_key)` đếm số tin. Dữ liệu nguồn chưa phân biệt kỹ năng bắt buộc với kỹ năng chỉ được nhắc đến, nên không diễn giải chỉ số này thành số yêu cầu bắt buộc.
 
 View `dw.job_necessary_skill` cung cấp kết quả đã nối để đọc và làm dashboard: các khóa fact/dim, mã và nội dung tin, nguồn, công ty, URL, ngày quan sát, `skill_type`, `skill_name`, `category`, `level_text` và `skill_mention_count`. Các thuộc tính mô tả không được lặp lại trong bảng fact vật lý.
+
+`dw.fact_job_role_city` không phải số tin hay số vị trí tuyển dụng: `SUM(combination_count)` đếm số tổ hợp role–city, còn số tin phải dùng `COUNT(DISTINCT fact_job_key)`. Nguồn chỉ cung cấp danh sách role và city ở cấp tin; nếu một tin có nhiều role lẫn nhiều city thì các tổ hợp là phép chiếu của hai danh sách, không phải cặp role–city được nguồn công bố. View `dw.job_role_city` cung cấp tên role, nhóm role và tên city để làm báo cáo. Script ví dụ: [role_city_examples.sql](data_preprocessing/sql/role_city_examples.sql).
 
 - `dim_framework.programming_language` ghi ngôn ngữ tiêu biểu của hệ sinh thái (ví dụ Spring Boot → Java, FastAPI → Python, Angular → TypeScript), không suy ra từ các kỹ năng khác trong tin. MVVM và tên chưa xác định có giá trị `NULL`.
 - Các bảng `dim_city` và `dim_level` không có `category` hay `level_text`. `dim_foreign_language` giữ `level_text` để mô tả yêu cầu ngoại ngữ, nhưng không có `category`.
