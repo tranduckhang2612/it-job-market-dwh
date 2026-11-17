@@ -1,0 +1,38 @@
+services:
+  airflow:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.airflow
+    container_name: it-job-market-airflow
+    restart: unless-stopped
+    command: standalone
+    ports:
+      - "8080:8080"
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://admin:AdminPassword123!@postgres:5432/airflow_db
+      AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+      AIRFLOW__WEBSERVER__SECRET_KEY: "it-job-market-secret-key"
+
+      PYTHONPATH: /opt/airflow/project/src
+      DATABASE_URL: postgresql://admin:AdminPassword123!@postgres:5432/it_job_market_v12
+      PGHOST: postgres
+      PGPORT: "5432"
+      PGDATABASE: it_job_market_v12
+      PGUSER: admin
+      PGPASSWORD: AdminPassword123!
+      DW_SQLSERVER_CONNECTION_STRING: "DRIVER={ODBC Driver 18 for SQL Server};SERVER=sqlserver,1433;DATABASE=it_job_market_dw;UID=sa;PWD=SqlServerPassword123!;Encrypt=yes;TrustServerCertificate=yes"
+    volumes:
+      - ../dags:/opt/airflow/dags
+      - ..:/opt/airflow/project
+      - airflow_logs:/opt/airflow/logs
+    networks:
+      - default
+
+volumes:
+  airflow_logs:
+
+networks:
+  default:
+    name: postgresql-pgadmin-lab_default
+    external: true

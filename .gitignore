@@ -8,7 +8,10 @@ __pycache__/
 *.py[cod]
 
 # Local environment settings
-
+.env
+.env.*
+!.env.example
+!.env.sample
 
 # ITviec login cookies and saved browser sessions
 cookie.txt
@@ -25,6 +28,3 @@ topdev_sample.json
 
 # Local analytics snapshots contain observed source records; keep them out of Git.
 reports/analytics/
-
-# Local SQL Server exports can contain source records.
-exports/

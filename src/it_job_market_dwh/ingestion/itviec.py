@@ -948,6 +948,16 @@ class PostgresSink:
             self._payload(metadata), self._payload(errors),
         ))
 
+    def get_existing_job_ids(self) -> set[str]:
+        """Truy xuất các job_id đã lưu để tránh request lại trang chi tiết."""
+        try:
+            with self.conn.cursor() as cursor:
+                cursor.execute("SELECT DISTINCT job_id FROM raw.job_postings")
+                return {row[0] for row in cursor.fetchall()}
+        except self.db_errors as exc:
+            LOG.warning("Không lấy được danh sách ID: %s", exc)
+            return set()
+
     def start_run(self, metadata, errors):
         try:
             with self.conn.transaction():
@@ -1066,6 +1076,10 @@ def run(args) -> int:
         sink = PostgresSink(args)
         sink.start_run(metadata, errors)
         run_started = True
+
+        existing_job_ids = sink.get_existing_job_ids()
+        LOG.info("Đã tải %s job_id từ database để lọc tin trùng.", len(existing_job_ids))
+
         LOG.info("Lần crawl: %s; lưu dữ liệu vào raw.job_postings.", metadata["crawl_run_id"])
         client = BrowserClient(args.delay, args.timeout, args.retries, args.auth_file) if args.browser else Client(args.delay, args.timeout, args.retries)
         if args.save_html:
@@ -1096,6 +1110,18 @@ def run(args) -> int:
                 normalized = canonical(card["url"])
                 if normalized in seen_jobs:
                     continue
+
+                source_id = card.get("job_id")
+                if source_id:
+                    expected_id = "itviec:" + str(source_id).removeprefix("itviec:")
+                else:
+                    expected_id = "itviec:url_" + hashlib.sha256(normalized.encode("utf-8")).hexdigest()
+
+                if expected_id in existing_job_ids:
+                    seen_jobs.add(normalized)
+                    LOG.info("Bỏ qua tin đã có trong DB: %s", expected_id)
+                    continue
+
                 seen_jobs.add(normalized)
                 try:
                     client.phase = "detail"
@@ -1192,9 +1218,8 @@ def run(args) -> int:
     if metadata["authentication_required"]:
         return 3
     if len(jobs) < args.limit:
-        LOG.error("Chưa đủ số tin yêu cầu; xem raw.crawl_runs để kiểm tra trạng thái và errors.")
-    return 0 if metadata["complete"] else 2 if jobs else 1
-
+        LOG.warning("Số tin mới ít hơn chỉ tiêu (%s/%s) — tiếp tục bước chuẩn hóa.", len(jobs), args.limit)
+        return 0
 
 
 def main(argv=None) -> int:

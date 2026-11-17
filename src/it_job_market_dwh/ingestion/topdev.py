@@ -327,6 +327,16 @@ class PostgresSink:
         except (psycopg.Error, ValueError, TypeError) as exc:
             raise StorageError(f"Không kết nối được PostgreSQL: {exc}") from None
 
+    def get_existing_job_ids(self) -> set[str]:
+        """Truy xuất các job_id đã lưu để tránh request lại trang chi tiết."""
+        try:
+            with self.conn.cursor() as cur:
+                cur.execute("SELECT DISTINCT job_id FROM raw.job_postings")
+                return {row[0] for row in cur.fetchall()}
+        except self.db_errors as exc:
+            LOG.warning("Không lấy được danh sách ID: %s", exc)
+            return set()
+
     def start_run(self, metadata: dict, errors: list):
         started_at = database_timestamp(metadata["started_at"], "started_at")
         with self.conn.cursor() as cur:
@@ -416,6 +426,7 @@ def run(args) -> int:
     errors = []
     jobs = []
     seen_ids = set()
+    existing_job_ids = set()
 
     client = None
     sink = None
@@ -438,6 +449,10 @@ def run(args) -> int:
                 sink = PostgresSink(args)
                 sink.start_run(metadata, errors)
                 run_started = True
+                
+                existing_job_ids = sink.get_existing_job_ids()
+                LOG.info("Đã tải %s job_id từ database để lọc tin trùng.", len(existing_job_ids))
+
                 LOG.info("Khởi tạo phiên crawl TopDev trong PostgreSQL: crawl_run_id=%s, target=%s", crawl_run_id, limit)
             except StorageError as exc:
                 LOG.error("Lỗi kết nối PostgreSQL: %s", exc)
@@ -448,7 +463,9 @@ def run(args) -> int:
 
         page = 1
         page_size = min(50, limit)
-        while len(jobs) < limit:
+        max_pages = getattr(args, "max_pages", 30)
+
+        while len(jobs) < limit and page <= max_pages:
             params = {
                 "page": page,
                 "page_size": page_size,
@@ -475,6 +492,17 @@ def run(args) -> int:
             for item in items:
                 if not isinstance(item, dict):
                     continue
+
+                try:
+                    expected_id, _, _ = raw_job_identity(item)
+                except CrawlError:
+                    continue
+
+                if expected_id in existing_job_ids or expected_id in seen_ids:
+                    seen_ids.add(expected_id)
+                    LOG.info("Bỏ qua tin đã có trong DB: %s", expected_id)
+                    continue
+
                 observed_time = datetime.now(VIETNAM_TZ).isoformat()
                 item_with_meta = {
                     **item,
@@ -482,7 +510,7 @@ def run(args) -> int:
                     "crawl_run_id": crawl_run_id,
                     "source": "topdev",
                 }
-                # Lấy thêm chi tiết trách nhiệm, yêu cầu, phúc lợi
+                
                 full_job = fetch_job_details(client, item_with_meta)
                 try:
                     job_id, _, _ = raw_job_identity(full_job)
@@ -490,8 +518,6 @@ def run(args) -> int:
                     errors.append({"error": str(exc), "stage": "identity"})
                     continue
 
-                if job_id in seen_ids:
-                    continue
                 seen_ids.add(job_id)
 
                 next_count = len(jobs) + 1
@@ -577,7 +603,8 @@ def run(args) -> int:
 
 def build_parser(description: str | None = None) -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=description or __doc__)
-    parser.add_argument("--limit", type=int, default=20, help="Số tin cần crawl (mặc định: 20)")
+    parser.add_argument("--limit", type=int, default=500, help="Số tin cần crawl (mặc định: 500)")
+    parser.add_argument("--max-pages", type=int, default=30, help="Số trang tối đa (mặc định: 30)")
     parser.add_argument("--cookie", help="Chuỗi cookie đăng nhập TopDev (trực tiếp từ DevTools)")
     parser.add_argument("--cookie-file", type=Path, default=None, help="Đường dẫn file chứa cookie đăng nhập")
     parser.add_argument("--token", help="Bearer token xác thực nếu có (hoặc Authorization header)")

@@ -90,12 +90,12 @@ def run_step(arguments: list[str], env: dict[str, str]) -> int:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source", choices=("both", "itviec", "topdev"), default="both")
-    parser.add_argument("--limit", type=int, default=20, help="Số tin cần crawl ở mỗi nguồn.")
+    parser.add_argument("--limit", type=int, default=500, help="Số tin cần crawl ở mỗi nguồn.")
     parser.add_argument(
         "--itviec-max-pages",
         type=int,
-        default=5,
-        help="Số trang danh sách ITviec tối đa cần duyệt (mặc định: 5).",
+        default=30,
+        help="Số trang danh sách ITviec tối đa cần duyệt (mặc định: 30).",
     )
     parser.add_argument("--cookie-file", type=Path, help="File Cookie ITviec khác đường dẫn mặc định.")
     parser.add_argument("--itviec-login", action="store_true", help="Đăng nhập ITviec bằng trình duyệt có giao diện.")
@@ -144,7 +144,6 @@ def main(argv: list[str] | None = None) -> int:
     if out is not None:
         stages.append(("analytics", ["load.py", "analytics", "--apply", "--out", str(out), *scope]))
     elif not args.normalize_only:
-        # DW reconciles a complete snapshot, even when only one source was crawled.
         stages.append(("warehouse", ["load.py", "warehouse", "--apply"]))
     for label, command in stages:
         status = run_step(command, env)
