@@ -8,7 +8,7 @@ Yêu cầu Python 3.10+ và Docker Compose. Chạy từ thư mục gốc dự á
 python3 -m venv venv
 source venv/bin/activate
 python -m pip install -r requirements.txt
-docker compose -f docker/docker-compose.yml up -d postgres
+docker compose up -d 
 ```
 
 Các giá trị `PG*` sau khớp cấu hình Docker Compose mặc định. Hãy đổi chúng nếu bạn dùng PostgreSQL khác; dùng cùng một bộ giá trị cho mọi lệnh dưới đây.
