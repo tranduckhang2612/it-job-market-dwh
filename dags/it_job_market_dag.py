@@ -24,7 +24,7 @@ with DAG(
         task_id="run_itviec_pipeline",
         bash_command=(
             "cd /opt/airflow/project && "
-            "(python pipeline/main.py --source itviec --limit 5 || python pipeline/main.py --normalize-only)"
+            "exec python pipeline/main.py --source itviec --limit 5"
         ),
     )
 
@@ -32,9 +32,8 @@ with DAG(
         task_id="run_topdev_pipeline",
         bash_command=(
             "cd /opt/airflow/project && "
-            "(python pipeline/main.py --source topdev --limit 10 || python pipeline/main.py --normalize-only)"
+            "exec python pipeline/main.py --source topdev --limit 10"
         ),
-        trigger_rule="all_done",
     )
 
     run_itviec_pipeline >> run_topdev_pipeline

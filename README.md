@@ -66,6 +66,24 @@ Thay `HOST`, `DB`, `USER`, `PASSWORD` bằng thông tin SQL Server của bạn. 
 - Loader lấy bản quan sát mới nhất theo `observed_at` của mỗi `job_id` (hòa thì lấy `crawl_run_id` lớn hơn), tách tám nhóm trong Python rồi nạp fact/dim. Khi crawl một nguồn, SQL Server vẫn nhận snapshot chuẩn hóa của tất cả nguồn.
 - `analytics` là luồng cũ, chỉ chạy nếu chọn `--out` trên `pipeline/main.py` hoặc gọi `load.py analytics` riêng. Luồng DWH không đọc, tạo hay xóa schema này.
 
+## Airflow
+
+Build và khởi động toàn bộ PostgreSQL, SQL Server, pgAdmin và Airflow bằng một
+Compose project:
+
+```bash
+docker compose -f docker/docker-compose.yml up -d --build
+```
+
+Compose tự tạo PostgreSQL metadata riêng cho Airflow (`airflow_db`), chờ
+PostgreSQL nghiệp vụ sẵn sàng và tạo database SQL Server `it_job_market_dw` nếu
+còn thiếu.
+Airflow web UI chạy tại `http://localhost:8080`. Xem log bằng:
+
+```bash
+docker compose -f docker/docker-compose.yml logs -f airflow
+```
+
 ### Chuẩn hóa cấp bậc
 
 Ưu tiên cấp bậc do nguồn công bố, rồi đến tiêu đề, sau đó mới suy từ số năm kinh nghiệm tổng quát. Các mốc là **Fresher** (0–dưới 1 năm), **Junior** (1–dưới 3), **Mid-level** (3–dưới 5), **Senior** (từ 5 năm). Khoảng giao hai dải liền kề giữ cả hai; giao từ ba dải thì để trống.
@@ -78,6 +96,7 @@ Chỉ dùng **Intern**, **Lead**, **Principal**, **Architect**, **Director**, **
 |---|---|---|
 | `raw.crawl_runs` | Một lần crawl; PK `crawl_run_id` | Nguồn, thời gian bắt đầu/kết thúc, số tin yêu cầu/thu được, trạng thái, metadata và lỗi. |
 | `raw.job_postings` | Một tin trong một lần crawl; PK `(job_id, crawl_run_id)` | ID và URL nguồn, `observed_at`, JSON gốc trong `raw_payload`. |
+| `raw.seen_jobs` | Một `job_id` toàn cục | Registry atomic chống hai crawler đồng thời ghi trùng cùng một tin. |
 | `normalize_data.normalized_jobs` | Một tin đã qua lọc role/ngôn ngữ và chuẩn hóa; PK `(job_id, crawl_run_id)` | Tiêu đề, công ty, mô tả, vai trò, cấp bậc, thành phố, kỹ năng, ngoại ngữ, hình thức làm; `normalization_meta`, version và thời điểm chuẩn hóa. |
 | `analytics.job_observations` | Một lần quan sát đã tách nguyên tử; PK `observation_key`, duy nhất `(job_id, crawl_run_id)` | Nội dung chính của tin, trạng thái ngoại ngữ, thời điểm/version nguồn, các hash kiểm tra đồng bộ. |
 | `analytics.dim_<nhóm>` | Một giá trị danh mục; PK `<nhóm>_key` | `name`, `category`; duy nhất `(name, category)`. |

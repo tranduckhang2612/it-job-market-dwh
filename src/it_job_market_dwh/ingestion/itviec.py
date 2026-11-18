@@ -899,6 +899,13 @@ class PostgresSink:
         ON CONFLICT (job_id, crawl_run_id) DO NOTHING
         RETURNING job_id
     """
+    CLAIM_SQL = """
+        INSERT INTO raw.seen_jobs
+            (job_id, source, first_crawl_run_id, first_seen_at)
+        VALUES (%s, 'itviec', %s, %s)
+        ON CONFLICT (job_id) DO NOTHING
+        RETURNING job_id
+    """
 
     def __init__(self, args):
         self.conn = None
@@ -948,15 +955,28 @@ class PostgresSink:
             self._payload(metadata), self._payload(errors),
         ))
 
-    def get_existing_job_ids(self) -> set[str]:
-        """Truy xuất các job_id đã lưu để tránh request lại trang chi tiết."""
+    def find_existing_job_ids(self, candidate_ids: list[str]) -> set[str]:
+        """Return existing IDs for one listing page without loading crawl history."""
+        candidate_ids = list(dict.fromkeys(candidate_ids))
+        if not candidate_ids:
+            return set()
         try:
             with self.conn.cursor() as cursor:
-                cursor.execute("SELECT DISTINCT job_id FROM raw.job_postings")
+                cursor.execute(
+                    """
+                    SELECT candidate.job_id
+                    FROM unnest(%s::text[]) AS candidate(job_id)
+                    WHERE EXISTS (
+                        SELECT 1
+                        FROM raw.seen_jobs AS stored
+                        WHERE stored.job_id = candidate.job_id
+                    )
+                    """,
+                    (candidate_ids,),
+                )
                 return {row[0] for row in cursor.fetchall()}
         except self.db_errors as exc:
-            LOG.warning("Không lấy được danh sách ID: %s", exc)
-            return set()
+            raise self._error(exc) from None
 
     def start_run(self, metadata, errors):
         try:
@@ -977,10 +997,16 @@ class PostgresSink:
         try:
             with self.conn.transaction():
                 with self.conn.cursor() as cursor:
+                    cursor.execute(
+                        self.CLAIM_SQL,
+                        (job_id, metadata["crawl_run_id"], observed),
+                    )
+                    if cursor.fetchone() is None:
+                        return False
                     cursor.execute(self.JOB_SQL, (job_id, metadata["crawl_run_id"], source_job_id,
                                                   url, observed, payload))
                     if cursor.fetchone() is None:
-                        return False
+                        raise StorageError("Không ghi được tin ITviec sau khi claim job_id.")
                     self._write_run(cursor, metadata, errors, "running")
         except self.db_errors as exc:
             raise self._error(exc) from None
@@ -1077,9 +1103,6 @@ def run(args) -> int:
         sink.start_run(metadata, errors)
         run_started = True
 
-        existing_job_ids = sink.get_existing_job_ids()
-        LOG.info("Đã tải %s job_id từ database để lọc tin trùng.", len(existing_job_ids))
-
         LOG.info("Lần crawl: %s; lưu dữ liệu vào raw.job_postings.", metadata["crawl_run_id"])
         client = BrowserClient(args.delay, args.timeout, args.retries, args.auth_file) if args.browser else Client(args.delay, args.timeout, args.retries)
         if args.save_html:
@@ -1106,23 +1129,35 @@ def run(args) -> int:
                     listing_html, encoding="utf-8")
             if not cards:
                 raise CrawlError("Không thấy tin trong danh sách. Kiểm tra selector hoặc trang xác minh.")
+            candidates = []
             for card in cards:
                 normalized = canonical(card["url"])
                 if normalized in seen_jobs:
                     continue
+                seen_jobs.add(normalized)
 
                 source_id = card.get("job_id")
+                if not source_id:
+                    match = re.search(r"-(\d+)$", urlsplit(normalized).path)
+                    source_id = match.group(1) if match else None
                 if source_id:
                     expected_id = "itviec:" + str(source_id).removeprefix("itviec:")
                 else:
                     expected_id = "itviec:url_" + hashlib.sha256(normalized.encode("utf-8")).hexdigest()
+                candidates.append((card, expected_id))
 
+            existing_job_ids = sink.find_existing_job_ids(
+                [expected_id for _, expected_id in candidates]
+            )
+            LOG.info(
+                "Trang hiện tại có %s/%s tin đã tồn tại.",
+                len(existing_job_ids), len(candidates),
+            )
+            for card, expected_id in candidates:
                 if expected_id in existing_job_ids:
-                    seen_jobs.add(normalized)
                     LOG.info("Bỏ qua tin đã có trong DB: %s", expected_id)
                     continue
 
-                seen_jobs.add(normalized)
                 try:
                     client.phase = "detail"
                     html, fetched_url = client.get(card["url"])

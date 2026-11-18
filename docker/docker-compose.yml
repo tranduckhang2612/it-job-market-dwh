@@ -52,7 +52,74 @@ services:
       postgres:
         condition: service_healthy
 
+  airflow-postgres:
+    image: postgres:17-bookworm
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in docker/.env}
+      POSTGRES_DB: airflow_db
+    volumes:
+      - airflow_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U airflow -d airflow_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+
+  sqlserver-db-init:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    restart: "no"
+    environment:
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:?Set MSSQL_SA_PASSWORD in docker/.env}
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P "$${MSSQL_SA_PASSWORD}" -C -b \
+          -Q "IF DB_ID(N'it_job_market_dw') IS NULL EXEC(N'CREATE DATABASE [it_job_market_dw]');"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+
+  airflow:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.airflow
+    container_name: it-job-market-airflow
+    restart: unless-stopped
+    command: standalone
+    ports:
+      - "${AIRFLOW_BIND_ADDRESS:-127.0.0.1}:${AIRFLOW_PORT:-8080}:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      airflow-postgres:
+        condition: service_healthy
+      sqlserver-db-init:
+        condition: service_completed_successfully
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in docker/.env}@airflow-postgres:5432/airflow_db
+      AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+      AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW_WEBSERVER_SECRET_KEY:-it-job-market-secret-key}
+
+      PYTHONPATH: /opt/airflow/project/src
+      DATABASE_URL: postgresql://${POSTGRES_USER:-admin}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in docker/.env}@postgres:5432/${POSTGRES_DB:-it_job_market_v12}
+      PGHOST: postgres
+      PGPORT: "5432"
+      PGDATABASE: ${POSTGRES_DB:-it_job_market_v12}
+      PGUSER: ${POSTGRES_USER:-admin}
+      PGPASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in docker/.env}
+      DW_SQLSERVER_CONNECTION_STRING: "DRIVER={ODBC Driver 18 for SQL Server};SERVER=sqlserver,1433;DATABASE=it_job_market_dw;UID=sa;PWD=${MSSQL_SA_PASSWORD:?Set MSSQL_SA_PASSWORD in docker/.env};Encrypt=yes;TrustServerCertificate=yes"
+    volumes:
+      - ../dags:/opt/airflow/dags
+      - ..:/opt/airflow/project
+      - airflow_logs:/opt/airflow/logs
+
 volumes:
   postgres_data:
   sqlserver_data:
   pgadmin_data:
+  airflow_logs:
+  airflow_postgres_data:

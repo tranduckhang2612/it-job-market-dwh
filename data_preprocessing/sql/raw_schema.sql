@@ -37,9 +37,33 @@ CREATE TABLE IF NOT EXISTS raw.job_postings (
     PRIMARY KEY (job_id, crawl_run_id)
 );
 
+CREATE TABLE IF NOT EXISTS raw.seen_jobs (
+    job_id             TEXT PRIMARY KEY CHECK (
+                           (job_id LIKE 'itviec:%' AND length(job_id) > 7)
+                           OR (job_id LIKE 'topdev:%' AND length(job_id) > 7)
+                       ),
+    source             TEXT NOT NULL CHECK (source IN ('itviec', 'topdev')),
+    first_crawl_run_id TEXT NOT NULL
+                       REFERENCES raw.crawl_runs(crawl_run_id) ON DELETE RESTRICT,
+    first_seen_at      TIMESTAMPTZ NOT NULL,
+    claimed_at         TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CHECK (job_id LIKE source || ':%')
+);
+
+-- Migrate existing installations before crawlers start using atomic claims.
+INSERT INTO raw.seen_jobs (job_id, source, first_crawl_run_id, first_seen_at)
+SELECT DISTINCT ON (posting.job_id)
+       posting.job_id, run.source, posting.crawl_run_id, posting.observed_at
+FROM raw.job_postings AS posting
+JOIN raw.crawl_runs AS run USING (crawl_run_id)
+ORDER BY posting.job_id, posting.observed_at, posting.crawl_run_id
+ON CONFLICT (job_id) DO NOTHING;
+
 COMMENT ON TABLE raw.crawl_runs IS
     'Metadata, trạng thái và lỗi của từng lần crawl ITviec hoặc TopDev.';
 COMMENT ON TABLE raw.job_postings IS
     'JSON gốc của mỗi tin tại từng lần quan sát; chưa làm sạch hoặc chuyển đổi.';
+COMMENT ON TABLE raw.seen_jobs IS
+    'Registry chống trùng toàn cục; khóa chính job_id cấp quyền ghi atomic cho đúng một crawler.';
 
 COMMIT;

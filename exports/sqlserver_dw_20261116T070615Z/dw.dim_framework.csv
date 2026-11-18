@@ -1,0 +1,140 @@
+﻿framework_key,fact_job_key,name,category,programming_language,created_at_utc
+1,2,Spring,framework_library,Java,2026-11-15T02:53:13.329379
+2,16,FastAPI,framework_library,Python,2026-11-15T02:53:13.333467
+3,17,Django,framework_library,Python,2026-11-15T02:53:13.333467
+4,19,Node.js,framework_library,JavaScript,2026-11-15T02:53:13.337573
+5,19,React,framework_library,JavaScript,2026-11-15T02:53:13.337573
+6,21,Spring,framework_library,Java,2026-11-15T02:53:13.341674
+7,22,Spring Boot,framework_library,Java,2026-11-15T02:53:13.341674
+8,26,jQuery,framework_library,JavaScript,2026-11-15T02:53:13.341674
+9,26,.NET,framework_library,C#,2026-11-15T02:53:13.345774
+10,28,FastAPI,framework_library,Python,2026-11-15T02:53:13.345774
+11,30,Angular,framework_library,TypeScript,2026-11-15T02:53:13.345774
+12,32,Spring Boot,framework_library,Java,2026-11-15T02:53:13.345774
+13,42,Vue.js,framework_library,JavaScript,2026-11-15T02:53:13.345774
+14,42,Node.js,framework_library,JavaScript,2026-11-15T02:53:13.349843
+15,42,React,framework_library,JavaScript,2026-11-15T02:53:13.349843
+16,45,Spring,framework_library,Java,2026-11-16T03:18:13.489523
+17,63,Spring,framework_library,Java,2026-11-16T04:32:43.109635
+18,69,MVVM,framework_library,,2026-11-16T04:32:43.113659
+19,87,Spring Boot,framework_library,Java,2026-11-16T04:32:43.113659
+20,91,.NET,framework_library,C#,2026-11-16T04:32:43.117726
+21,94,Spring Boot,framework_library,Java,2026-11-16T04:32:43.117726
+22,95,Spring Boot,framework_library,Java,2026-11-16T04:32:43.117726
+23,103,Vue.js,framework_library,JavaScript,2026-11-16T04:32:43.117726
+24,103,Laravel,framework_library,PHP,2026-11-16T04:32:43.117726
+25,106,MVVM,framework_library,,2026-11-16T04:32:43.121795
+26,108,Spring Boot,framework_library,Java,2026-11-16T04:32:43.121795
+27,119,React,framework_library,JavaScript,2026-11-16T04:32:43.121795
+28,123,React,framework_library,JavaScript,2026-11-16T04:32:43.125863
+29,124,Flutter,framework_library,Dart,2026-11-16T04:32:43.125863
+30,124,React,framework_library,JavaScript,2026-11-16T04:32:43.125863
+31,125,Spring Boot,framework_library,Java,2026-11-16T04:32:43.125863
+32,131,PySpark,framework_library,Python,2026-11-16T04:32:43.129928
+33,140,Spring Boot,framework_library,Java,2026-11-16T04:56:49.833020
+34,143,React,framework_library,JavaScript,2026-11-16T04:56:49.833020
+35,145,.NET,framework_library,C#,2026-11-16T04:56:49.837044
+36,145,.NET Core,framework_library,C#,2026-11-16T04:56:49.837044
+37,145,Flutter,framework_library,Dart,2026-11-16T04:56:49.837044
+38,150,React,framework_library,JavaScript,2026-11-16T04:56:49.837044
+39,155,Spring Boot,framework_library,Java,2026-11-16T04:56:49.837044
+40,156,Spring,framework_library,Java,2026-11-16T04:56:49.837044
+41,166,Node.js,framework_library,JavaScript,2026-11-16T04:56:49.841125
+42,172,Laravel,framework_library,PHP,2026-11-16T04:56:49.841125
+43,178,React,framework_library,JavaScript,2026-11-16T04:56:49.841125
+44,181,.NET Core,framework_library,C#,2026-11-16T04:56:49.841125
+45,182,.NET,framework_library,C#,2026-11-16T04:56:49.841125
+46,186,Vue.js,framework_library,JavaScript,2026-11-16T04:56:49.841125
+47,186,Spring Boot,framework_library,Java,2026-11-16T04:56:49.841125
+48,187,Spring,framework_library,Java,2026-11-16T04:56:49.841125
+49,189,React,framework_library,JavaScript,2026-11-16T04:56:49.841125
+50,191,.NET Core,framework_library,C#,2026-11-16T04:56:49.841125
+51,192,Node.js,framework_library,JavaScript,2026-11-16T04:56:49.841125
+52,192,React,framework_library,JavaScript,2026-11-16T04:56:49.841125
+53,196,PyTorch,framework_library,Python,2026-11-16T04:56:49.841125
+54,197,Spring Boot,framework_library,Java,2026-11-16T04:56:49.841125
+55,197,Spring,framework_library,Java,2026-11-16T04:56:49.845189
+56,201,Node.js,framework_library,JavaScript,2026-11-16T04:56:49.845189
+57,201,React,framework_library,JavaScript,2026-11-16T04:56:49.845189
+58,213,.NET,framework_library,C#,2026-11-16T04:56:49.845189
+59,213,Angular,framework_library,TypeScript,2026-11-16T04:56:49.845189
+60,216,Spring Boot,framework_library,Java,2026-11-16T04:56:49.845189
+61,216,Angular,framework_library,TypeScript,2026-11-16T04:56:49.845189
+62,222,Flutter,framework_library,Dart,2026-11-16T04:56:49.845189
+63,228,jQuery,framework_library,JavaScript,2026-11-16T04:56:49.845189
+64,233,React,framework_library,JavaScript,2026-11-16T04:56:49.845189
+65,234,PyTorch,framework_library,Python,2026-11-16T04:56:49.845189
+66,234,TensorFlow,framework_library,Python,2026-11-16T04:56:49.849290
+67,245,Node.js,framework_library,JavaScript,2026-11-16T04:56:49.849290
+68,258,PyTorch,framework_library,Python,2026-11-16T04:56:49.849290
+69,258,TensorFlow,framework_library,Python,2026-11-16T04:56:49.849290
+70,264,Spring Boot,framework_library,Java,2026-11-16T04:56:49.849290
+71,271,NestJS,framework_library,TypeScript,2026-11-16T04:56:49.849290
+72,271,Node.js,framework_library,JavaScript,2026-11-16T04:56:49.849290
+73,271,React,framework_library,JavaScript,2026-11-16T04:56:49.849290
+74,272,PyTorch,framework_library,Python,2026-11-16T04:56:49.849290
+75,274,React,framework_library,JavaScript,2026-11-16T04:56:49.849290
+76,277,.NET,framework_library,C#,2026-11-16T04:56:49.853353
+77,283,.NET,framework_library,C#,2026-11-16T04:56:49.853353
+78,284,jQuery,framework_library,JavaScript,2026-11-16T04:56:49.853353
+79,284,Spring Boot,framework_library,Java,2026-11-16T04:56:49.853353
+80,284,Angular,framework_library,TypeScript,2026-11-16T04:56:49.853353
+81,287,PyTorch,framework_library,Python,2026-11-16T04:56:49.853353
+82,291,.NET,framework_library,C#,2026-11-16T04:56:49.853353
+83,296,Node.js,framework_library,JavaScript,2026-11-16T04:56:49.853353
+84,297,Spring Boot,framework_library,Java,2026-11-16T04:56:49.853353
+85,297,Angular,framework_library,TypeScript,2026-11-16T04:56:49.853353
+86,304,.NET,framework_library,C#,2026-11-16T04:56:49.853353
+87,310,NestJS,framework_library,TypeScript,2026-11-16T04:56:49.853353
+88,310,Node.js,framework_library,JavaScript,2026-11-16T04:56:49.853353
+89,310,React,framework_library,JavaScript,2026-11-16T04:56:49.853353
+90,316,Spring Boot,framework_library,Java,2026-11-16T04:56:49.853353
+91,319,Spring Boot,framework_library,Java,2026-11-16T04:56:49.853353
+92,334,.NET,framework_library,C#,2026-11-16T04:56:49.853353
+93,339,NestJS,framework_library,TypeScript,2026-11-16T04:56:49.853353
+94,339,Node.js,framework_library,JavaScript,2026-11-16T04:56:49.857441
+95,339,React,framework_library,JavaScript,2026-11-16T04:56:49.857441
+96,342,Laravel,framework_library,PHP,2026-11-16T04:56:49.857441
+97,343,Node.js,framework_library,JavaScript,2026-11-16T04:56:49.857441
+98,350,Angular,framework_library,TypeScript,2026-11-16T04:56:49.857441
+99,358,Spring Boot,framework_library,Java,2026-11-16T04:56:49.857441
+100,359,Node.js,framework_library,JavaScript,2026-11-16T04:56:49.857441
+101,374,Spring,framework_library,Java,2026-11-16T04:56:49.857441
+102,377,Spring Boot,framework_library,Java,2026-11-16T04:56:49.857441
+103,380,Vue.js,framework_library,JavaScript,2026-11-16T04:56:49.857441
+104,380,Spring Boot,framework_library,Java,2026-11-16T04:56:49.857441
+105,380,Spring,framework_library,Java,2026-11-16T04:56:49.857441
+106,384,NestJS,framework_library,TypeScript,2026-11-16T04:56:49.857441
+107,384,Node.js,framework_library,JavaScript,2026-11-16T04:56:49.857441
+108,384,React,framework_library,JavaScript,2026-11-16T04:56:49.857441
+109,385,Spring,framework_library,Java,2026-11-16T04:56:49.857441
+110,388,Spring Boot,framework_library,Java,2026-11-16T04:56:49.857441
+111,390,Node.js,framework_library,JavaScript,2026-11-16T04:56:49.857441
+112,391,Spring Boot,framework_library,Java,2026-11-16T04:56:49.857441
+113,393,Node.js,framework_library,JavaScript,2026-11-16T04:56:49.861538
+114,393,React,framework_library,JavaScript,2026-11-16T04:56:49.861538
+115,395,React,framework_library,JavaScript,2026-11-16T04:56:49.861538
+116,396,.NET,framework_library,C#,2026-11-16T04:56:49.861538
+117,401,Vue.js,framework_library,JavaScript,2026-11-16T04:56:49.861538
+118,401,React,framework_library,JavaScript,2026-11-16T04:56:49.861538
+119,408,.NET,framework_library,C#,2026-11-16T04:56:49.861538
+120,408,React,framework_library,JavaScript,2026-11-16T04:56:49.861538
+121,411,.NET,framework_library,C#,2026-11-16T04:56:49.861538
+122,411,Node.js,framework_library,JavaScript,2026-11-16T04:56:49.861538
+123,411,React,framework_library,JavaScript,2026-11-16T04:56:49.861538
+124,414,Spring Boot,framework_library,Java,2026-11-16T04:56:49.861538
+125,416,Spring Boot,framework_library,Java,2026-11-16T04:56:49.861538
+126,417,Spring,framework_library,Java,2026-11-16T04:56:49.861538
+127,421,Vue.js,framework_library,JavaScript,2026-11-16T04:56:49.861538
+128,421,Node.js,framework_library,JavaScript,2026-11-16T04:56:49.861538
+129,421,React,framework_library,JavaScript,2026-11-16T04:56:49.861538
+130,426,Node.js,framework_library,JavaScript,2026-11-16T04:56:49.861538
+131,438,Angular,framework_library,TypeScript,2026-11-16T04:56:49.861538
+132,445,Spring Boot,framework_library,Java,2026-11-16T04:56:49.865638
+133,450,Spring Boot,framework_library,Java,2026-11-16T04:56:49.865638
+134,450,Spring,framework_library,Java,2026-11-16T04:56:49.865638
+135,461,.NET,framework_library,C#,2026-11-16T04:56:49.865638
+136,465,Spring Boot,framework_library,Java,2026-11-16T04:56:49.865638
+137,474,.NET,framework_library,C#,2026-11-16T04:56:49.865638
+138,484,Spring Boot,framework_library,Java,2026-11-16T04:56:49.865638
+139,484,Spring,framework_library,Java,2026-11-16T04:56:49.865638

@@ -273,7 +273,7 @@ def database_timestamp(value, field: str) -> datetime:
 
 
 class PostgresSink:
-    """Ghi trực tiếp bản ghi raw vào bảng raw.crawl_runs và raw.job_postings."""
+    """Claim job_id atomically, then write raw crawl data in one transaction."""
 
     RUN_SQL = """
         INSERT INTO raw.crawl_runs
@@ -292,6 +292,13 @@ class PostgresSink:
             (job_id, crawl_run_id, source_job_id, job_url, observed_at, raw_payload)
         VALUES (%s, %s, %s, %s, %s, %s)
         ON CONFLICT (job_id, crawl_run_id) DO NOTHING
+        RETURNING job_id
+    """
+    CLAIM_SQL = """
+        INSERT INTO raw.seen_jobs
+            (job_id, source, first_crawl_run_id, first_seen_at)
+        VALUES (%s, 'topdev', %s, %s)
+        ON CONFLICT (job_id) DO NOTHING
         RETURNING job_id
     """
 
@@ -327,15 +334,28 @@ class PostgresSink:
         except (psycopg.Error, ValueError, TypeError) as exc:
             raise StorageError(f"Không kết nối được PostgreSQL: {exc}") from None
 
-    def get_existing_job_ids(self) -> set[str]:
-        """Truy xuất các job_id đã lưu để tránh request lại trang chi tiết."""
+    def find_existing_job_ids(self, candidate_ids: list[str]) -> set[str]:
+        """Return existing IDs for one API page without loading crawl history."""
+        candidate_ids = list(dict.fromkeys(candidate_ids))
+        if not candidate_ids:
+            return set()
         try:
             with self.conn.cursor() as cur:
-                cur.execute("SELECT DISTINCT job_id FROM raw.job_postings")
+                cur.execute(
+                    """
+                    SELECT candidate.job_id
+                    FROM unnest(%s::text[]) AS candidate(job_id)
+                    WHERE EXISTS (
+                        SELECT 1
+                        FROM raw.seen_jobs AS stored
+                        WHERE stored.job_id = candidate.job_id
+                    )
+                    """,
+                    (candidate_ids,),
+                )
                 return {row[0] for row in cur.fetchall()}
         except self.db_errors as exc:
-            LOG.warning("Không lấy được danh sách ID: %s", exc)
-            return set()
+            raise StorageError("Không kiểm tra được tin đã tồn tại trong PostgreSQL.") from None
 
     def start_run(self, metadata: dict, errors: list):
         started_at = database_timestamp(metadata["started_at"], "started_at")
@@ -349,22 +369,32 @@ class PostgresSink:
     def save_job(self, job: dict, progress: dict, errors: list) -> bool:
         job_id, source_id, url = raw_job_identity(job)
         observed_at = database_timestamp(job.get("observed_at"), "observed_at")
-        with self.conn.transaction():
-            with self.conn.cursor() as cur:
-                cur.execute(self.JOB_SQL, (
-                    job_id, progress["crawl_run_id"], source_id, url,
-                    observed_at, self.jsonb(job)
-                ))
-                inserted = bool(cur.fetchone())
-                status = "succeeded" if progress.get("complete") else "partial"
-                finished = database_timestamp(progress["finished_at"], "finished_at") if progress.get("finished_at") else None
-                cur.execute(self.RUN_SQL, (
-                    progress["crawl_run_id"], "topdev",
-                    database_timestamp(progress["started_at"], "started_at"),
-                    finished, progress["requested_count"], progress["collected_count"],
-                    status, self.jsonb(progress), self.jsonb(errors)
-                ))
-        return inserted
+        try:
+            with self.conn.transaction():
+                with self.conn.cursor() as cur:
+                    cur.execute(
+                        self.CLAIM_SQL,
+                        (job_id, progress["crawl_run_id"], observed_at),
+                    )
+                    if cur.fetchone() is None:
+                        return False
+                    cur.execute(self.JOB_SQL, (
+                        job_id, progress["crawl_run_id"], source_id, url,
+                        observed_at, self.jsonb(job)
+                    ))
+                    if cur.fetchone() is None:
+                        raise StorageError("Không ghi được tin TopDev sau khi claim job_id.")
+                    status = "succeeded" if progress.get("complete") else "partial"
+                    finished = database_timestamp(progress["finished_at"], "finished_at") if progress.get("finished_at") else None
+                    cur.execute(self.RUN_SQL, (
+                        progress["crawl_run_id"], "topdev",
+                        database_timestamp(progress["started_at"], "started_at"),
+                        finished, progress["requested_count"], progress["collected_count"],
+                        status, self.jsonb(progress), self.jsonb(errors)
+                    ))
+        except self.db_errors:
+            raise StorageError("Không ghi được dữ liệu TopDev vào PostgreSQL.") from None
+        return True
 
     def finish_run(self, metadata: dict, errors: list):
         if self.conn is None:
@@ -426,8 +456,6 @@ def run(args) -> int:
     errors = []
     jobs = []
     seen_ids = set()
-    existing_job_ids = set()
-
     client = None
     sink = None
     run_started = False
@@ -450,9 +478,6 @@ def run(args) -> int:
                 sink.start_run(metadata, errors)
                 run_started = True
                 
-                existing_job_ids = sink.get_existing_job_ids()
-                LOG.info("Đã tải %s job_id từ database để lọc tin trùng.", len(existing_job_ids))
-
                 LOG.info("Khởi tạo phiên crawl TopDev trong PostgreSQL: crawl_run_id=%s, target=%s", crawl_run_id, limit)
             except StorageError as exc:
                 LOG.error("Lỗi kết nối PostgreSQL: %s", exc)
@@ -489,6 +514,7 @@ def run(args) -> int:
                 LOG.info("Hết tin tại trang %s.", page)
                 break
 
+            candidates = []
             for item in items:
                 if not isinstance(item, dict):
                     continue
@@ -498,8 +524,21 @@ def run(args) -> int:
                 except CrawlError:
                     continue
 
-                if expected_id in existing_job_ids or expected_id in seen_ids:
-                    seen_ids.add(expected_id)
+                if expected_id in seen_ids:
+                    continue
+                seen_ids.add(expected_id)
+                candidates.append((item, expected_id))
+
+            existing_job_ids = (
+                sink.find_existing_job_ids([expected_id for _, expected_id in candidates])
+                if sink is not None else set()
+            )
+            LOG.info(
+                "Trang %s có %s/%s tin đã tồn tại.",
+                page, len(existing_job_ids), len(candidates),
+            )
+            for item, expected_id in candidates:
+                if expected_id in existing_job_ids:
                     LOG.info("Bỏ qua tin đã có trong DB: %s", expected_id)
                     continue
 
@@ -528,7 +567,8 @@ def run(args) -> int:
                 }
                 if sink is not None:
                     try:
-                        sink.save_job(full_job, progress, errors)
+                        if not sink.save_job(full_job, progress, errors):
+                            continue
                     except StorageError as exc:
                         metadata["storage_failed"] = True
                         errors.append({"error": str(exc), "stage": "postgresql"})
@@ -561,8 +601,10 @@ def run(args) -> int:
     except KeyboardInterrupt:
         metadata["interrupted"] = True
         LOG.warning("Crawl bị ngắt bởi người dùng.")
-    except StorageError:
+    except StorageError as exc:
         metadata["storage_failed"] = True
+        errors.append({"error": str(exc), "stage": "postgresql"})
+        LOG.error("%s", exc)
     finally:
         metadata["finished_at"] = datetime.now(timezone.utc).isoformat()
         metadata["complete"] = len(jobs) == limit and not metadata["storage_failed"] and not metadata["interrupted"]
