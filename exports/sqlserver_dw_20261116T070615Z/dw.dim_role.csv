@@ -1,0 +1,577 @@
+﻿role_key,fact_job_key,name,category,created_at_utc
+1,1,DevOps Engineer,Software Engineer,2026-11-15T02:53:13.505435
+2,2,Full-stack Developer,Web/App,2026-11-15T02:53:13.509525
+3,3,Natural Language Processing (NLP) Engineer,Data/AI,2026-11-15T02:53:13.509525
+4,3,AI Engineer,Data/AI,2026-11-15T02:53:13.513624
+5,4,Product Manager,Software Engineer,2026-11-15T02:53:13.513624
+6,5,Systems Engineer,Software Engineer,2026-11-15T02:53:13.513624
+7,6,Data Scientist,Data/AI,2026-11-15T02:53:13.517688
+8,7,Data Scientist,Data/AI,2026-11-15T02:53:13.517688
+9,8,AI Engineer,Data/AI,2026-11-15T02:53:13.517688
+10,9,Tester,Software Engineer,2026-11-15T02:53:13.517688
+11,10,Natural Language Processing (NLP) Engineer,Data/AI,2026-11-15T02:53:13.517688
+12,11,Solution Architect,Software Engineer,2026-11-15T02:53:13.521753
+13,12,Data Analyst,Data/AI,2026-11-15T02:53:13.525839
+14,13,Technical Architect,Software Engineer,2026-11-15T02:53:13.529912
+15,14,iOS Developer,Web/App,2026-11-15T02:53:13.529912
+16,15,Bridge Software Engineer (BrSE),Software Engineer,2026-11-15T02:53:13.533982
+17,16,AI Engineer,Data/AI,2026-11-15T02:53:13.533982
+18,17,Project Manager,Software Engineer,2026-11-15T02:53:13.533982
+19,18,Google Cloud (GCP) Engineer,Software Engineer,2026-11-15T02:53:13.533982
+20,18,Data Engineer,Data/AI,2026-11-15T02:53:13.533982
+21,19,AI Engineer,Data/AI,2026-11-15T02:53:13.538030
+22,20,Solution Architect,Software Engineer,2026-11-15T02:53:13.538030
+23,21,Full-stack Developer,Web/App,2026-11-15T02:53:13.538030
+24,22,Back-end Developer,Web/App,2026-11-15T02:53:13.538030
+25,23,Back-end Developer,Web/App,2026-11-15T02:53:13.538030
+26,24,DevSecOps Engineer,Security,2026-11-15T02:53:13.542099
+27,25,Security Engineer,Security,2026-11-15T02:53:13.542099
+28,26,DevOps Engineer,Software Engineer,2026-11-15T02:53:13.546203
+29,27,Natural Language Processing (NLP) Engineer,Data/AI,2026-11-15T02:53:13.546203
+30,27,AI Engineer,Data/AI,2026-11-15T02:53:13.546203
+31,28,AI Engineer,Data/AI,2026-11-15T02:53:13.546203
+32,28,Software Developer / Engineer,Software Engineer,2026-11-15T02:53:13.546203
+33,29,Full-stack Developer,Web/App,2026-11-15T02:53:13.550277
+34,29,Product Owner,Software Engineer,2026-11-15T02:53:13.550277
+35,30,Systems Engineer,Software Engineer,2026-11-15T02:53:13.550277
+36,30,Bridge Software Engineer (BrSE),Software Engineer,2026-11-15T02:53:13.550277
+37,31,AI Engineer,Data/AI,2026-11-15T02:53:13.550277
+38,32,Back-end Developer,Web/App,2026-11-15T02:53:13.550277
+39,33,Data Scientist,Data/AI,2026-11-15T02:53:13.554372
+40,34,Data Scientist,Data/AI,2026-11-15T02:53:13.554372
+41,35,Google Cloud (GCP) Engineer,Software Engineer,2026-11-15T02:53:13.554372
+42,35,Data Engineer,Data/AI,2026-11-15T02:53:13.554372
+43,36,Machine Learning Engineer,Data/AI,2026-11-15T02:53:13.554372
+44,37,Tester,Software Engineer,2026-11-15T02:53:13.558473
+45,37,Software Developer / Engineer,Software Engineer,2026-11-15T02:53:13.558473
+46,38,Business Analyst,Software Engineer,2026-11-15T02:53:13.558473
+47,39,Project Manager,Software Engineer,2026-11-15T02:53:13.558473
+48,40,UI/UX Designer,Software Engineer,2026-11-15T02:53:13.558473
+49,41,Tester,Software Engineer,2026-11-15T02:53:13.558473
+50,42,AI Engineer,Data/AI,2026-11-15T02:53:13.562543
+51,42,Full-stack Developer,Web/App,2026-11-15T02:53:13.562543
+52,43,Tester,Software Engineer,2026-11-15T02:53:13.562543
+53,43,Bridge Software Engineer (BrSE),Software Engineer,2026-11-15T02:53:13.562543
+54,43,IT Communicator,Software Engineer,2026-11-15T02:53:13.562543
+55,44,DevOps Engineer,Software Engineer,2026-11-15T02:53:13.562543
+1002,45,Back-end Developer,Web/App,2026-11-16T03:18:13.596011
+1003,46,Business Analyst,Software Engineer,2026-11-16T03:18:13.596011
+1004,47,Back-end Developer,Web/App,2026-11-16T03:18:13.600080
+1005,48,Systems Engineer,Software Engineer,2026-11-16T03:18:13.600080
+1006,49,Security Engineer,Security,2026-11-16T03:18:13.600080
+1007,50,Security Engineer,Security,2026-11-16T03:18:13.604154
+1008,51,Product Manager,Software Engineer,2026-11-16T03:18:13.604154
+1009,52,Cloud Engineer,Software Engineer,2026-11-16T03:18:13.608255
+1010,53,Project Manager,Software Engineer,2026-11-16T03:18:13.608255
+1011,54,Business Analyst,Software Engineer,2026-11-16T03:18:13.612330
+1012,55,QA Engineer,Software Engineer,2026-11-16T04:32:43.296910
+1013,55,Tester,Software Engineer,2026-11-16T04:32:43.300977
+1014,56,Business Analyst,Software Engineer,2026-11-16T04:32:43.300977
+1015,57,Android Developer,Web/App,2026-11-16T04:32:43.300977
+1016,58,Software Developer / Engineer,Software Engineer,2026-11-16T04:32:43.305068
+1017,59,Systems Engineer,Software Engineer,2026-11-16T04:32:43.305068
+1018,60,Back-end Developer,Web/App,2026-11-16T04:32:43.305068
+1019,61,Integration Engineer,Software Engineer,2026-11-16T04:32:43.305068
+1020,62,Software Developer / Engineer,Software Engineer,2026-11-16T04:32:43.305068
+1021,63,Kotlin Developer,Web/App,2026-11-16T04:32:43.309131
+1022,64,Product Owner,Software Engineer,2026-11-16T04:32:43.309131
+1023,65,Project Manager,Software Engineer,2026-11-16T04:32:43.309131
+1024,66,Software Developer / Engineer,Software Engineer,2026-11-16T04:32:43.309131
+1025,67,Cloud Engineer,Software Engineer,2026-11-16T04:32:43.313193
+1026,68,Full-stack Developer,Web/App,2026-11-16T04:32:43.313193
+1027,69,iOS Developer,Web/App,2026-11-16T04:32:43.313193
+1028,70,Data Engineer,Data/AI,2026-11-16T04:32:43.313193
+1029,71,Technical Architect,Software Engineer,2026-11-16T04:32:43.317255
+1030,72,Systems Engineer,Software Engineer,2026-11-16T04:32:43.317255
+1031,72,Bridge Software Engineer (BrSE),Software Engineer,2026-11-16T04:32:43.317255
+1032,72,AI Engineer,Data/AI,2026-11-16T04:32:43.321354
+1033,73,Bridge Software Engineer (BrSE),Software Engineer,2026-11-16T04:32:43.321354
+1034,73,Software Developer / Engineer,Software Engineer,2026-11-16T04:32:43.321354
+1035,74,Scrum Master,Software Engineer,2026-11-16T04:32:43.321354
+1036,75,Data Engineer,Data/AI,2026-11-16T04:32:43.321354
+1037,76,Technical Architect,Software Engineer,2026-11-16T04:32:43.325416
+1038,76,Solution Architect,Software Engineer,2026-11-16T04:32:43.325416
+1039,77,AI Engineer,Data/AI,2026-11-16T04:32:43.325416
+1040,78,IT Communicator,Software Engineer,2026-11-16T04:32:43.325416
+1041,79,SAP Developer,Software Engineer,2026-11-16T04:32:43.325416
+1042,80,Systems Engineer,Software Engineer,2026-11-16T04:32:43.325416
+1043,81,Database Administrator (DBA),Data/AI,2026-11-16T04:32:43.329518
+1044,82,Project Manager,Software Engineer,2026-11-16T04:32:43.329518
+1045,83,Solution Architect,Software Engineer,2026-11-16T04:32:43.329518
+1046,84,Systems Engineer,Software Engineer,2026-11-16T04:32:43.329518
+1047,85,Project Manager,Software Engineer,2026-11-16T04:32:43.329518
+1048,86,Project Manager,Software Engineer,2026-11-16T04:32:43.329518
+1049,87,Solution Architect,Software Engineer,2026-11-16T04:32:43.329518
+1050,88,Cloud Engineer,Software Engineer,2026-11-16T04:32:43.329518
+1051,89,Embedded Systems Developer,Embbed,2026-11-16T04:32:43.329518
+1052,89,Software Developer / Engineer,Software Engineer,2026-11-16T04:32:43.333616
+1053,90,Android Developer,Web/App,2026-11-16T04:32:43.333616
+1054,90,Automation Test Engineer,Software Engineer,2026-11-16T04:32:43.333616
+1055,91,Automation Test Engineer,Software Engineer,2026-11-16T04:32:43.333616
+1056,91,Tester,Software Engineer,2026-11-16T04:32:43.333616
+1057,92,Tester,Software Engineer,2026-11-16T04:32:43.333616
+1058,93,Solution Architect,Software Engineer,2026-11-16T04:32:43.333616
+1059,94,Software Developer / Engineer,Software Engineer,2026-11-16T04:32:43.337697
+1060,95,Solution Architect,Software Engineer,2026-11-16T04:32:43.337697
+1061,96,Tester,Software Engineer,2026-11-16T04:32:43.337697
+1062,97,Project Manager,Software Engineer,2026-11-16T04:32:43.337697
+1063,98,Security Engineer,Security,2026-11-16T04:32:43.337697
+1064,99,Systems Engineer,Software Engineer,2026-11-16T04:32:43.337697
+1065,100,AI Engineer,Data/AI,2026-11-16T04:32:43.337697
+1066,100,Full-stack Developer,Web/App,2026-11-16T04:32:43.337697
+1067,101,Data Architect,Data/AI,2026-11-16T04:32:43.341787
+1068,101,Data Engineer,Data/AI,2026-11-16T04:32:43.341787
+1069,102,iOS Developer,Web/App,2026-11-16T04:32:43.341787
+1070,103,Software Developer / Engineer,Software Engineer,2026-11-16T04:32:43.341787
+1071,104,Front-end Developer,Web/App,2026-11-16T04:32:43.341787
+1072,105,Systems Engineer,Software Engineer,2026-11-16T04:32:43.341787
+1073,106,Android Developer,Web/App,2026-11-16T04:32:43.341787
+1074,107,DevOps Engineer,Software Engineer,2026-11-16T04:32:43.341787
+1075,108,Back-end Developer,Web/App,2026-11-16T04:32:43.341787
+1076,109,Software Developer / Engineer,Software Engineer,2026-11-16T04:32:43.345816
+1077,110,Systems Engineer,Software Engineer,2026-11-16T04:32:43.345816
+1078,111,Technical Architect,Software Engineer,2026-11-16T04:32:43.345816
+1079,112,QA Engineer,Software Engineer,2026-11-16T04:32:43.345816
+1080,112,Tester,Software Engineer,2026-11-16T04:32:43.345816
+1081,113,Tester,Software Engineer,2026-11-16T04:32:43.345816
+1082,114,Front-end Developer,Web/App,2026-11-16T04:32:43.345816
+1083,115,Tester,Software Engineer,2026-11-16T04:32:43.345816
+1084,116,Business Analyst,Software Engineer,2026-11-16T04:32:43.345816
+1085,116,Product Owner,Software Engineer,2026-11-16T04:32:43.345816
+1086,117,Tester,Software Engineer,2026-11-16T04:32:43.345816
+1087,118,Back-end Developer,Web/App,2026-11-16T04:32:43.345816
+1088,119,Full-stack Developer,Web/App,2026-11-16T04:32:43.345816
+1089,120,Product Manager,Software Engineer,2026-11-16T04:32:43.345816
+1090,121,Database Administrator (DBA),Data/AI,2026-11-16T04:32:43.345816
+1091,122,Business Analyst,Software Engineer,2026-11-16T04:32:43.349880
+1092,123,AI Engineer,Data/AI,2026-11-16T04:32:43.349880
+1093,123,Full-stack Developer,Web/App,2026-11-16T04:32:43.349880
+1094,124,Full-stack Developer,Web/App,2026-11-16T04:32:43.349880
+1095,125,Software Developer / Engineer,Software Engineer,2026-11-16T04:32:43.349880
+1096,126,Data Engineer,Data/AI,2026-11-16T04:32:43.349880
+1097,126,AI Engineer,Data/AI,2026-11-16T04:32:43.349880
+1098,127,Data Engineer,Data/AI,2026-11-16T04:32:43.349880
+1099,128,Project Manager,Software Engineer,2026-11-16T04:32:43.349880
+1100,129,DevOps Engineer,Software Engineer,2026-11-16T04:32:43.349880
+1101,130,Business Analyst,Software Engineer,2026-11-16T04:32:43.349880
+1102,131,Data Engineer,Data/AI,2026-11-16T04:32:43.349880
+1103,132,Business Analyst,Software Engineer,2026-11-16T04:32:43.349880
+1104,133,AI Engineer,Data/AI,2026-11-16T04:32:43.353983
+1105,134,Data Engineer,Data/AI,2026-11-16T04:32:43.353983
+1106,135,Business Analyst,Software Engineer,2026-11-16T04:32:43.353983
+1107,136,Bridge Software Engineer (BrSE),Software Engineer,2026-11-16T04:56:50.235807
+1108,137,Product Designer,Software Engineer,2026-11-16T04:56:50.235807
+1109,138,Automation Test Engineer,Software Engineer,2026-11-16T04:56:50.235807
+1110,138,Tester,Software Engineer,2026-11-16T04:56:50.235807
+1111,139,Product Manager,Software Engineer,2026-11-16T04:56:50.235807
+1112,139,Project Manager,Software Engineer,2026-11-16T04:56:50.235807
+1113,139,Product Owner,Software Engineer,2026-11-16T04:56:50.235807
+1114,140,Project Manager,Software Engineer,2026-11-16T04:56:50.235807
+1115,141,Data Scientist,Data/AI,2026-11-16T04:56:50.235807
+1116,142,Security Engineer,Security,2026-11-16T04:56:50.235807
+1117,143,Front-end Developer,Web/App,2026-11-16T04:56:50.235807
+1118,144,Data Scientist,Data/AI,2026-11-16T04:56:50.239879
+1119,145,ERP Developer,Software Engineer,2026-11-16T04:56:50.239879
+1120,146,Integration Engineer,Software Engineer,2026-11-16T04:56:50.239879
+1121,147,Project Manager,Software Engineer,2026-11-16T04:56:50.239879
+1122,148,Security Engineer,Security,2026-11-16T04:56:50.239879
+1123,149,Data Engineer,Data/AI,2026-11-16T04:56:50.239879
+1124,150,AI Engineer,Data/AI,2026-11-16T04:56:50.239879
+1125,151,ERP Developer,Software Engineer,2026-11-16T04:56:50.239879
+1126,152,Automation Test Engineer,Software Engineer,2026-11-16T04:56:50.239879
+1127,152,Tester,Software Engineer,2026-11-16T04:56:50.239879
+1128,153,IT Consultant,Software Engineer,2026-11-16T04:56:50.239879
+1129,154,DevOps Engineer,Software Engineer,2026-11-16T04:56:50.239879
+1130,155,Back-end Developer,Web/App,2026-11-16T04:56:50.243958
+1131,156,Back-end Developer,Web/App,2026-11-16T04:56:50.243958
+1132,157,Back-end Developer,Web/App,2026-11-16T04:56:50.243958
+1133,158,Project Manager,Software Engineer,2026-11-16T04:56:50.243958
+1134,159,Database Administrator (DBA),Data/AI,2026-11-16T04:56:50.243958
+1135,160,AI Engineer,Data/AI,2026-11-16T04:56:50.243958
+1136,161,Data Scientist,Data/AI,2026-11-16T04:56:50.243958
+1137,162,Robotic Process Automation (RPA) Developer,Software Engineer,2026-11-16T04:56:50.243958
+1138,162,AI Engineer,Data/AI,2026-11-16T04:56:50.248035
+1139,163,Automation Test Engineer,Software Engineer,2026-11-16T04:56:50.248035
+1140,164,Full-stack Developer,Web/App,2026-11-16T04:56:50.248035
+1141,165,Full-stack Developer,Web/App,2026-11-16T04:56:50.248035
+1142,166,Back-end Developer,Web/App,2026-11-16T04:56:50.248035
+1143,167,Embedded Systems Developer,Embbed,2026-11-16T04:56:50.248035
+1144,167,Software Developer / Engineer,Software Engineer,2026-11-16T04:56:50.248035
+1145,168,Integration Engineer,Software Engineer,2026-11-16T04:56:50.248035
+1146,169,DevOps Engineer,Software Engineer,2026-11-16T04:56:50.248035
+1147,170,Back-end Developer,Web/App,2026-11-16T04:56:50.248035
+1148,171,Data Engineer,Data/AI,2026-11-16T04:56:50.248035
+1149,171,AI Engineer,Data/AI,2026-11-16T04:56:50.252097
+1150,172,Back-end Developer,Web/App,2026-11-16T04:56:50.252097
+1151,173,Business Analyst,Software Engineer,2026-11-16T04:56:50.252097
+1152,173,Product Owner,Software Engineer,2026-11-16T04:56:50.252097
+1153,174,Virtual Reality (VR) Developer,Software Engineer,2026-11-16T04:56:50.252097
+1154,174,Game Developer,Software Engineer,2026-11-16T04:56:50.252097
+1155,175,AI Engineer,Data/AI,2026-11-16T04:56:50.252097
+1156,176,Integration Engineer,Software Engineer,2026-11-16T04:56:50.252097
+1157,177,Product Manager,Software Engineer,2026-11-16T04:56:50.252097
+1158,177,Product Owner,Software Engineer,2026-11-16T04:56:50.256159
+1159,178,Full-stack Developer,Web/App,2026-11-16T04:56:50.256159
+1160,179,Game Developer,Software Engineer,2026-11-16T04:56:50.256159
+1161,180,Tester,Software Engineer,2026-11-16T04:56:50.256159
+1162,180,Manual Test Engineer,Software Engineer,2026-11-16T04:56:50.256159
+1163,181,Back-end Developer,Web/App,2026-11-16T04:56:50.256159
+1164,182,Back-end Developer,Web/App,2026-11-16T04:56:50.256159
+1165,183,Software Developer / Engineer,Software Engineer,2026-11-16T04:56:50.256159
+1166,184,C++ Developer,Software Engineer,2026-11-16T04:56:50.256159
+1167,185,Data Scientist,Data/AI,2026-11-16T04:56:50.256159
+1168,186,Full-stack Developer,Web/App,2026-11-16T04:56:50.256159
+1169,187,Back-end Developer,Web/App,2026-11-16T04:56:50.256159
+1170,188,Business Analyst,Software Engineer,2026-11-16T04:56:50.256159
+1171,189,Product Manager,Software Engineer,2026-11-16T04:56:50.256159
+1172,190,Software Developer / Engineer,Software Engineer,2026-11-16T04:56:50.256159
+1173,191,Full-stack Developer,Web/App,2026-11-16T04:56:50.256159
+1174,192,Full-stack Developer,Web/App,2026-11-16T04:56:50.260220
+1175,193,Systems Engineer,Software Engineer,2026-11-16T04:56:50.260220
+1176,193,Bridge Software Engineer (BrSE),Software Engineer,2026-11-16T04:56:50.260220
+1177,193,Product Owner,Software Engineer,2026-11-16T04:56:50.260220
+1178,194,Solution Architect,Software Engineer,2026-11-16T04:56:50.260220
+1179,195,DevOps Engineer,Software Engineer,2026-11-16T04:56:50.260220
+1180,196,AI Engineer,Data/AI,2026-11-16T04:56:50.260220
+1181,197,Back-end Developer,Web/App,2026-11-16T04:56:50.260220
+1182,198,AI Engineer,Data/AI,2026-11-16T04:56:50.260220
+1183,198,Software Developer / Engineer,Software Engineer,2026-11-16T04:56:50.260220
+1184,199,Data Analyst,Data/AI,2026-11-16T04:56:50.260220
+1185,200,Data Engineer,Data/AI,2026-11-16T04:56:50.264327
+1186,201,Full-stack Developer,Web/App,2026-11-16T04:56:50.264327
+1187,202,UI/UX Designer,Software Engineer,2026-11-16T04:56:50.264327
+1188,203,DevOps Engineer,Software Engineer,2026-11-16T04:56:50.264327
+1189,204,Tester,Software Engineer,2026-11-16T04:56:50.264327
+1190,204,Manual Test Engineer,Software Engineer,2026-11-16T04:56:50.264327
+1191,205,Back-end Developer,Web/App,2026-11-16T04:56:50.264327
+1192,206,Software Developer / Engineer,Software Engineer,2026-11-16T04:56:50.264327
+1193,207,Data Analyst,Data/AI,2026-11-16T04:56:50.264327
+1194,208,DevOps Engineer,Software Engineer,2026-11-16T04:56:50.264327
+1195,209,Database Administrator (DBA),Data/AI,2026-11-16T04:56:50.268390
+1196,210,Front-end Developer,Web/App,2026-11-16T04:56:50.268390
+1197,211,IT Consultant,Software Engineer,2026-11-16T04:56:50.268390
+1198,212,Tester,Software Engineer,2026-11-16T04:56:50.268390
+1199,213,Full-stack Developer,Web/App,2026-11-16T04:56:50.268390
+1200,214,Business Analyst,Software Engineer,2026-11-16T04:56:50.268390
+1201,215,Systems Engineer,Software Engineer,2026-11-16T04:56:50.268390
+1202,216,Full-stack Developer,Web/App,2026-11-16T04:56:50.268390
+1203,217,Back-end Developer,Web/App,2026-11-16T04:56:50.268390
+1204,218,Software Developer / Engineer,Software Engineer,2026-11-16T04:56:50.268390
+1205,219,Business Intelligence (BI) Developer,Data/AI,2026-11-16T04:56:50.272450
+1206,220,Integration Engineer,Software Engineer,2026-11-16T04:56:50.272450
+1207,221,DevOps Engineer,Software Engineer,2026-11-16T04:56:50.272450
+1208,222,Android Developer,Web/App,2026-11-16T04:56:50.272450
+1209,222,Software Developer / Engineer,Software Engineer,2026-11-16T04:56:50.272450
+1210,223,Systems Engineer,Software Engineer,2026-11-16T04:56:50.272450
+1211,223,Bridge Software Engineer (BrSE),Software Engineer,2026-11-16T04:56:50.272450
+1212,224,Business Analyst,Software Engineer,2026-11-16T04:56:50.272450
+1213,225,Systems Engineer,Software Engineer,2026-11-16T04:56:50.272450
+1214,226,AI Engineer,Data/AI,2026-11-16T04:56:50.272450
+1215,227,Security Engineer,Security,2026-11-16T04:56:50.272450
+1216,228,Front-end Developer,Web/App,2026-11-16T04:56:50.276514
+1217,229,Google Cloud (GCP) Engineer,Software Engineer,2026-11-16T04:56:50.276514
+1218,230,Systems Engineer,Software Engineer,2026-11-16T04:56:50.276514
+1219,230,Security Engineer,Security,2026-11-16T04:56:50.276514
+1220,231,DevOps Engineer,Software Engineer,2026-11-16T04:56:50.276514
+1221,232,Data Governance Specialist,Data/AI,2026-11-16T04:56:50.280607
+1222,233,Front-end Developer,Web/App,2026-11-16T04:56:50.280607
+1223,234,Data Scientist,Data/AI,2026-11-16T04:56:50.280607
+1224,235,Project Manager,Software Engineer,2026-11-16T04:56:50.280607
+1225,236,Data Engineer,Data/AI,2026-11-16T04:56:50.280607
+1226,236,Software Architect,Software Engineer,2026-11-16T04:56:50.280607
+1227,237,Data Governance Specialist,Data/AI,2026-11-16T04:56:50.280607
+1228,238,Systems Engineer,Software Engineer,2026-11-16T04:56:50.280607
+1229,239,Automation Test Engineer,Software Engineer,2026-11-16T04:56:50.280607
+1230,239,Tester,Software Engineer,2026-11-16T04:56:50.280607
+1231,240,QC Engineer,Software Engineer,2026-11-16T04:56:50.280607
+1232,241,Systems Engineer,Software Engineer,2026-11-16T04:56:50.280607
+1233,242,Software Developer / Engineer,Software Engineer,2026-11-16T04:56:50.284669
+1234,243,Full-stack Developer,Web/App,2026-11-16T04:56:50.284669
+1235,244,Android Developer,Web/App,2026-11-16T04:56:50.284669
+1236,244,iOS Developer,Web/App,2026-11-16T04:56:50.284669
+1237,244,Mobile Application Developer,Web/App,2026-11-16T04:56:50.284669
+1238,245,Back-end Developer,Web/App,2026-11-16T04:56:50.284669
+1239,246,Software Developer / Engineer,Software Engineer,2026-11-16T04:56:50.284669
+1240,247,Data Engineer,Data/AI,2026-11-16T04:56:50.284669
+1241,248,Software Developer / Engineer,Software Engineer,2026-11-16T04:56:50.284669
+1242,249,Software Developer / Engineer,Software Engineer,2026-11-16T04:56:50.284669
+1243,250,Business Analyst,Software Engineer,2026-11-16T04:56:50.284669
+1244,251,Tester,Software Engineer,2026-11-16T04:56:50.284669
+1245,252,Tester,Software Engineer,2026-11-16T04:56:50.284669
+1246,253,Game Developer,Software Engineer,2026-11-16T04:56:50.284669
+1247,254,UI/UX Designer,Software Engineer,2026-11-16T04:56:50.288731
+1248,255,Business Analyst,Software Engineer,2026-11-16T04:56:50.288731
+1249,256,Automation Test Engineer,Software Engineer,2026-11-16T04:56:50.288731
+1250,256,Tester,Software Engineer,2026-11-16T04:56:50.288731
+1251,257,Tester,Software Engineer,2026-11-16T04:56:50.288731
+1252,258,Data Engineer,Data/AI,2026-11-16T04:56:50.288731
+1253,258,AI Engineer,Data/AI,2026-11-16T04:56:50.288731
+1254,258,Machine Learning Engineer,Data/AI,2026-11-16T04:56:50.292834
+1255,259,Data Analyst,Data/AI,2026-11-16T04:56:50.292834
+1256,260,Cloud Engineer,Software Engineer,2026-11-16T04:56:50.292834
+1257,261,Product Owner,Software Engineer,2026-11-16T04:56:50.292834
+1258,262,Systems Engineer,Software Engineer,2026-11-16T04:56:50.292834
+1259,262,Bridge Software Engineer (BrSE),Software Engineer,2026-11-16T04:56:50.292834
+1260,263,Business Analyst,Software Engineer,2026-11-16T04:56:50.292834
+1261,264,AI Engineer,Data/AI,2026-11-16T04:56:50.292834
+1262,264,Software Developer / Engineer,Software Engineer,2026-11-16T04:56:50.292834
+1263,265,Business Analyst,Software Engineer,2026-11-16T04:56:50.292834
+1264,266,Security Engineer,Security,2026-11-16T04:56:50.292834
+1265,267,Business Analyst,Software Engineer,2026-11-16T04:56:50.292834
+1266,268,Data Analyst,Data/AI,2026-11-16T04:56:50.296897
+1267,268,Data Engineer,Data/AI,2026-11-16T04:56:50.296897
+1268,269,Game Designer,Software Engineer,2026-11-16T04:56:50.296897
+1269,270,Site Reliability Engineer (SRE),Software Engineer,2026-11-16T04:56:50.296897
+1270,271,Software Developer / Engineer,Software Engineer,2026-11-16T04:56:50.296897
+1271,272,Machine Learning Engineer,Data/AI,2026-11-16T04:56:50.296897
+1272,273,Cloud Engineer,Software Engineer,2026-11-16T04:56:50.296897
+1273,274,Full-stack Developer,Web/App,2026-11-16T04:56:50.296897
+1274,275,Business Analyst,Software Engineer,2026-11-16T04:56:50.296897
+1275,276,Full-stack Developer,Web/App,2026-11-16T04:56:50.296897
+1276,277,Full-stack Developer,Web/App,2026-11-16T04:56:50.296897
+1277,278,UI/UX Designer,Software Engineer,2026-11-16T04:56:50.296897
+1278,279,Technical Architect,Software Engineer,2026-11-16T04:56:50.296897
+1279,280,Back-end Developer,Web/App,2026-11-16T04:56:50.296897
+1280,281,AI Engineer,Data/AI,2026-11-16T04:56:50.296897
+1281,282,Solution Architect,Software Engineer,2026-11-16T04:56:50.296897
+1282,283,Software Developer / Engineer,Software Engineer,2026-11-16T04:56:50.296897
+1283,284,Full-stack Developer,Web/App,2026-11-16T04:56:50.300957
+1284,285,Data Engineer,Data/AI,2026-11-16T04:56:50.300957
+1285,286,Solution Architect,Software Engineer,2026-11-16T04:56:50.300957
+1286,287,AI Engineer,Data/AI,2026-11-16T04:56:50.300957
+1287,288,Systems Engineer,Software Engineer,2026-11-16T04:56:50.300957
+1288,289,DevOps Engineer,Software Engineer,2026-11-16T04:56:50.300957
+1289,290,Bridge Software Engineer (BrSE),Software Engineer,2026-11-16T04:56:50.300957
+1290,291,Software Developer / Engineer,Software Engineer,2026-11-16T04:56:50.300957
+1291,291,Business Intelligence (BI) Developer,Data/AI,2026-11-16T04:56:50.300957
+1292,292,Security Engineer,Security,2026-11-16T04:56:50.300957
+1293,292,Cybersecurity Engineer,Security,2026-11-16T04:56:50.300957
+1294,293,DevOps Engineer,Software Engineer,2026-11-16T04:56:50.305053
+1295,294,Business Analyst,Software Engineer,2026-11-16T04:56:50.305053
+1296,295,QA Engineer,Software Engineer,2026-11-16T04:56:50.305053
+1297,295,Tester,Software Engineer,2026-11-16T04:56:50.305053
+1298,295,AI Engineer,Data/AI,2026-11-16T04:56:50.305053
+1299,296,Full-stack Developer,Web/App,2026-11-16T04:56:50.305053
+1300,297,Principal Engineer,Software Engineer,2026-11-16T04:56:50.305053
+1301,298,Tester,Software Engineer,2026-11-16T04:56:50.305053
+1302,299,Back-end Developer,Web/App,2026-11-16T04:56:50.305053
+1303,300,Cloud Engineer,Software Engineer,2026-11-16T04:56:50.305053
+1304,300,AI Engineer,Data/AI,2026-11-16T04:56:50.305053
+1305,301,Product Owner,Software Engineer,2026-11-16T04:56:50.305053
+1306,302,Data Governance Specialist,Data/AI,2026-11-16T04:56:50.309116
+1307,303,Project Manager,Software Engineer,2026-11-16T04:56:50.309116
+1308,304,ERP Developer,Software Engineer,2026-11-16T04:56:50.309116
+1309,305,Bridge Software Engineer (BrSE),Software Engineer,2026-11-16T04:56:50.309116
+1310,306,Back-end Developer,Web/App,2026-11-16T04:56:50.309116
+1311,307,SAP Developer,Software Engineer,2026-11-16T04:56:50.309116
+1312,308,Data Scientist,Data/AI,2026-11-16T04:56:50.309116
+1313,308,Product Owner,Software Engineer,2026-11-16T04:56:50.309116
+1314,309,Security Engineer,Security,2026-11-16T04:56:50.309116
+1315,309,Cybersecurity Engineer,Security,2026-11-16T04:56:50.309116
+1316,310,Technical Architect,Software Engineer,2026-11-16T04:56:50.309116
+1317,311,Business Analyst,Software Engineer,2026-11-16T04:56:50.309116
+1318,311,Product Owner,Software Engineer,2026-11-16T04:56:50.309116
+1319,312,Back-end Developer,Web/App,2026-11-16T04:56:50.313179
+1320,313,DevOps Engineer,Software Engineer,2026-11-16T04:56:50.313179
+1321,314,Data Engineer,Data/AI,2026-11-16T04:56:50.313179
+1322,315,Business Analyst,Software Engineer,2026-11-16T04:56:50.313179
+1323,316,Back-end Developer,Web/App,2026-11-16T04:56:50.313179
+1324,317,Project Manager,Software Engineer,2026-11-16T04:56:50.313179
+1325,318,Systems Engineer,Software Engineer,2026-11-16T04:56:50.313179
+1326,319,Back-end Developer,Web/App,2026-11-16T04:56:50.313179
+1327,320,Software Developer / Engineer,Software Engineer,2026-11-16T04:56:50.313179
+1328,321,ERP Developer,Software Engineer,2026-11-16T04:56:50.313179
+1329,322,Systems Engineer,Software Engineer,2026-11-16T04:56:50.313179
+1330,323,Azure Cloud Engineer,Software Engineer,2026-11-16T04:56:50.313179
+1331,323,Cloud Engineer,Software Engineer,2026-11-16T04:56:50.313179
+1332,324,DevOps Engineer,Software Engineer,2026-11-16T04:56:50.317242
+1333,325,Systems Engineer,Software Engineer,2026-11-16T04:56:50.317242
+1334,326,Embedded Systems Developer,Embbed,2026-11-16T04:56:50.317242
+1335,326,Software Developer / Engineer,Software Engineer,2026-11-16T04:56:50.317242
+1336,327,Back-end Developer,Web/App,2026-11-16T04:56:50.317242
+1337,328,Business Analyst,Software Engineer,2026-11-16T04:56:50.317242
+1338,329,Software Developer / Engineer,Software Engineer,2026-11-16T04:56:50.317242
+1339,330,Software Developer / Engineer,Software Engineer,2026-11-16T04:56:50.317242
+1340,331,Game Developer,Software Engineer,2026-11-16T04:56:50.317242
+1341,332,Project Manager,Software Engineer,2026-11-16T04:56:50.317242
+1342,333,Site Reliability Engineer (SRE),Software Engineer,2026-11-16T04:56:50.317242
+1343,334,AI Engineer,Data/AI,2026-11-16T04:56:50.317242
+1344,334,Software Developer / Engineer,Software Engineer,2026-11-16T04:56:50.317242
+1345,335,Full-stack Developer,Web/App,2026-11-16T04:56:50.317242
+1346,336,AI Engineer,Data/AI,2026-11-16T04:56:50.317242
+1347,336,Machine Learning Engineer,Data/AI,2026-11-16T04:56:50.317242
+1348,337,Business Analyst,Software Engineer,2026-11-16T04:56:50.317242
+1349,338,Software Developer / Engineer,Software Engineer,2026-11-16T04:56:50.317242
+1350,339,Software Developer / Engineer,Software Engineer,2026-11-16T04:56:50.321300
+1351,340,Tester,Software Engineer,2026-11-16T04:56:50.321300
+1352,340,Manual Test Engineer,Software Engineer,2026-11-16T04:56:50.321300
+1353,341,QA Engineer,Software Engineer,2026-11-16T04:56:50.321300
+1354,341,Tester,Software Engineer,2026-11-16T04:56:50.321300
+1355,342,Full-stack Developer,Web/App,2026-11-16T04:56:50.321300
+1356,343,Back-end Developer,Web/App,2026-11-16T04:56:50.321300
+1357,344,Tester,Software Engineer,2026-11-16T04:56:50.321300
+1358,345,Solution Architect,Software Engineer,2026-11-16T04:56:50.321300
+1359,346,Tester,Software Engineer,2026-11-16T04:56:50.321300
+1360,347,Tester,Software Engineer,2026-11-16T04:56:50.321300
+1361,347,Penetration Tester,Security,2026-11-16T04:56:50.325364
+1362,348,Back-end Developer,Web/App,2026-11-16T04:56:50.325364
+1363,349,Database Administrator (DBA),Data/AI,2026-11-16T04:56:50.325364
+1364,350,Full-stack Developer,Web/App,2026-11-16T04:56:50.325364
+1365,351,Product Owner,Software Engineer,2026-11-16T04:56:50.325364
+1366,352,Business Analyst,Software Engineer,2026-11-16T04:56:50.325364
+1367,353,Data Analyst,Data/AI,2026-11-16T04:56:50.325364
+1368,354,Database Administrator (DBA),Data/AI,2026-11-16T04:56:50.325364
+1369,355,Back-end Developer,Web/App,2026-11-16T04:56:50.325364
+1370,356,QA Engineer,Software Engineer,2026-11-16T04:56:50.325364
+1371,356,Tester,Software Engineer,2026-11-16T04:56:50.325364
+1372,357,DevOps Engineer,Software Engineer,2026-11-16T04:56:50.325364
+1373,358,Solution Architect,Software Engineer,2026-11-16T04:56:50.325364
+1374,359,Software Developer / Engineer,Software Engineer,2026-11-16T04:56:50.325364
+1375,360,Cloud Engineer,Software Engineer,2026-11-16T04:56:50.325364
+1376,360,Security Engineer,Security,2026-11-16T04:56:50.325364
+1377,361,Tester,Software Engineer,2026-11-16T04:56:50.329427
+1378,361,QC Engineer,Software Engineer,2026-11-16T04:56:50.329427
+1379,362,DevOps Engineer,Software Engineer,2026-11-16T04:56:50.329427
+1380,363,AI Engineer,Data/AI,2026-11-16T04:56:50.329427
+1381,364,Data Engineer,Data/AI,2026-11-16T04:56:50.329427
+1382,365,Systems Engineer,Software Engineer,2026-11-16T04:56:50.329427
+1383,366,Full-stack Developer,Web/App,2026-11-16T04:56:50.329427
+1384,367,AI Engineer,Data/AI,2026-11-16T04:56:50.329427
+1385,367,Full-stack Developer,Web/App,2026-11-16T04:56:50.329427
+1386,368,Systems Engineer,Software Engineer,2026-11-16T04:56:50.329427
+1387,369,Embedded Systems Developer,Embbed,2026-11-16T04:56:50.329427
+1388,370,Embedded Systems Developer,Embbed,2026-11-16T04:56:50.329427
+1389,371,AI Engineer,Data/AI,2026-11-16T04:56:50.329427
+1390,372,DevOps Engineer,Software Engineer,2026-11-16T04:56:50.333489
+1391,373,Tester,Software Engineer,2026-11-16T04:56:50.333489
+1392,373,Software Developer / Engineer,Software Engineer,2026-11-16T04:56:50.333489
+1393,374,Back-end Developer,Web/App,2026-11-16T04:56:50.333489
+1394,375,Business Analyst,Software Engineer,2026-11-16T04:56:50.333489
+1395,376,Systems Engineer,Software Engineer,2026-11-16T04:56:50.333489
+1396,377,Technical Architect,Software Engineer,2026-11-16T04:56:50.333489
+1397,378,Systems Engineer,Software Engineer,2026-11-16T04:56:50.333489
+1398,379,Data Engineer,Data/AI,2026-11-16T04:56:50.333489
+1399,380,Full-stack Developer,Web/App,2026-11-16T04:56:50.333489
+1400,381,Data Engineer,Data/AI,2026-11-16T04:56:50.333489
+1401,382,Project Manager,Software Engineer,2026-11-16T04:56:50.333489
+1402,383,Game Designer,Software Engineer,2026-11-16T04:56:50.333489
+1403,384,Technical Architect,Software Engineer,2026-11-16T04:56:50.333489
+1404,385,Back-end Developer,Web/App,2026-11-16T04:56:50.337550
+1405,386,Data Analyst,Data/AI,2026-11-16T04:56:50.337550
+1406,387,Tester,Software Engineer,2026-11-16T04:56:50.337550
+1407,388,Back-end Developer,Web/App,2026-11-16T04:56:50.337550
+1408,389,Systems Engineer,Software Engineer,2026-11-16T04:56:50.337550
+1409,390,Full-stack Developer,Web/App,2026-11-16T04:56:50.337550
+1410,391,Back-end Developer,Web/App,2026-11-16T04:56:50.337550
+1411,392,Database Administrator (DBA),Data/AI,2026-11-16T04:56:50.337550
+1412,393,AI Engineer,Data/AI,2026-11-16T04:56:50.337550
+1413,394,ERP Developer,Software Engineer,2026-11-16T04:56:50.337550
+1414,395,Front-end Developer,Web/App,2026-11-16T04:56:50.337550
+1415,396,Software Developer / Engineer,Software Engineer,2026-11-16T04:56:50.337550
+1416,397,UI/UX Designer,Software Engineer,2026-11-16T04:56:50.337550
+1417,398,Software Developer / Engineer,Software Engineer,2026-11-16T04:56:50.337550
+1418,399,iOS Developer,Web/App,2026-11-16T04:56:50.341614
+1419,400,Embedded Systems Developer,Embbed,2026-11-16T04:56:50.341614
+1420,400,Software Developer / Engineer,Software Engineer,2026-11-16T04:56:50.341614
+1421,401,Front-end Developer,Web/App,2026-11-16T04:56:50.341614
+1422,402,Business Analyst,Software Engineer,2026-11-16T04:56:50.341614
+1423,403,Project Manager,Software Engineer,2026-11-16T04:56:50.341614
+1424,404,Tester,Software Engineer,2026-11-16T04:56:50.341614
+1425,405,Systems Engineer,Software Engineer,2026-11-16T04:56:50.341614
+1426,406,Full-stack Developer,Web/App,2026-11-16T04:56:50.341614
+1427,407,Data Engineer,Data/AI,2026-11-16T04:56:50.341614
+1428,408,Back-end Developer,Web/App,2026-11-16T04:56:50.341614
+1429,409,DevSecOps Engineer,Security,2026-11-16T04:56:50.341614
+1430,410,Data Scientist,Data/AI,2026-11-16T04:56:50.341614
+1431,411,Solution Architect,Software Engineer,2026-11-16T04:56:50.341614
+1432,412,Business Analyst,Software Engineer,2026-11-16T04:56:50.341614
+1433,413,Automation Test Engineer,Software Engineer,2026-11-16T04:56:50.341614
+1434,413,Tester,Software Engineer,2026-11-16T04:56:50.341614
+1435,414,Kotlin Developer,Web/App,2026-11-16T04:56:50.341614
+1436,414,Security Engineer,Security,2026-11-16T04:56:50.341614
+1437,415,Business Analyst,Software Engineer,2026-11-16T04:56:50.345718
+1438,416,Back-end Developer,Web/App,2026-11-16T04:56:50.345718
+1439,417,Back-end Developer,Web/App,2026-11-16T04:56:50.345718
+1440,418,Front-end Developer,Web/App,2026-11-16T04:56:50.345718
+1441,419,ERP Developer,Software Engineer,2026-11-16T04:56:50.345718
+1442,420,AI Engineer,Data/AI,2026-11-16T04:56:50.345718
+1443,421,Full-stack Developer,Web/App,2026-11-16T04:56:50.345718
+1444,422,Technical Architect,Software Engineer,2026-11-16T04:56:50.345718
+1445,423,Tester,Software Engineer,2026-11-16T04:56:50.345718
+1446,424,Back-end Developer,Web/App,2026-11-16T04:56:50.345718
+1447,425,Business Analyst,Software Engineer,2026-11-16T04:56:50.345718
+1448,426,AI Engineer,Data/AI,2026-11-16T04:56:50.345718
+1449,426,Full-stack Developer,Web/App,2026-11-16T04:56:50.345718
+1450,427,Tester,Software Engineer,2026-11-16T04:56:50.345718
+1451,428,Site Reliability Engineer (SRE),Software Engineer,2026-11-16T04:56:50.345718
+1452,429,DevOps Engineer,Software Engineer,2026-11-16T04:56:50.345718
+1453,430,Product Owner,Software Engineer,2026-11-16T04:56:50.345718
+1454,431,Business Analyst,Software Engineer,2026-11-16T04:56:50.345718
+1455,432,Data Engineer,Data/AI,2026-11-16T04:56:50.345718
+1456,433,Product Owner,Software Engineer,2026-11-16T04:56:50.349781
+1457,434,Data Engineer,Data/AI,2026-11-16T04:56:50.349781
+1458,435,Project Manager,Software Engineer,2026-11-16T04:56:50.349781
+1459,436,Product Owner,Software Engineer,2026-11-16T04:56:50.349781
+1460,437,DevOps Engineer,Software Engineer,2026-11-16T04:56:50.349781
+1461,438,Front-end Developer,Web/App,2026-11-16T04:56:50.349781
+1462,439,Systems Engineer,Software Engineer,2026-11-16T04:56:50.349781
+1463,439,Embedded Systems Developer,Embbed,2026-11-16T04:56:50.349781
+1464,440,AI Engineer,Data/AI,2026-11-16T04:56:50.349781
+1465,441,Data Analyst,Data/AI,2026-11-16T04:56:50.349781
+1466,442,Back-end Developer,Web/App,2026-11-16T04:56:50.349781
+1467,443,Systems Engineer,Software Engineer,2026-11-16T04:56:50.349781
+1468,443,Tester,Software Engineer,2026-11-16T04:56:50.349781
+1469,444,DevOps Engineer,Software Engineer,2026-11-16T04:56:50.349781
+1470,445,Software Developer / Engineer,Software Engineer,2026-11-16T04:56:50.349781
+1471,446,Firmware Developer,Embbed,2026-11-16T04:56:50.353856
+1472,447,AI Engineer,Data/AI,2026-11-16T04:56:50.353856
+1473,448,QC Engineer,Software Engineer,2026-11-16T04:56:50.353856
+1474,449,Product Owner,Software Engineer,2026-11-16T04:56:50.353856
+1475,450,Full-stack Developer,Web/App,2026-11-16T04:56:50.353856
+1476,451,Data Analyst,Data/AI,2026-11-16T04:56:50.353856
+1477,452,Business Analyst,Software Engineer,2026-11-16T04:56:50.353856
+1478,453,Data Engineer,Data/AI,2026-11-16T04:56:50.353856
+1479,454,Tester,Software Engineer,2026-11-16T04:56:50.353856
+1480,455,Back-end Developer,Web/App,2026-11-16T04:56:50.353856
+1481,456,AI Engineer,Data/AI,2026-11-16T04:56:50.353856
+1482,457,Integration Engineer,Software Engineer,2026-11-16T04:56:50.353856
+1483,458,AI Engineer,Data/AI,2026-11-16T04:56:50.353856
+1484,459,Business Analyst,Software Engineer,2026-11-16T04:56:50.353856
+1485,460,Site Reliability Engineer (SRE),Software Engineer,2026-11-16T04:56:50.353856
+1486,461,AI Engineer,Data/AI,2026-11-16T04:56:50.357922
+1487,462,Game Designer,Software Engineer,2026-11-16T04:56:50.357922
+1488,463,Tester,Software Engineer,2026-11-16T04:56:50.357922
+1489,464,QA Engineer,Software Engineer,2026-11-16T04:56:50.357922
+1490,464,Tester,Software Engineer,2026-11-16T04:56:50.357922
+1491,465,Back-end Developer,Web/App,2026-11-16T04:56:50.357922
+1492,466,Tester,Software Engineer,2026-11-16T04:56:50.357922
+1493,467,Full-stack Developer,Web/App,2026-11-16T04:56:50.357922
+1494,468,Product Owner,Software Engineer,2026-11-16T04:56:50.357922
+1495,469,AI Engineer,Data/AI,2026-11-16T04:56:50.357922
+1496,470,Data Scientist,Data/AI,2026-11-16T04:56:50.357922
+1497,471,Back-end Developer,Web/App,2026-11-16T04:56:50.357922
+1498,472,Tester,Software Engineer,2026-11-16T04:56:50.357922
+1499,472,Penetration Tester,Security,2026-11-16T04:56:50.357922
+1500,473,Product Owner,Software Engineer,2026-11-16T04:56:50.361989
+1501,474,Back-end Developer,Web/App,2026-11-16T04:56:50.361989
+1502,475,Software Developer / Engineer,Software Engineer,2026-11-16T04:56:50.361989
+1503,476,Systems Engineer,Software Engineer,2026-11-16T04:56:50.361989
+1504,477,Business Analyst,Software Engineer,2026-11-16T04:56:50.361989
+1505,478,DevSecOps Engineer,Security,2026-11-16T04:56:50.361989
+1506,479,Tester,Software Engineer,2026-11-16T04:56:50.361989
+1507,480,Solution Architect,Software Engineer,2026-11-16T04:56:50.361989
+1508,481,Tester,Software Engineer,2026-11-16T04:56:50.361989
+1509,481,Manual Test Engineer,Software Engineer,2026-11-16T04:56:50.361989
+1510,482,Game Artist,Software Engineer,2026-11-16T04:56:50.361989
+1511,483,Automation Test Engineer,Software Engineer,2026-11-16T04:56:50.361989
+1512,483,Tester,Software Engineer,2026-11-16T04:56:50.361989
+1513,484,Back-end Developer,Web/App,2026-11-16T04:56:50.361989
+1514,485,Database Administrator (DBA),Data/AI,2026-11-16T04:56:50.366052
+1515,486,Mobile Application Developer,Web/App,2026-11-16T04:56:50.366052
+1516,487,Business Analyst,Software Engineer,2026-11-16T04:56:50.366052
+1517,488,Data Engineer,Data/AI,2026-11-16T04:56:50.366052
+1518,489,DevOps Engineer,Software Engineer,2026-11-16T04:56:50.366052
+1519,490,DevSecOps Engineer,Security,2026-11-16T04:56:50.366052
+1520,491,Business Intelligence (BI) Developer,Data/AI,2026-11-16T04:56:50.366052
+1521,492,Business Intelligence (BI) Developer,Data/AI,2026-11-16T04:56:50.366052
+1522,493,Tester,Software Engineer,2026-11-16T04:56:50.366052

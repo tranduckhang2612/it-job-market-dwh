@@ -8,7 +8,7 @@ Chạy từ thư mục gốc project:
 
 Mặc định crawler lấy cookie từ
 data_preprocessing/itviec_crawl_data/cookie_itviec.txt và ghi vào
-raw.crawl_runs, raw.job_postings. Database chưa có hai bảng raw sẽ được
+raw.crawl_runs, raw.job_postings và raw.seen_jobs. Database thiếu bảng raw sẽ được
 khởi tạo bằng data_preprocessing/sql/raw_schema.sql.
 """
 
@@ -89,7 +89,7 @@ def _configure_compose_database(args) -> str:
 
 
 def check_database(args) -> int:
-    """Khởi tạo nếu cần rồi kiểm tra hai bảng raw và quyền truy cập."""
+    """Khởi tạo nếu cần rồi kiểm tra các bảng raw và quyền truy cập."""
     sink = None
     try:
         sink = crawl_itviec.PostgresSink(args)
@@ -97,7 +97,7 @@ def check_database(args) -> int:
         validate_raw_schema(sink.conn, crawl_itviec.StorageError)
         if created:
             LOG.info("Đã khởi tạo schema raw từ raw_schema.sql.")
-        LOG.info("PostgreSQL đã kết nối; hai bảng raw và quyền truy cập hợp lệ.")
+        LOG.info("PostgreSQL đã kết nối; các bảng raw và quyền truy cập hợp lệ.")
         return 0
     except crawl_itviec.StorageError as exc:
         LOG.error("%s", exc)
@@ -117,7 +117,7 @@ def main(argv=None) -> int:
     parser = crawl_itviec.build_parser(description=__doc__)
     parser.add_argument(
         "--check-db", action="store_true",
-        help="Chỉ kiểm tra kết nối, hai bảng raw và quyền; không crawl.",
+        help="Chỉ kiểm tra kết nối, các bảng raw và quyền; không crawl.",
     )
     parser.add_argument(
         "--no-compose-db", action="store_true",

@@ -10,6 +10,42 @@ from unittest.mock import call, patch
 from pipeline import load_to_dwh, main as pipeline_main
 
 
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+
+
+class AirflowDagContractTests(TestCase):
+    def test_pipeline_failures_are_not_masked_by_fallback_commands(self):
+        dag_source = (PROJECT_ROOT / "dags" / "it_job_market_dag.py").read_text(encoding="utf-8")
+
+        self.assertNotIn("||", dag_source)
+        self.assertNotIn("--normalize-only", dag_source)
+        self.assertNotIn('trigger_rule="all_done"', dag_source)
+        self.assertIn(
+            "exec python pipeline/main.py --source itviec --limit 5",
+            dag_source,
+        )
+        self.assertIn(
+            "exec python pipeline/main.py --source topdev --limit 10",
+            dag_source,
+        )
+
+    def test_unified_compose_bootstraps_only_infrastructure_databases(self):
+        compose = (PROJECT_ROOT / "docker" / "docker-compose.yml").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertFalse((PROJECT_ROOT / "docker" / "docker-compose.airflow.yml").exists())
+        self.assertIn("airflow-postgres:", compose)
+        self.assertIn("POSTGRES_DB: airflow_db", compose)
+        self.assertIn("airflow_postgres_data:/var/lib/postgresql/data", compose)
+        self.assertNotIn("project-db-ready:", compose)
+        self.assertIn("postgres:\n        condition: service_healthy", compose)
+        self.assertIn("condition: service_healthy", compose)
+        self.assertIn("sqlserver-db-init:", compose)
+        self.assertIn("CREATE DATABASE [it_job_market_dw]", compose)
+        self.assertIn("condition: service_completed_successfully", compose)
+
+
 class PipelineEntrypointTests(TestCase):
     def test_full_pipeline_bypasses_analytics(self):
         with TemporaryDirectory() as directory:

@@ -61,6 +61,7 @@ def run_postgres_checks(connection_options):
         try:
             sink.start_run({**itviec_run, "collected_count": 0, "complete": False}, [])
             assert sink.save_job(itviec_job, itviec_run, []) is True
+            assert sink.find_existing_job_ids(["itviec:101", "itviec:missing"]) == {"itviec:101"}
             sink.finish_run(itviec_run, [])
         finally:
             sink.close()
@@ -79,6 +80,7 @@ def run_postgres_checks(connection_options):
         try:
             sink.start_run({**topdev_run, "collected_count": 0, "complete": False}, [])
             assert sink.save_job(topdev_job, topdev_run, []) is True
+            assert sink.find_existing_job_ids(["topdev:202", "topdev:missing"]) == {"topdev:202"}
             sink.finish_run(topdev_run, [])
         finally:
             sink.close()
@@ -89,8 +91,12 @@ def run_postgres_checks(connection_options):
         jobs = connection.execute(
             "SELECT job_id, raw_payload->>'title' FROM raw.job_postings ORDER BY job_id"
         ).fetchall()
+        seen_jobs = connection.execute(
+            "SELECT job_id, source FROM raw.seen_jobs ORDER BY job_id"
+        ).fetchall()
         assert runs == [("itviec", "succeeded", 1), ("topdev", "succeeded", 1)]
         assert jobs == [("itviec:101", "Backend Engineer"), ("topdev:202", "Data Engineer")]
+        assert seen_jobs == [("itviec:101", "itviec"), ("topdev:202", "topdev")]
 
         assert ensure_normalize_data_schema(connection) is True
         assert ensure_normalize_data_schema(connection) is False

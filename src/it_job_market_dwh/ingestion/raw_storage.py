@@ -23,14 +23,22 @@ RAW_TABLES = {
         ),
         ("SELECT", "INSERT"),
     ),
+    "raw.seen_jobs": (
+        (
+            "job_id", "source", "first_crawl_run_id", "first_seen_at",
+            "claimed_at",
+        ),
+        ("SELECT", "INSERT"),
+    ),
 }
 
 
 def ensure_raw_schema(connection) -> bool:
-    """Tạo schema raw khi database chưa có đủ hai bảng bắt buộc."""
+    """Tạo hoặc nâng cấp schema raw khi thiếu một bảng bắt buộc."""
     with connection.cursor() as cursor:
         cursor.execute(
-            "SELECT to_regclass('raw.crawl_runs'), to_regclass('raw.job_postings')"
+            "SELECT to_regclass('raw.crawl_runs'), "
+            "to_regclass('raw.job_postings'), to_regclass('raw.seen_jobs')"
         )
         tables = cursor.fetchone()
         if tables and all(tables):
