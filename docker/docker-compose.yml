@@ -77,7 +77,109 @@ services:
     command:
       - |
         /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P "$${MSSQL_SA_PASSWORD}" -C -b \
-          -Q "IF DB_ID(N'it_job_market_dw') IS NULL EXEC(N'CREATE DATABASE [it_job_market_dw]');"
+          -Q "IF DB_ID(N'it_job_market_dw') IS NULL EXEC(N'CREATE DATABASE [it_job_market_dw]');" && \
+        /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P "$${MSSQL_SA_PASSWORD}" -C -b \
+          -d it_job_market_dw -i /init/dw_v2.sql
+    volumes:
+      - ../data_preprocessing/sql/dw_v2.sql:/init/dw_v2.sql:ro
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+
+  sqlserver-dw-v2-backfill:
+    profiles: ["migration"]
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    restart: "no"
+    environment:
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:?Set MSSQL_SA_PASSWORD in docker/.env}
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P "$${MSSQL_SA_PASSWORD}" -C -b \
+          -Q "IF DB_ID(N'it_job_market_dw') IS NULL EXEC(N'CREATE DATABASE [it_job_market_dw]');" && \
+        /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P "$${MSSQL_SA_PASSWORD}" -C -b \
+          -d it_job_market_dw -i /migration/dw_v2.sql && \
+        /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P "$${MSSQL_SA_PASSWORD}" -C -b \
+          -d it_job_market_dw -i /migration/dw_v2_backfill_dimensions.sql
+    volumes:
+      - ../data_preprocessing/sql/dw_v2.sql:/migration/dw_v2.sql:ro
+      - ../data_preprocessing/sql/dw_v2_backfill_dimensions.sql:/migration/dw_v2_backfill_dimensions.sql:ro
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+
+  sqlserver-dw-v2-backfill-facts:
+    profiles: ["migration"]
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    restart: "no"
+    environment:
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:?Set MSSQL_SA_PASSWORD in docker/.env}
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P "$${MSSQL_SA_PASSWORD}" -C -b \
+          -Q "IF DB_ID(N'it_job_market_dw') IS NULL EXEC(N'CREATE DATABASE [it_job_market_dw]');" && \
+        /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P "$${MSSQL_SA_PASSWORD}" -C -b \
+          -d it_job_market_dw -i /migration/dw_v2.sql && \
+        /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P "$${MSSQL_SA_PASSWORD}" -C -b \
+          -d it_job_market_dw -i /migration/dw_v2_backfill_dimensions.sql && \
+        /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P "$${MSSQL_SA_PASSWORD}" -C -b \
+          -d it_job_market_dw -i /migration/dw_v2_backfill_facts.sql
+    volumes:
+      - ../data_preprocessing/sql/dw_v2.sql:/migration/dw_v2.sql:ro
+      - ../data_preprocessing/sql/dw_v2_backfill_dimensions.sql:/migration/dw_v2_backfill_dimensions.sql:ro
+      - ../data_preprocessing/sql/dw_v2_backfill_facts.sql:/migration/dw_v2_backfill_facts.sql:ro
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+
+  sqlserver-dw-v2-reconcile:
+    profiles: ["migration"]
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    restart: "no"
+    environment:
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:?Set MSSQL_SA_PASSWORD in docker/.env}
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P "$${MSSQL_SA_PASSWORD}" -C -b \
+          -d it_job_market_dw -i /reconcile/dw_v2_reconcile.sql
+    volumes:
+      - ../data_preprocessing/sql/dw_v2_reconcile.sql:/reconcile/dw_v2_reconcile.sql:ro
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+
+  sqlserver-dw-v2-views:
+    profiles: ["migration"]
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    restart: "no"
+    environment:
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:?Set MSSQL_SA_PASSWORD in docker/.env}
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P "$${MSSQL_SA_PASSWORD}" -C -b \
+          -d it_job_market_dw -i /views/dw_v2_semantic_views.sql
+    volumes:
+      - ../data_preprocessing/sql/dw_v2_semantic_views.sql:/views/dw_v2_semantic_views.sql:ro
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+
+  sqlserver-dw-v2-cutover:
+    profiles: ["migration"]
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    restart: "no"
+    environment:
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:?Set MSSQL_SA_PASSWORD in docker/.env}
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P "$${MSSQL_SA_PASSWORD}" -C -b \
+          -d it_job_market_dw -i /cutover/dw_v2_consumer_cutover.sql
+    volumes:
+      - ../data_preprocessing/sql/dw_v2_consumer_cutover.sql:/cutover/dw_v2_consumer_cutover.sql:ro
     depends_on:
       sqlserver:
         condition: service_healthy
@@ -103,6 +205,7 @@ services:
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in docker/.env}@airflow-postgres:5432/airflow_db
       AIRFLOW__CORE__LOAD_EXAMPLES: "False"
       AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW_WEBSERVER_SECRET_KEY:-it-job-market-secret-key}
+      DWH_PIPELINE_MODE: ${DWH_PIPELINE_MODE:-shadow}
 
       PYTHONPATH: /opt/airflow/project/src
       DATABASE_URL: postgresql://${POSTGRES_USER:-admin}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in docker/.env}@postgres:5432/${POSTGRES_DB:-it_job_market_v12}

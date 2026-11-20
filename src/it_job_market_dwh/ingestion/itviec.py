@@ -543,6 +543,10 @@ def read_cookie_file(path: Path) -> list[tuple[str, str]]:
         raw = path.read_text(encoding="utf-8-sig").strip()
     except (OSError, UnicodeError):
         raise CrawlError("Không đọc được --cookie-file. Kiểm tra file văn bản UTF-8.") from None
+    lines = [line.strip() for line in raw.splitlines() if line.strip()]
+    if len(lines) != 1:
+        raise CrawlError("File cookie phải chứa đúng một dòng Cookie hợp lệ.")
+    raw = lines[0]
     raw = re.sub(r"^cookie: *", "", raw, flags=re.I)
     if not raw or any(ord(char) < 32 or ord(char) == 127 for char in raw):
         raise CrawlError("File cookie phải chứa một dòng Cookie hợp lệ, không chứa ký tự điều khiển.")

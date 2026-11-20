@@ -107,7 +107,24 @@ Chỉ dùng **Intern**, **Lead**, **Principal**, **Architect**, **Director**, **
 
 Tám `<nhóm>` trong analytics: `programming_language`, `framework`, `core_skill`, `role`, `city`, `foreign_language`, `level`, `soft_skill`. View `analytics.fact_job_latest` lấy lần quan sát mới nhất của từng tin; các view `*_demand_latest` dùng để thống kê nhu cầu.
 
-## Data dictionary — SQL Server DW
+## Data dictionary — SQL Server DW v2
+
+`dw_v2` là dimensional presentation layer chính cho dữ liệu lịch sử. Một job có thể có nhiều observation ở các crawl run khác nhau; các fact kỹ năng và role–city cùng mang `job_key`, `date_key`, `source_key` và `crawl_run_key`, không nối fact-to-fact.
+
+| Nhóm | Grain |
+|---|---|
+| `dw_v2.fact_job_observation` | Một job được quan sát trong một crawl run. |
+| `dw_v2.fact_job_necessary_skill` | Một skill occurrence của một job trong một crawl run và context. |
+| `dw_v2.fact_job_role_city` | Một tổ hợp job–role–city trong một crawl run. |
+| `dw_v2.dim_*` | Conformed dimensions dùng chung giữa các fact. |
+
+Dashboard và ML không đọc trực tiếp các bảng vật lý trên. Dùng schema `semantic` cho dữ liệu chính thức; schema `dw_v2_compat` chỉ giữ contract snapshot cũ trong thời gian chuyển đổi. Hướng dẫn dataset, quyền đọc và rollback nằm tại [BI/ML cutover](docs/bi_ml_cutover.md).
+
+Sau khi ITviec và TopDev hoàn tất, Airflow chạy `load_dw_v2_direct` rồi `publish_dw_v2`. Biến `DWH_PIPELINE_MODE` mặc định là `shadow`: pipeline vẫn cập nhật `dw` để rollback và publisher đối soát hai mô hình. Chỉ sau khi BI/ML đã chuyển consumer, đặt `DWH_PIPELINE_MODE=direct`; khi đó crawler dùng `--normalize-only`, `dw_v2` là đường ghi DWH duy nhất và publisher kiểm tra nội bộ mà không phụ thuộc `dw`. Quy trình kích hoạt và rollback nằm tại [BI/ML cutover](docs/bi_ml_cutover.md).
+
+## Data dictionary — SQL Server DW legacy
+
+Schema `dw` dưới đây là snapshot cũ được giữ lại trong giai đoạn chuyển đổi và rollback. Consumer mới không nên kết nối trực tiếp vào schema này.
 
 | Bảng | Một dòng đại diện cho | Khóa và dữ liệu chính |
 |---|---|---|

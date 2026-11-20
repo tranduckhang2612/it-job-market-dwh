@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from types import SimpleNamespace
 import unittest
 from unittest import mock
@@ -15,6 +16,29 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 
 class RawContractTests(unittest.TestCase):
+    def test_topdev_incremental_underfill_is_not_a_pipeline_failure(self):
+        metadata = {
+            "complete": False,
+            "storage_failed": False,
+            "interrupted": False,
+        }
+        self.assertEqual(crawl_topdev.crawl_exit_code(metadata, [], []), 0)
+        self.assertEqual(crawl_topdev.crawl_exit_code(metadata, [{}], []), 0)
+        self.assertEqual(crawl_topdev.crawl_exit_code(metadata, [{}], [{}]), 2)
+        self.assertEqual(crawl_topdev.crawl_exit_code(metadata, [], [{}]), 1)
+
+    def test_itviec_cookie_allows_blank_lines_but_rejects_extra_content(self):
+        with TemporaryDirectory() as directory:
+            cookie = Path(directory) / "cookie.txt"
+            cookie.write_text("session=encoded-value\n\n", encoding="utf-8")
+            self.assertEqual(
+                crawl_itviec.read_cookie_file(cookie),
+                [("session", "encoded-value")],
+            )
+            cookie.write_text("session=encoded-value\nnot-a-cookie", encoding="utf-8")
+            with self.assertRaises(crawl_itviec.CrawlError):
+                crawl_itviec.read_cookie_file(cookie)
+
     def test_itviec_identity_uses_source_id_and_canonical_url(self):
         identity = crawl_itviec.raw_job_identity({
             "source_job_id": "12345",

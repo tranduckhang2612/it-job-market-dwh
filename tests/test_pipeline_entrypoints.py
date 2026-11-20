@@ -18,8 +18,10 @@ class AirflowDagContractTests(TestCase):
         dag_source = (PROJECT_ROOT / "dags" / "it_job_market_dag.py").read_text(encoding="utf-8")
 
         self.assertNotIn("||", dag_source)
-        self.assertNotIn("--normalize-only", dag_source)
         self.assertNotIn('trigger_rule="all_done"', dag_source)
+        self.assertIn('DWH_PIPELINE_MODE', dag_source)
+        self.assertIn('NORMALIZE_ONLY = " --normalize-only"', dag_source)
+        self.assertIn('--mode {PIPELINE_MODE}', dag_source)
         self.assertIn(
             "exec python pipeline/main.py --source itviec --limit 5",
             dag_source,
@@ -27,6 +29,13 @@ class AirflowDagContractTests(TestCase):
         self.assertIn(
             "exec python pipeline/main.py --source topdev --limit 10",
             dag_source,
+        )
+        self.assertIn("exec python load.py warehouse-v2 --apply", dag_source)
+        self.assertIn("exec python load.py warehouse-v2-direct --apply", dag_source)
+        self.assertRegex(
+            dag_source,
+            r"run_itviec_pipeline\s*>>\s*run_topdev_pipeline\s*>>\s*"
+            r"load_dw_v2_direct\s*>>\s*publish_dw_v2",
         )
 
     def test_unified_compose_bootstraps_only_infrastructure_databases(self):
@@ -61,10 +70,10 @@ class PipelineEntrypointTests(TestCase):
             self.assertEqual(status, 0)
             self.assertEqual(run.call_args_list, [
                 call([
-                    "main_itviec.py", "--limit", "20", "--max-pages", "12",
+                    "main_itviec.py", "--limit", "500", "--max-pages", "12",
                     "--cookie-file", str(cookie),
                 ], env),
-                call(["main_topdev.py", "--limit", "20"], env),
+                call(["main_topdev.py", "--limit", "500"], env),
                 call(["load.py", "normalize"], env),
                 call(["load.py", "warehouse", "--apply"], env),
             ])
@@ -75,7 +84,7 @@ class PipelineEntrypointTests(TestCase):
               patch.object(pipeline_main, "run_step", return_value=0) as run):
             self.assertEqual(pipeline_main.main(["--source", "topdev", "--normalize-only"]), 0)
         self.assertEqual(run.call_args_list, [
-            call(["main_topdev.py", "--limit", "20"], env),
+            call(["main_topdev.py", "--limit", "500"], env),
             call(["load.py", "normalize", "--source", "topdev"], env),
         ])
 

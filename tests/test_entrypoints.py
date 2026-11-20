@@ -64,7 +64,7 @@ class TopDevEntrypointTests(unittest.TestCase):
             mock.patch.object(main_topdev.crawl_topdev, "run", side_effect=crawl),
         ):
             self.assertEqual(main_topdev.main([]), 0)
-        self.assertEqual(events, [("check",), ("crawl", "topdev_test_run", 20)])
+        self.assertEqual(events, [("check",), ("crawl", "topdev_test_run", 500)])
 
     def test_check_db_does_not_crawl(self):
         with (

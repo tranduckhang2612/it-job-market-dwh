@@ -438,6 +438,21 @@ def fetch_job_details(client: TopDevHttpClient, job: dict) -> dict:
     return job
 
 
+def crawl_exit_code(metadata, jobs, errors) -> int:
+    """Distinguish a healthy incremental underfill from an actual crawl error."""
+    if metadata.get("storage_failed"):
+        return 4
+    if metadata.get("interrupted"):
+        return 130
+    if metadata.get("complete"):
+        return 0
+    # Exhausting the listing with fewer new jobs (including zero) is normal for
+    # an incremental crawler when the remaining postings are already claimed.
+    if not errors:
+        return 0
+    return 2 if jobs else 1
+
+
 def run(args) -> int:
     crawl_run_id = getattr(args, "crawl_run_id", None) or new_crawl_run_id()
     args.crawl_run_id = crawl_run_id
@@ -638,9 +653,14 @@ def run(args) -> int:
         "interrupted": metadata["interrupted"],
     }
     LOG.info("Hoàn tất crawl TopDev: %s/%s tin đã lưu (crawl_run_id=%s)", len(jobs), limit, crawl_run_id)
-    if metadata["storage_failed"]:
-        return 4
-    return 0 if metadata["complete"] else (2 if jobs else 1)
+    status = crawl_exit_code(metadata, jobs, errors)
+    if status == 0 and not metadata["complete"]:
+        LOG.warning(
+            "Số tin mới ít hơn chỉ tiêu (%s/%s); danh sách còn lại đã có trong DB, "
+            "tiếp tục bước chuẩn hóa.",
+            len(jobs), limit,
+        )
+    return status
 
 
 def build_parser(description: str | None = None) -> argparse.ArgumentParser:

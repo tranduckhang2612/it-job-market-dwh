@@ -1,6 +1,17 @@
 from datetime import datetime, timedelta
+import os
+
 from airflow import DAG
 from airflow.operators.bash import BashOperator
+
+
+PIPELINE_MODE = os.environ.get("DWH_PIPELINE_MODE", "shadow").strip().lower()
+if PIPELINE_MODE not in {"shadow", "direct"}:
+    raise ValueError("DWH_PIPELINE_MODE must be 'shadow' or 'direct'")
+
+# Shadow keeps the legacy dw snapshot current for rollback. Direct makes
+# normalize_data -> dw_v2 the only warehouse write path after consumer cutover.
+NORMALIZE_ONLY = " --normalize-only" if PIPELINE_MODE == "direct" else ""
 
 default_args = {
     "owner": "data_engineer",
@@ -24,7 +35,7 @@ with DAG(
         task_id="run_itviec_pipeline",
         bash_command=(
             "cd /opt/airflow/project && "
-            "exec python pipeline/main.py --source itviec --limit 5"
+            f"exec python pipeline/main.py --source itviec --limit 5{NORMALIZE_ONLY}"
         ),
     )
 
@@ -32,8 +43,24 @@ with DAG(
         task_id="run_topdev_pipeline",
         bash_command=(
             "cd /opt/airflow/project && "
-            "exec python pipeline/main.py --source topdev --limit 10"
+            f"exec python pipeline/main.py --source topdev --limit 10{NORMALIZE_ONLY}"
         ),
     )
 
-    run_itviec_pipeline >> run_topdev_pipeline
+    load_dw_v2_direct = BashOperator(
+        task_id="load_dw_v2_direct",
+        bash_command=(
+            "cd /opt/airflow/project && "
+            "exec python load.py warehouse-v2-direct --apply"
+        ),
+    )
+
+    publish_dw_v2 = BashOperator(
+        task_id="publish_dw_v2",
+        bash_command=(
+            "cd /opt/airflow/project && "
+            f"exec python load.py warehouse-v2 --apply --mode {PIPELINE_MODE}"
+        ),
+    )
+
+    run_itviec_pipeline >> run_topdev_pipeline >> load_dw_v2_direct >> publish_dw_v2

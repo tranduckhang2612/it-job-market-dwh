@@ -1,4 +1,4 @@
-"""Run one pipeline loader: normalize, analytics, warehouse, or legacy staging."""
+"""Run one pipeline loader, including the guarded dw_v2 publisher."""
 
 import argparse
 from importlib import import_module
@@ -8,6 +8,8 @@ STAGES = {
     "normalize": "it_job_market_dwh.loaders.normalize",
     "analytics": "it_job_market_dwh.loaders.analytics",
     "warehouse": "it_job_market_dwh.loaders.warehouse",
+    "warehouse-v2": "it_job_market_dwh.loaders.warehouse_v2",
+    "warehouse-v2-direct": "it_job_market_dwh.loaders.warehouse_v2_direct",
     "staging": "it_job_market_dwh.loaders.staging",
 }
 
