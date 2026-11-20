@@ -214,7 +214,7 @@ BEGIN TRY
 
     GRANT SELECT, VIEW DEFINITION ON SCHEMA::[semantic] TO [bi_ml_reader];
     GRANT SELECT, VIEW DEFINITION ON SCHEMA::[dw_v2_compat] TO [bi_ml_reader];
-    DENY SELECT ON SCHEMA::[dw_v2] TO [bi_ml_reader];
+    DENY SELECT ON SCHEMA::[dbo] TO [bi_ml_reader];
 
     COMMIT TRANSACTION;
 

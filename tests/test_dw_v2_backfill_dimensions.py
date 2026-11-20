@@ -43,7 +43,7 @@ class DwV2BackfillStaticTests(unittest.TestCase):
                 self.assertIn(message, BACKFILL_DDL)
 
     def test_phase_two_does_not_load_facts(self):
-        self.assertNotRegex(BACKFILL_DDL, r"INSERT\s+INTO\s+dw_v2\.fact_",)
+        self.assertNotRegex(BACKFILL_DDL, r"INSERT\s+INTO\s+dbo\.fact_",)
 
 
 @unittest.skipUnless(
@@ -138,12 +138,12 @@ class DwV2BackfillSqlServerTests(unittest.TestCase):
 
         self.execute_batch(BACKFILL_DDL)
         first = {
-            table: self.rows(f"SELECT COUNT(*) FROM dw_v2.{table}")[0][0]
+            table: self.rows(f"SELECT COUNT(*) FROM dbo.{table}")[0][0]
             for table in ("dim_job", "dim_company", "dim_skill", "dim_role", "dim_city")
         }
         self.execute_batch(BACKFILL_DDL)
         second = {
-            table: self.rows(f"SELECT COUNT(*) FROM dw_v2.{table}")[0][0]
+            table: self.rows(f"SELECT COUNT(*) FROM dbo.{table}")[0][0]
             for table in first
         }
 

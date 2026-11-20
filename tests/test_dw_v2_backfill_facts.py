@@ -25,9 +25,9 @@ class DwV2FactBackfillStaticTests(unittest.TestCase):
     def test_v2_facts_are_append_only(self):
         self.assertNotRegex(
             FACT_DDL,
-            r"(?im)^\s*(DELETE|UPDATE|TRUNCATE)\s+.*dw_v2\.fact_",
+            r"(?im)^\s*(DELETE|UPDATE|TRUNCATE)\s+.*dbo\.fact_",
         )
-        inserts = set(re.findall(r"INSERT INTO dw_v2\.(fact_[a-z_]+)", FACT_DDL))
+        inserts = set(re.findall(r"INSERT INTO dbo\.(fact_[a-z_]+)", FACT_DDL))
         self.assertEqual(
             inserts,
             {"fact_job_observation", "fact_job_necessary_skill", "fact_job_role_city"},
@@ -151,12 +151,12 @@ class DwV2FactBackfillSqlServerTests(unittest.TestCase):
 
         self.execute_batch(FACT_DDL)
         first = {
-            fact: self.rows(f"SELECT COUNT(*) FROM dw_v2.{fact}")[0][0]
+            fact: self.rows(f"SELECT COUNT(*) FROM dbo.{fact}")[0][0]
             for fact in legacy
         }
         self.execute_batch(FACT_DDL)
         second = {
-            fact: self.rows(f"SELECT COUNT(*) FROM dw_v2.{fact}")[0][0]
+            fact: self.rows(f"SELECT COUNT(*) FROM dbo.{fact}")[0][0]
             for fact in legacy
         }
 
@@ -164,19 +164,19 @@ class DwV2FactBackfillSqlServerTests(unittest.TestCase):
         self.assertEqual(second, legacy)
         self.assertEqual(
             self.rows(
-                "SELECT SUM(job_posting_count) FROM dw_v2.fact_job_observation"
+                "SELECT SUM(job_posting_count) FROM dbo.fact_job_observation"
             ),
             [(2,)],
         )
         self.assertEqual(
             self.rows(
-                "SELECT SUM(skill_mention_count) FROM dw_v2.fact_job_necessary_skill"
+                "SELECT SUM(skill_mention_count) FROM dbo.fact_job_necessary_skill"
             ),
             [(2,)],
         )
         self.assertEqual(
             self.rows(
-                "SELECT SUM(combination_count) FROM dw_v2.fact_job_role_city"
+                "SELECT SUM(combination_count) FROM dbo.fact_job_role_city"
             ),
             [(2,)],
         )

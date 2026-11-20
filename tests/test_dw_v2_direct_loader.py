@@ -85,14 +85,14 @@ class DirectLoaderSqlServerTests(schema_support.DwV2SqlServerIntegrationTests):
         result_one = direct.apply(self.conn, [first])
         result_two = direct.apply(self.conn, [second])
         before = {
-            table: self.conn.execute(f"SELECT COUNT(*) FROM dw_v2.{table}").fetchone()[0]
+            table: self.conn.execute(f"SELECT COUNT(*) FROM dbo.{table}").fetchone()[0]
             for table in (
                 "fact_job_observation", "fact_job_necessary_skill", "fact_job_role_city",
             )
         }
         result_repeat = direct.apply(self.conn, [second])
         after = {
-            table: self.conn.execute(f"SELECT COUNT(*) FROM dw_v2.{table}").fetchone()[0]
+            table: self.conn.execute(f"SELECT COUNT(*) FROM dbo.{table}").fetchone()[0]
             for table in before
         }
 
@@ -107,7 +107,7 @@ class DirectLoaderSqlServerTests(schema_support.DwV2SqlServerIntegrationTests):
         self.assertEqual(after, before)
         self.assertEqual(
             self.conn.execute(
-                "SELECT COUNT(*) FROM dw_v2.fact_job_observation WHERE work_mode=N'hybrid'"
+                "SELECT COUNT(*) FROM dbo.fact_job_observation WHERE work_mode=N'hybrid'"
             ).fetchone()[0],
             2,
         )
@@ -116,7 +116,7 @@ class DirectLoaderSqlServerTests(schema_support.DwV2SqlServerIntegrationTests):
     def test_empty_snapshot_fails_before_database_mutation(self):
         with self.assertRaisesRegex(ValueError, "Empty normalized snapshot"):
             direct.apply(self.conn, [])
-        self.assertIsNone(self.conn.execute("SELECT SCHEMA_ID(N'dw_v2')").fetchone()[0])
+        self.assertIsNone(self.conn.execute("SELECT OBJECT_ID(N'dbo.fact_job_observation')").fetchone()[0])
 
 
 if __name__ == "__main__":

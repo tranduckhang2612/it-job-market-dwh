@@ -1,4 +1,4 @@
--- Phase 4: read-only reconciliation between the legacy dw snapshot and dw_v2.
+-- Phase 4: read-only reconciliation between the legacy dw snapshot and dbo.
 -- This is a strict cutover check: every current v2 fact must correspond to legacy data.
 SET XACT_ABORT ON;
 SET NOCOUNT ON;
@@ -26,9 +26,9 @@ BEGIN TRY
        OR OBJECT_ID(N'dw.fact_job_necessary_skill', N'U') IS NULL
        OR OBJECT_ID(N'dw.fact_job_role_city', N'U') IS NULL
         THROW 53001, 'Legacy facts are incomplete.', 1;
-    IF OBJECT_ID(N'dw_v2.fact_job_observation', N'U') IS NULL
-       OR OBJECT_ID(N'dw_v2.fact_job_necessary_skill', N'U') IS NULL
-       OR OBJECT_ID(N'dw_v2.fact_job_role_city', N'U') IS NULL
+    IF OBJECT_ID(N'dbo.fact_job_observation', N'U') IS NULL
+       OR OBJECT_ID(N'dbo.fact_job_necessary_skill', N'U') IS NULL
+       OR OBJECT_ID(N'dbo.fact_job_role_city', N'U') IS NULL
         THROW 53002, 'dw_v2 facts are incomplete.', 1;
     IF OBJECT_ID(N'dw_v2_migration.map_job', N'U') IS NULL
        OR OBJECT_ID(N'dw_v2_migration.map_skill', N'U') IS NULL
@@ -50,47 +50,47 @@ BEGIN TRY
         THROW 53013, 'City mapping count mismatch.', 1;
 
     IF (SELECT COUNT_BIG(*) FROM dw.fact_job)
-        <> (SELECT COUNT_BIG(*) FROM dw_v2.fact_job_observation)
+        <> (SELECT COUNT_BIG(*) FROM dbo.fact_job_observation)
         THROW 53020, 'Observation row count mismatch.', 1;
     IF (SELECT COUNT_BIG(*) FROM dw.fact_job_necessary_skill)
-        <> (SELECT COUNT_BIG(*) FROM dw_v2.fact_job_necessary_skill)
+        <> (SELECT COUNT_BIG(*) FROM dbo.fact_job_necessary_skill)
         THROW 53021, 'Skill fact row count mismatch.', 1;
     IF (SELECT COUNT_BIG(*) FROM dw.fact_job_role_city)
-        <> (SELECT COUNT_BIG(*) FROM dw_v2.fact_job_role_city)
+        <> (SELECT COUNT_BIG(*) FROM dbo.fact_job_role_city)
         THROW 53022, 'Role-city fact row count mismatch.', 1;
 
     IF (SELECT COALESCE(SUM(CONVERT(bigint, job_posting_count)), 0) FROM dw.fact_job)
         <> (SELECT COALESCE(SUM(CONVERT(bigint, job_posting_count)), 0)
-            FROM dw_v2.fact_job_observation)
+            FROM dbo.fact_job_observation)
         THROW 53023, 'Observation measure mismatch.', 1;
     IF (SELECT COALESCE(SUM(CONVERT(bigint, skill_mention_count)), 0)
         FROM dw.fact_job_necessary_skill)
         <> (SELECT COALESCE(SUM(CONVERT(bigint, skill_mention_count)), 0)
-            FROM dw_v2.fact_job_necessary_skill)
+            FROM dbo.fact_job_necessary_skill)
         THROW 53024, 'Skill measure mismatch.', 1;
     IF (SELECT COALESCE(SUM(CONVERT(bigint, combination_count)), 0)
         FROM dw.fact_job_role_city)
         <> (SELECT COALESCE(SUM(CONVERT(bigint, combination_count)), 0)
-            FROM dw_v2.fact_job_role_city)
+            FROM dbo.fact_job_role_city)
         THROW 53025, 'Role-city measure mismatch.', 1;
 
     IF EXISTS (
         SELECT job_key, crawl_run_key
-        FROM dw_v2.fact_job_observation
+        FROM dbo.fact_job_observation
         GROUP BY job_key, crawl_run_key
         HAVING COUNT_BIG(*) > 1
     )
         THROW 53030, 'Duplicate observation grain detected.', 1;
     IF EXISTS (
         SELECT job_key, crawl_run_key, skill_key, context_no
-        FROM dw_v2.fact_job_necessary_skill
+        FROM dbo.fact_job_necessary_skill
         GROUP BY job_key, crawl_run_key, skill_key, context_no
         HAVING COUNT_BIG(*) > 1
     )
         THROW 53031, 'Duplicate skill grain detected.', 1;
     IF EXISTS (
         SELECT job_key, crawl_run_key, role_key, city_key
-        FROM dw_v2.fact_job_role_city
+        FROM dbo.fact_job_role_city
         GROUP BY job_key, crawl_run_key, role_key, city_key
         HAVING COUNT_BIG(*) > 1
     )
@@ -98,8 +98,8 @@ BEGIN TRY
 
     IF EXISTS (
         SELECT 1
-        FROM dw_v2.fact_job_necessary_skill skill
-        LEFT JOIN dw_v2.fact_job_observation observation
+        FROM dbo.fact_job_necessary_skill skill
+        LEFT JOIN dbo.fact_job_observation observation
           ON observation.observation_id = skill.observation_id
          AND observation.job_key = skill.job_key
          AND observation.crawl_run_key = skill.crawl_run_key
@@ -108,8 +108,8 @@ BEGIN TRY
         THROW 53033, 'Skill fact has no matching observation.', 1;
     IF EXISTS (
         SELECT 1
-        FROM dw_v2.fact_job_role_city role_city
-        LEFT JOIN dw_v2.fact_job_observation observation
+        FROM dbo.fact_job_role_city role_city
+        LEFT JOIN dbo.fact_job_observation observation
           ON observation.observation_id = role_city.observation_id
          AND observation.job_key = role_city.job_key
          AND observation.crawl_run_key = role_city.crawl_run_key
@@ -138,11 +138,11 @@ BEGIN TRY
             fact.observed_at_utc,
             ISNULL(fact.job_title_snapshot, N'') COLLATE Latin1_General_100_BIN2,
             ISNULL(job.canonical_job_url, N'') COLLATE Latin1_General_100_BIN2
-        FROM dw_v2.fact_job_observation fact
-        JOIN dw_v2.dim_job job ON job.job_key = fact.job_key
-        JOIN dw_v2.dim_source source ON source.source_key = fact.source_key
-        JOIN dw_v2.dim_company company ON company.company_key = fact.company_key
-        JOIN dw_v2.dim_crawl_run run ON run.crawl_run_key = fact.crawl_run_key
+        FROM dbo.fact_job_observation fact
+        JOIN dbo.dim_job job ON job.job_key = fact.job_key
+        JOIN dbo.dim_source source ON source.source_key = fact.source_key
+        JOIN dbo.dim_company company ON company.company_key = fact.company_key
+        JOIN dbo.dim_crawl_run run ON run.crawl_run_key = fact.crawl_run_key
     ) OR EXISTS (
         SELECT
             job.job_id,
@@ -152,11 +152,11 @@ BEGIN TRY
             fact.observed_at_utc,
             ISNULL(fact.job_title_snapshot, N'') COLLATE Latin1_General_100_BIN2,
             ISNULL(job.canonical_job_url, N'') COLLATE Latin1_General_100_BIN2
-        FROM dw_v2.fact_job_observation fact
-        JOIN dw_v2.dim_job job ON job.job_key = fact.job_key
-        JOIN dw_v2.dim_source source ON source.source_key = fact.source_key
-        JOIN dw_v2.dim_company company ON company.company_key = fact.company_key
-        JOIN dw_v2.dim_crawl_run run ON run.crawl_run_key = fact.crawl_run_key
+        FROM dbo.fact_job_observation fact
+        JOIN dbo.dim_job job ON job.job_key = fact.job_key
+        JOIN dbo.dim_source source ON source.source_key = fact.source_key
+        JOIN dbo.dim_company company ON company.company_key = fact.company_key
+        JOIN dbo.dim_crawl_run run ON run.crawl_run_key = fact.crawl_run_key
         EXCEPT
         SELECT
             legacy.job_id COLLATE Latin1_General_100_BIN2,
@@ -188,7 +188,7 @@ BEGIN TRY
           ON skill.necessary_skill_key = legacy.necessary_skill_key
         JOIN dw_v2_migration.map_job job_map
           ON job_map.legacy_fact_job_key = legacy.fact_job_key
-        JOIN dw_v2.dim_crawl_run run ON run.crawl_run_key = job_map.crawl_run_key
+        JOIN dbo.dim_crawl_run run ON run.crawl_run_key = job_map.crawl_run_key
         EXCEPT
         SELECT
             job.job_id,
@@ -199,10 +199,10 @@ BEGIN TRY
             fact.context_no,
             ISNULL(LOWER(LTRIM(RTRIM(fact.level_text_snapshot))), N'')
                 COLLATE Latin1_General_100_BIN2
-        FROM dw_v2.fact_job_necessary_skill fact
-        JOIN dw_v2.dim_job job ON job.job_key = fact.job_key
-        JOIN dw_v2.dim_crawl_run run ON run.crawl_run_key = fact.crawl_run_key
-        JOIN dw_v2.dim_skill skill ON skill.skill_key = fact.skill_key
+        FROM dbo.fact_job_necessary_skill fact
+        JOIN dbo.dim_job job ON job.job_key = fact.job_key
+        JOIN dbo.dim_crawl_run run ON run.crawl_run_key = fact.crawl_run_key
+        JOIN dbo.dim_skill skill ON skill.skill_key = fact.skill_key
     ) OR EXISTS (
         SELECT
             job.job_id,
@@ -213,10 +213,10 @@ BEGIN TRY
             fact.context_no,
             ISNULL(LOWER(LTRIM(RTRIM(fact.level_text_snapshot))), N'')
                 COLLATE Latin1_General_100_BIN2
-        FROM dw_v2.fact_job_necessary_skill fact
-        JOIN dw_v2.dim_job job ON job.job_key = fact.job_key
-        JOIN dw_v2.dim_crawl_run run ON run.crawl_run_key = fact.crawl_run_key
-        JOIN dw_v2.dim_skill skill ON skill.skill_key = fact.skill_key
+        FROM dbo.fact_job_necessary_skill fact
+        JOIN dbo.dim_job job ON job.job_key = fact.job_key
+        JOIN dbo.dim_crawl_run run ON run.crawl_run_key = fact.crawl_run_key
+        JOIN dbo.dim_skill skill ON skill.skill_key = fact.skill_key
         EXCEPT
         SELECT
             job.job_id,
@@ -233,7 +233,7 @@ BEGIN TRY
           ON skill.necessary_skill_key = legacy.necessary_skill_key
         JOIN dw_v2_migration.map_job job_map
           ON job_map.legacy_fact_job_key = legacy.fact_job_key
-        JOIN dw_v2.dim_crawl_run run ON run.crawl_run_key = job_map.crawl_run_key
+        JOIN dbo.dim_crawl_run run ON run.crawl_run_key = job_map.crawl_run_key
     )
         THROW 53041, 'Skill fact anti-join mismatch.', 1;
 
@@ -252,7 +252,7 @@ BEGIN TRY
         LEFT JOIN dw.dim_city city ON city.city_key = legacy.city_key
         JOIN dw_v2_migration.map_job job_map
           ON job_map.legacy_fact_job_key = legacy.fact_job_key
-        JOIN dw_v2.dim_crawl_run run ON run.crawl_run_key = job_map.crawl_run_key
+        JOIN dbo.dim_crawl_run run ON run.crawl_run_key = job_map.crawl_run_key
         EXCEPT
         SELECT
             job.job_id,
@@ -260,11 +260,11 @@ BEGIN TRY
             role.normalized_name,
             role.role_category,
             city.normalized_name
-        FROM dw_v2.fact_job_role_city fact
-        JOIN dw_v2.dim_job job ON job.job_key = fact.job_key
-        JOIN dw_v2.dim_crawl_run run ON run.crawl_run_key = fact.crawl_run_key
-        JOIN dw_v2.dim_role role ON role.role_key = fact.role_key
-        JOIN dw_v2.dim_city city ON city.city_key = fact.city_key
+        FROM dbo.fact_job_role_city fact
+        JOIN dbo.dim_job job ON job.job_key = fact.job_key
+        JOIN dbo.dim_crawl_run run ON run.crawl_run_key = fact.crawl_run_key
+        JOIN dbo.dim_role role ON role.role_key = fact.role_key
+        JOIN dbo.dim_city city ON city.city_key = fact.city_key
     ) OR EXISTS (
         SELECT
             job.job_id,
@@ -272,11 +272,11 @@ BEGIN TRY
             role.normalized_name,
             role.role_category,
             city.normalized_name
-        FROM dw_v2.fact_job_role_city fact
-        JOIN dw_v2.dim_job job ON job.job_key = fact.job_key
-        JOIN dw_v2.dim_crawl_run run ON run.crawl_run_key = fact.crawl_run_key
-        JOIN dw_v2.dim_role role ON role.role_key = fact.role_key
-        JOIN dw_v2.dim_city city ON city.city_key = fact.city_key
+        FROM dbo.fact_job_role_city fact
+        JOIN dbo.dim_job job ON job.job_key = fact.job_key
+        JOIN dbo.dim_crawl_run run ON run.crawl_run_key = fact.crawl_run_key
+        JOIN dbo.dim_role role ON role.role_key = fact.role_key
+        JOIN dbo.dim_city city ON city.city_key = fact.city_key
         EXCEPT
         SELECT
             job.job_id,
@@ -292,7 +292,7 @@ BEGIN TRY
         LEFT JOIN dw.dim_city city ON city.city_key = legacy.city_key
         JOIN dw_v2_migration.map_job job_map
           ON job_map.legacy_fact_job_key = legacy.fact_job_key
-        JOIN dw_v2.dim_crawl_run run ON run.crawl_run_key = job_map.crawl_run_key
+        JOIN dbo.dim_crawl_run run ON run.crawl_run_key = job_map.crawl_run_key
     )
         THROW 53042, 'Role-city fact anti-join mismatch.', 1;
 
@@ -304,16 +304,16 @@ BEGIN TRY
         EXCEPT
         SELECT date.calendar_date, source.source_code,
                SUM(CONVERT(bigint, fact.job_posting_count))
-        FROM dw_v2.fact_job_observation fact
-        JOIN dw_v2.dim_date date ON date.date_key = fact.date_key
-        JOIN dw_v2.dim_source source ON source.source_key = fact.source_key
+        FROM dbo.fact_job_observation fact
+        JOIN dbo.dim_date date ON date.date_key = fact.date_key
+        JOIN dbo.dim_source source ON source.source_key = fact.source_key
         GROUP BY date.calendar_date, source.source_code
     ) OR EXISTS (
         SELECT date.calendar_date, source.source_code,
                SUM(CONVERT(bigint, fact.job_posting_count))
-        FROM dw_v2.fact_job_observation fact
-        JOIN dw_v2.dim_date date ON date.date_key = fact.date_key
-        JOIN dw_v2.dim_source source ON source.source_key = fact.source_key
+        FROM dbo.fact_job_observation fact
+        JOIN dbo.dim_date date ON date.date_key = fact.date_key
+        JOIN dbo.dim_source source ON source.source_key = fact.source_key
         GROUP BY date.calendar_date, source.source_code
         EXCEPT
         SELECT CAST(observed_at_utc AS date), source COLLATE Latin1_General_100_BIN2,
@@ -340,16 +340,16 @@ BEGIN TRY
         EXCEPT
         SELECT date.calendar_date, skill.skill_type, skill.normalized_name, skill.category,
                SUM(CONVERT(bigint, fact.skill_mention_count))
-        FROM dw_v2.fact_job_necessary_skill fact
-        JOIN dw_v2.dim_date date ON date.date_key = fact.date_key
-        JOIN dw_v2.dim_skill skill ON skill.skill_key = fact.skill_key
+        FROM dbo.fact_job_necessary_skill fact
+        JOIN dbo.dim_date date ON date.date_key = fact.date_key
+        JOIN dbo.dim_skill skill ON skill.skill_key = fact.skill_key
         GROUP BY date.calendar_date, skill.skill_type, skill.normalized_name, skill.category
     ) OR EXISTS (
         SELECT date.calendar_date, skill.skill_type, skill.normalized_name, skill.category,
                SUM(CONVERT(bigint, fact.skill_mention_count))
-        FROM dw_v2.fact_job_necessary_skill fact
-        JOIN dw_v2.dim_date date ON date.date_key = fact.date_key
-        JOIN dw_v2.dim_skill skill ON skill.skill_key = fact.skill_key
+        FROM dbo.fact_job_necessary_skill fact
+        JOIN dbo.dim_date date ON date.date_key = fact.date_key
+        JOIN dbo.dim_skill skill ON skill.skill_key = fact.skill_key
         GROUP BY date.calendar_date, skill.skill_type, skill.normalized_name, skill.category
         EXCEPT
         SELECT
@@ -391,10 +391,10 @@ BEGIN TRY
             role.normalized_name,
             city.normalized_name,
             COUNT(DISTINCT fact.job_key)
-        FROM dw_v2.fact_job_role_city fact
-        JOIN dw_v2.dim_date date ON date.date_key = fact.date_key
-        JOIN dw_v2.dim_role role ON role.role_key = fact.role_key
-        JOIN dw_v2.dim_city city ON city.city_key = fact.city_key
+        FROM dbo.fact_job_role_city fact
+        JOIN dbo.dim_date date ON date.date_key = fact.date_key
+        JOIN dbo.dim_role role ON role.role_key = fact.role_key
+        JOIN dbo.dim_city city ON city.city_key = fact.city_key
         GROUP BY date.calendar_date, role.normalized_name, city.normalized_name
     ) OR EXISTS (
         SELECT
@@ -402,10 +402,10 @@ BEGIN TRY
             role.normalized_name,
             city.normalized_name,
             COUNT(DISTINCT fact.job_key)
-        FROM dw_v2.fact_job_role_city fact
-        JOIN dw_v2.dim_date date ON date.date_key = fact.date_key
-        JOIN dw_v2.dim_role role ON role.role_key = fact.role_key
-        JOIN dw_v2.dim_city city ON city.city_key = fact.city_key
+        FROM dbo.fact_job_role_city fact
+        JOIN dbo.dim_date date ON date.date_key = fact.date_key
+        JOIN dbo.dim_role role ON role.role_key = fact.role_key
+        JOIN dbo.dim_city city ON city.city_key = fact.city_key
         GROUP BY date.calendar_date, role.normalized_name, city.normalized_name
         EXCEPT
         SELECT
@@ -433,13 +433,13 @@ BEGIN TRY
     FROM (VALUES
         (N'job_observations',
             (SELECT COUNT_BIG(*) FROM dw.fact_job),
-            (SELECT COUNT_BIG(*) FROM dw_v2.fact_job_observation)),
+            (SELECT COUNT_BIG(*) FROM dbo.fact_job_observation)),
         (N'skill_facts',
             (SELECT COUNT_BIG(*) FROM dw.fact_job_necessary_skill),
-            (SELECT COUNT_BIG(*) FROM dw_v2.fact_job_necessary_skill)),
+            (SELECT COUNT_BIG(*) FROM dbo.fact_job_necessary_skill)),
         (N'role_city_facts',
             (SELECT COUNT_BIG(*) FROM dw.fact_job_role_city),
-            (SELECT COUNT_BIG(*) FROM dw_v2.fact_job_role_city)),
+            (SELECT COUNT_BIG(*) FROM dbo.fact_job_role_city)),
         (N'jobs_by_date_source', CONVERT(bigint, 1), CONVERT(bigint, 1)),
         (N'skill_demand', CONVERT(bigint, 1), CONVERT(bigint, 1)),
         (N'role_city_demand', CONVERT(bigint, 1), CONVERT(bigint, 1))

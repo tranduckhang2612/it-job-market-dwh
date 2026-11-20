@@ -59,8 +59,8 @@ class DwV2ReconcileSqlServerTests(fact_support.DwV2FactBackfillSqlServerTests):
         import pyodbc
 
         self.conn.execute(
-            "DELETE FROM dw_v2.fact_job_necessary_skill WHERE job_necessary_skill_key=("
-            "SELECT MIN(job_necessary_skill_key) FROM dw_v2.fact_job_necessary_skill)"
+            "DELETE FROM dbo.fact_job_necessary_skill WHERE job_necessary_skill_key=("
+            "SELECT MIN(job_necessary_skill_key) FROM dbo.fact_job_necessary_skill)"
         )
         self.conn.commit()
         with self.assertRaises(pyodbc.Error):

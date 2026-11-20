@@ -58,7 +58,7 @@ class DwV2CutoverStaticTests(unittest.TestCase):
             CUTOVER_SQL,
             re.compile(
                 r"COUNT_BIG\(\*\) FROM dw\.fact_job\)\s*<>\s*"
-                r"\(SELECT COUNT_BIG\(\*\) FROM dw_v2\.fact_job_observation",
+                r"\(SELECT COUNT_BIG\(\*\) FROM dbo\.fact_job_observation",
                 re.IGNORECASE,
             ),
         )
@@ -73,7 +73,7 @@ class DwV2CutoverStaticTests(unittest.TestCase):
             "GRANT SELECT, VIEW DEFINITION ON SCHEMA::[dw_v2_compat] TO [bi_ml_reader]",
             CUTOVER_SQL,
         )
-        self.assertIn("DENY SELECT ON SCHEMA::[dw_v2] TO [bi_ml_reader]", CUTOVER_SQL)
+        self.assertIn("DENY SELECT ON SCHEMA::[dbo] TO [bi_ml_reader]", CUTOVER_SQL)
 
 
 class DwV2CutoverSqlServerTests(
@@ -118,26 +118,26 @@ class DwV2CutoverSqlServerTests(
                 2,
             )
             with self.assertRaises(pyodbc.Error):
-                cursor.execute("SELECT COUNT(*) FROM dw_v2.fact_job_observation").fetchone()
+                cursor.execute("SELECT COUNT(*) FROM dbo.fact_job_observation").fetchone()
         finally:
             cursor.execute("REVERT")
 
     def test_cutover_allows_older_history_beyond_current_snapshot(self):
         cursor = self.conn.cursor()
         cursor.execute(
-            "INSERT INTO dw_v2.dim_crawl_run("
+            "INSERT INTO dbo.dim_crawl_run("
             "crawl_run_id,source_scope,pipeline_version,started_at_utc,finished_at_utc,run_status) "
             "VALUES(N'phase6:older',N'test',N'test',SYSUTCDATETIME(),SYSUTCDATETIME(),N'succeeded')"
         )
         cursor.execute(
-            "INSERT INTO dw_v2.fact_job_observation("
+            "INSERT INTO dbo.fact_job_observation("
             "observation_id,job_key,date_key,source_key,company_key,crawl_run_key,"
             "observed_at_utc,job_title_snapshot,work_mode) "
             "SELECT N'phase6:older-observation',job_key,date_key,source_key,company_key,"
-            "(SELECT crawl_run_key FROM dw_v2.dim_crawl_run WHERE crawl_run_id=N'phase6:older'),"
+            "(SELECT crawl_run_key FROM dbo.dim_crawl_run WHERE crawl_run_id=N'phase6:older'),"
             "DATEADD(day,-1,observed_at_utc),job_title_snapshot,work_mode "
-            "FROM dw_v2.fact_job_observation WHERE job_observation_key=("
-            "SELECT MIN(job_observation_key) FROM dw_v2.fact_job_observation)"
+            "FROM dbo.fact_job_observation WHERE job_observation_key=("
+            "SELECT MIN(job_observation_key) FROM dbo.fact_job_observation)"
         )
         cursor.execute(CUTOVER_SQL)
         self.consume(cursor)
@@ -177,9 +177,9 @@ class DwV2DirectPublishSqlServerTests(
         import pyodbc
 
         self.conn.cursor().execute(
-            "UPDATE dw_v2.fact_job_necessary_skill SET observation_id=N'broken-lineage' "
+            "UPDATE dbo.fact_job_necessary_skill SET observation_id=N'broken-lineage' "
             "WHERE job_necessary_skill_key=("
-            "SELECT MIN(job_necessary_skill_key) FROM dw_v2.fact_job_necessary_skill)"
+            "SELECT MIN(job_necessary_skill_key) FROM dbo.fact_job_necessary_skill)"
         )
         self.conn.commit()
         with self.assertRaises(pyodbc.Error):

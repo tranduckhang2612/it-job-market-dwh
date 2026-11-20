@@ -1,4 +1,4 @@
--- Phase 3: append legacy observations, skill facts, and role-city facts into dw_v2.
+-- Phase 3: append legacy observations, skill facts, and role-city facts into dbo.
 -- Both the legacy schema and existing v2 facts are immutable inputs to this backfill.
 SET XACT_ABORT ON;
 SET NOCOUNT ON;
@@ -36,9 +36,9 @@ BEGIN TRY
         THROW 52006, 'Missing phase-two role mapping.', 1;
     IF OBJECT_ID(N'dw_v2_migration.map_city', N'U') IS NULL
         THROW 52007, 'Missing phase-two city mapping.', 1;
-    IF OBJECT_ID(N'dw_v2.fact_job_observation', N'U') IS NULL
-       OR OBJECT_ID(N'dw_v2.fact_job_necessary_skill', N'U') IS NULL
-       OR OBJECT_ID(N'dw_v2.fact_job_role_city', N'U') IS NULL
+    IF OBJECT_ID(N'dbo.fact_job_observation', N'U') IS NULL
+       OR OBJECT_ID(N'dbo.fact_job_necessary_skill', N'U') IS NULL
+       OR OBJECT_ID(N'dbo.fact_job_role_city', N'U') IS NULL
         THROW 52008, 'Missing phase-one fact tables.', 1;
 
     DROP TABLE IF EXISTS #observation_source;
@@ -64,7 +64,7 @@ BEGIN TRY
         <> (SELECT COUNT(*) FROM #observation_source)
         THROW 52010, 'Observation source mapping is incomplete.', 1;
 
-    INSERT INTO dw_v2.fact_job_observation(
+    INSERT INTO dbo.fact_job_observation(
         observation_id, job_key, date_key, source_key, company_key, crawl_run_key,
         observed_at_utc, job_title_snapshot, work_mode
     )
@@ -81,7 +81,7 @@ BEGIN TRY
     FROM #observation_source source
     WHERE NOT EXISTS (
         SELECT 1
-        FROM dw_v2.fact_job_observation target
+        FROM dbo.fact_job_observation target
         WHERE target.job_key = source.job_key
           AND target.crawl_run_key = source.crawl_run_key
     );
@@ -89,7 +89,7 @@ BEGIN TRY
     IF EXISTS (
         SELECT 1
         FROM #observation_source source
-        LEFT JOIN dw_v2.fact_job_observation target
+        LEFT JOIN dbo.fact_job_observation target
           ON target.job_key = source.job_key
          AND target.crawl_run_key = source.crawl_run_key
          AND target.observation_id = source.observation_id
@@ -144,7 +144,7 @@ BEGIN TRY
     )
         THROW 52014, 'Skill mapping would collapse legacy occurrences.', 1;
 
-    INSERT INTO dw_v2.fact_job_necessary_skill(
+    INSERT INTO dbo.fact_job_necessary_skill(
         observation_id, job_key, date_key, source_key, crawl_run_key,
         skill_key, proficiency_level_key, context_no, level_text_snapshot
     )
@@ -161,7 +161,7 @@ BEGIN TRY
     FROM #skill_source source
     WHERE NOT EXISTS (
         SELECT 1
-        FROM dw_v2.fact_job_necessary_skill target
+        FROM dbo.fact_job_necessary_skill target
         WHERE target.job_key = source.job_key
           AND target.crawl_run_key = source.crawl_run_key
           AND target.skill_key = source.skill_key
@@ -171,7 +171,7 @@ BEGIN TRY
     IF EXISTS (
         SELECT 1
         FROM #skill_source source
-        LEFT JOIN dw_v2.fact_job_necessary_skill target
+        LEFT JOIN dbo.fact_job_necessary_skill target
           ON target.job_key = source.job_key
          AND target.crawl_run_key = source.crawl_run_key
          AND target.skill_key = source.skill_key
@@ -233,7 +233,7 @@ BEGIN TRY
     )
         THROW 52019, 'Role-city mapping would collapse legacy occurrences.', 1;
 
-    INSERT INTO dw_v2.fact_job_role_city(
+    INSERT INTO dbo.fact_job_role_city(
         observation_id, job_key, date_key, source_key, crawl_run_key, role_key, city_key
     )
     SELECT
@@ -247,7 +247,7 @@ BEGIN TRY
     FROM #role_city_source source
     WHERE NOT EXISTS (
         SELECT 1
-        FROM dw_v2.fact_job_role_city target
+        FROM dbo.fact_job_role_city target
         WHERE target.job_key = source.job_key
           AND target.crawl_run_key = source.crawl_run_key
           AND target.role_key = source.role_key
@@ -257,7 +257,7 @@ BEGIN TRY
     IF EXISTS (
         SELECT 1
         FROM #role_city_source source
-        LEFT JOIN dw_v2.fact_job_role_city target
+        LEFT JOIN dbo.fact_job_role_city target
           ON target.job_key = source.job_key
          AND target.crawl_run_key = source.crawl_run_key
          AND target.role_key = source.role_key
@@ -272,9 +272,9 @@ BEGIN TRY
     COMMIT TRANSACTION;
 
     SELECT
-        (SELECT COUNT(*) FROM dw_v2.fact_job_observation) AS observations,
-        (SELECT COUNT(*) FROM dw_v2.fact_job_necessary_skill) AS skill_facts,
-        (SELECT COUNT(*) FROM dw_v2.fact_job_role_city) AS role_city_facts;
+        (SELECT COUNT(*) FROM dbo.fact_job_observation) AS observations,
+        (SELECT COUNT(*) FROM dbo.fact_job_necessary_skill) AS skill_facts,
+        (SELECT COUNT(*) FROM dbo.fact_job_role_city) AS role_city_facts;
 END TRY
 BEGIN CATCH
     IF XACT_STATE() <> 0 ROLLBACK TRANSACTION;

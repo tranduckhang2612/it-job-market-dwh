@@ -1,4 +1,4 @@
-"""Load the latest normalized PostgreSQL observations directly into dw_v2."""
+"""Load the latest normalized PostgreSQL observations directly into dbo."""
 
 from __future__ import annotations
 
@@ -109,7 +109,7 @@ def _acquire_lock(cursor) -> None:
 def _insert_dimensions(cursor, observations, writes):
     scalar_rows = [item["scalar"] for item in observations]
     days = {utc_naive(row["observed_at"]).date() for row in scalar_rows}
-    existing_dates = {row[0] for row in cursor.execute("SELECT date_key FROM dw_v2.dim_date")}
+    existing_dates = {row[0] for row in cursor.execute("SELECT date_key FROM dbo.dim_date")}
     day_names = ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
     month_names = (
         "January", "February", "March", "April", "May", "June",
@@ -121,7 +121,7 @@ def _insert_dimensions(cursor, observations, writes):
             continue
         weekday = day.isoweekday()
         cursor.execute(
-            "INSERT INTO dw_v2.dim_date("
+            "INSERT INTO dbo.dim_date("
             "date_key,calendar_date,day_of_week,day_name,month_no,month_name,"
             "quarter_no,year_no,is_weekend) VALUES(?,?,?,?,?,?,?,?,?)",
             key, day, weekday, day_names[weekday - 1], day.month,
@@ -133,8 +133,8 @@ def _insert_dimensions(cursor, observations, writes):
     for source in sorted({row["source"] for row in scalar_rows}):
         source_name = {"itviec": "ITviec", "topdev": "TopDev"}.get(source, source)
         cursor.execute(
-            "IF NOT EXISTS (SELECT 1 FROM dw_v2.dim_source WHERE source_code=?) "
-            "INSERT INTO dw_v2.dim_source(source_code,source_name,is_active) VALUES(?,?,1)",
+            "IF NOT EXISTS (SELECT 1 FROM dbo.dim_source WHERE source_code=?) "
+            "INSERT INTO dbo.dim_source(source_code,source_name,is_active) VALUES(?,?,1)",
             source, source, source_name,
         )
 
@@ -145,8 +145,8 @@ def _insert_dimensions(cursor, observations, writes):
             companies.setdefault(normalized(name), name)
     for normalized_name, name in sorted(companies.items()):
         cursor.execute(
-            "IF NOT EXISTS (SELECT 1 FROM dw_v2.dim_company WHERE normalized_name=?) "
-            "INSERT INTO dw_v2.dim_company(company_name,normalized_name) VALUES(?,?)",
+            "IF NOT EXISTS (SELECT 1 FROM dbo.dim_company WHERE normalized_name=?) "
+            "INSERT INTO dbo.dim_company(company_name,normalized_name) VALUES(?,?)",
             normalized_name, name, normalized_name,
         )
 
@@ -162,8 +162,8 @@ def _insert_dimensions(cursor, observations, writes):
     for run_id, value in sorted(runs.items()):
         scope = next(iter(value["sources"])) if len(value["sources"]) == 1 else "multi"
         cursor.execute(
-            "IF NOT EXISTS (SELECT 1 FROM dw_v2.dim_crawl_run WHERE crawl_run_id=?) "
-            "INSERT INTO dw_v2.dim_crawl_run("
+            "IF NOT EXISTS (SELECT 1 FROM dbo.dim_crawl_run WHERE crawl_run_id=?) "
+            "INSERT INTO dbo.dim_crawl_run("
             "crawl_run_id,source_scope,pipeline_version,started_at_utc,finished_at_utc,run_status) "
             "VALUES(?,?,N'5.1',?,?,N'succeeded')",
             run_id, run_id, scope, value["start"], value["finish"],
@@ -173,14 +173,14 @@ def _insert_dimensions(cursor, observations, writes):
         at = utc_naive(row["observed_at"])
         source_job_id = row.get("source_job_id")
         cursor.execute(
-            "IF NOT EXISTS (SELECT 1 FROM dw_v2.dim_job WHERE job_id=?) "
-            "INSERT INTO dw_v2.dim_job("
+            "IF NOT EXISTS (SELECT 1 FROM dbo.dim_job WHERE job_id=?) "
+            "INSERT INTO dbo.dim_job("
             "job_id,source_job_id,canonical_job_url,first_seen_at_utc,last_seen_at_utc) "
             "VALUES(?,?,?,?,?)",
             row["job_id"], row["job_id"], source_job_id, row["job_url"], at, at,
         )
         cursor.execute(
-            "UPDATE dw_v2.dim_job SET source_job_id=?,canonical_job_url=?,"
+            "UPDATE dbo.dim_job SET source_job_id=?,canonical_job_url=?,"
             "first_seen_at_utc=CASE WHEN ?>first_seen_at_utc THEN first_seen_at_utc ELSE ? END,"
             "last_seen_at_utc=CASE WHEN ?<last_seen_at_utc THEN last_seen_at_utc ELSE ? END,"
             "updated_at_utc=SYSUTCDATETIME() WHERE job_id=?",
@@ -208,30 +208,30 @@ def _insert_dimensions(cursor, observations, writes):
 
     for value in sorted(skill_rows.values(), key=lambda row: (row[0], row[2], row[3])):
         cursor.execute(
-            "IF NOT EXISTS (SELECT 1 FROM dw_v2.dim_skill "
+            "IF NOT EXISTS (SELECT 1 FROM dbo.dim_skill "
             "WHERE skill_type=? AND normalized_name=? AND category=?) "
-            "INSERT INTO dw_v2.dim_skill("
+            "INSERT INTO dbo.dim_skill("
             "skill_type,skill_name,normalized_name,category,programming_language) "
             "VALUES(?,?,?,?,?)",
             value[0], value[2], value[3], *value,
         )
     for value in sorted(role_rows.values(), key=lambda row: (row[1], row[2])):
         cursor.execute(
-            "IF NOT EXISTS (SELECT 1 FROM dw_v2.dim_role "
+            "IF NOT EXISTS (SELECT 1 FROM dbo.dim_role "
             "WHERE normalized_name=? AND role_category=?) "
-            "INSERT INTO dw_v2.dim_role(role_name,normalized_name,role_category) VALUES(?,?,?)",
+            "INSERT INTO dbo.dim_role(role_name,normalized_name,role_category) VALUES(?,?,?)",
             value[1], value[2], *value,
         )
     for normalized_name, name in sorted(city_rows.items()):
         cursor.execute(
-            "IF NOT EXISTS (SELECT 1 FROM dw_v2.dim_city WHERE normalized_name=?) "
-            "INSERT INTO dw_v2.dim_city(city_name,normalized_name,region_name) VALUES(?,?,NULL)",
+            "IF NOT EXISTS (SELECT 1 FROM dbo.dim_city WHERE normalized_name=?) "
+            "INSERT INTO dbo.dim_city(city_name,normalized_name,region_name) VALUES(?,?,NULL)",
             normalized_name, name, normalized_name,
         )
     for normalized_name, name in sorted(level_rows.items()):
         cursor.execute(
-            "IF NOT EXISTS (SELECT 1 FROM dw_v2.dim_proficiency_level WHERE normalized_name=?) "
-            "INSERT INTO dw_v2.dim_proficiency_level(level_code,level_name,normalized_name) "
+            "IF NOT EXISTS (SELECT 1 FROM dbo.dim_proficiency_level WHERE normalized_name=?) "
+            "INSERT INTO dbo.dim_proficiency_level(level_code,level_name,normalized_name) "
             "VALUES(NULL,?,?)",
             normalized_name, name, normalized_name,
         )
@@ -251,25 +251,25 @@ def apply(conn, observations):
         _acquire_lock(cursor)
         _insert_dimensions(cursor, observations, writes)
 
-        source_keys = dict(cursor.execute("SELECT source_code,source_key FROM dw_v2.dim_source"))
-        company_keys = dict(cursor.execute("SELECT normalized_name,company_key FROM dw_v2.dim_company"))
-        run_keys = dict(cursor.execute("SELECT crawl_run_id,crawl_run_key FROM dw_v2.dim_crawl_run"))
-        job_keys = dict(cursor.execute("SELECT job_id,job_key FROM dw_v2.dim_job"))
+        source_keys = dict(cursor.execute("SELECT source_code,source_key FROM dbo.dim_source"))
+        company_keys = dict(cursor.execute("SELECT normalized_name,company_key FROM dbo.dim_company"))
+        run_keys = dict(cursor.execute("SELECT crawl_run_id,crawl_run_key FROM dbo.dim_crawl_run"))
+        job_keys = dict(cursor.execute("SELECT job_id,job_key FROM dbo.dim_job"))
         skill_keys = {
             (row[0], row[1], row[2]): row[3]
             for row in cursor.execute(
-                "SELECT skill_type,normalized_name,category,skill_key FROM dw_v2.dim_skill"
+                "SELECT skill_type,normalized_name,category,skill_key FROM dbo.dim_skill"
             )
         }
         role_keys = {
             (row[0], row[1]): row[2]
             for row in cursor.execute(
-                "SELECT normalized_name,role_category,role_key FROM dw_v2.dim_role"
+                "SELECT normalized_name,role_category,role_key FROM dbo.dim_role"
             )
         }
-        city_keys = dict(cursor.execute("SELECT normalized_name,city_key FROM dw_v2.dim_city"))
+        city_keys = dict(cursor.execute("SELECT normalized_name,city_key FROM dbo.dim_city"))
         level_keys = dict(cursor.execute(
-            "SELECT normalized_name,proficiency_level_key FROM dw_v2.dim_proficiency_level"
+            "SELECT normalized_name,proficiency_level_key FROM dbo.dim_proficiency_level"
         ))
 
         for item in observations:
@@ -283,31 +283,31 @@ def apply(conn, observations):
             key = date_key(at.date())
             oid = observation_id(row["job_id"], row["crawl_run_id"])
             existing = cursor.execute(
-                "SELECT observation_id FROM dw_v2.fact_job_observation "
+                "SELECT observation_id FROM dbo.fact_job_observation "
                 "WHERE job_key=? AND crawl_run_key=?",
                 job_key, run_key,
             ).fetchone()
             if existing:
                 if existing[0] != oid:
                     cursor.execute(
-                        "UPDATE dw_v2.fact_job_necessary_skill SET observation_id=? "
+                        "UPDATE dbo.fact_job_necessary_skill SET observation_id=? "
                         "WHERE job_key=? AND crawl_run_key=?",
                         oid, job_key, run_key,
                     )
                     cursor.execute(
-                        "UPDATE dw_v2.fact_job_role_city SET observation_id=? "
+                        "UPDATE dbo.fact_job_role_city SET observation_id=? "
                         "WHERE job_key=? AND crawl_run_key=?",
                         oid, job_key, run_key,
                     )
                     cursor.execute(
-                        "UPDATE dw_v2.fact_job_observation SET observation_id=? "
+                        "UPDATE dbo.fact_job_observation SET observation_id=? "
                         "WHERE job_key=? AND crawl_run_key=?",
                         oid, job_key, run_key,
                     )
                     writes["lineage_repairs"] += 1
             else:
                 cursor.execute(
-                    "INSERT INTO dw_v2.fact_job_observation("
+                    "INSERT INTO dbo.fact_job_observation("
                     "observation_id,job_key,date_key,source_key,company_key,crawl_run_key,"
                     "observed_at_utc,job_title_snapshot,work_mode) VALUES(?,?,?,?,?,?,?,?,?)",
                     oid, job_key, key, source_key, company_key, run_key,
@@ -327,13 +327,13 @@ def apply(conn, observations):
                 ):
                     level_key = level_keys.get(normalized(level_text), 0) if level_text else 0
                     if cursor.execute(
-                        "SELECT COUNT(*) FROM dw_v2.fact_job_necessary_skill "
+                        "SELECT COUNT(*) FROM dbo.fact_job_necessary_skill "
                         "WHERE job_key=? AND crawl_run_key=? AND skill_key=? AND context_no=?",
                         job_key, run_key, skill_key, context_no,
                     ).fetchone()[0]:
                         continue
                     cursor.execute(
-                        "INSERT INTO dw_v2.fact_job_necessary_skill("
+                        "INSERT INTO dbo.fact_job_necessary_skill("
                         "observation_id,job_key,date_key,source_key,crawl_run_key,skill_key,"
                         "proficiency_level_key,context_no,level_text_snapshot) "
                         "VALUES(?,?,?,?,?,?,?,?,?)",
@@ -353,13 +353,13 @@ def apply(conn, observations):
             for role_key in roles:
                 for city_key in cities:
                     if cursor.execute(
-                        "SELECT COUNT(*) FROM dw_v2.fact_job_role_city "
+                        "SELECT COUNT(*) FROM dbo.fact_job_role_city "
                         "WHERE job_key=? AND crawl_run_key=? AND role_key=? AND city_key=?",
                         job_key, run_key, role_key, city_key,
                     ).fetchone()[0]:
                         continue
                     cursor.execute(
-                        "INSERT INTO dw_v2.fact_job_role_city("
+                        "INSERT INTO dbo.fact_job_role_city("
                         "observation_id,job_key,date_key,source_key,crawl_run_key,role_key,city_key) "
                         "VALUES(?,?,?,?,?,?,?)",
                         oid, job_key, key, source_key, run_key, role_key, city_key,
@@ -380,14 +380,14 @@ def apply(conn, observations):
 
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--apply", action="store_true", help="Ghi trực tiếp vào dw_v2.")
+    parser.add_argument("--apply", action="store_true", help="Ghi trực tiếp vào dbo.")
     args = parser.parse_args(argv)
     observations = read_source()
     if not args.apply:
         print(json.dumps({"status": "preview", "source_observations": len(observations)}))
         return 0
     if not os.environ.get("DW_SQLSERVER_CONNECTION_STRING"):
-        parser.error("Thiếu DW_SQLSERVER_CONNECTION_STRING để ghi dw_v2.")
+        parser.error("Thiếu DW_SQLSERVER_CONNECTION_STRING để ghi dbo.")
 
     import pyodbc
 

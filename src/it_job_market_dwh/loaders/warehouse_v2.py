@@ -71,7 +71,7 @@ def main(argv=None) -> int:
         "--mode",
         choices=("shadow", "direct"),
         default="shadow",
-        help="shadow đối soát dw cũ; direct chỉ kiểm tra và publish dw_v2.",
+        help="shadow đối soát dw cũ; direct chỉ kiểm tra và publish dbo.",
     )
     args = parser.parse_args(argv)
 
@@ -83,7 +83,7 @@ def main(argv=None) -> int:
         }))
         return 0
     if not os.environ.get("DW_SQLSERVER_CONNECTION_STRING"):
-        parser.error("Thiếu DW_SQLSERVER_CONNECTION_STRING để publish dw_v2.")
+        parser.error("Thiếu DW_SQLSERVER_CONNECTION_STRING để publish dbo.")
 
     import pyodbc
 

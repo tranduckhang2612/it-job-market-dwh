@@ -7,9 +7,9 @@ SET QUOTED_IDENTIFIER ON;
 BEGIN TRY
     BEGIN TRANSACTION;
 
-    IF OBJECT_ID(N'dw_v2.fact_job_observation', N'U') IS NULL
-       OR OBJECT_ID(N'dw_v2.fact_job_necessary_skill', N'U') IS NULL
-       OR OBJECT_ID(N'dw_v2.fact_job_role_city', N'U') IS NULL
+    IF OBJECT_ID(N'dbo.fact_job_observation', N'U') IS NULL
+       OR OBJECT_ID(N'dbo.fact_job_necessary_skill', N'U') IS NULL
+       OR OBJECT_ID(N'dbo.fact_job_role_city', N'U') IS NULL
         THROW 54001, 'Missing dw_v2 fact tables.', 1;
 
     IF SCHEMA_ID(N'semantic') IS NULL EXEC(N'CREATE SCHEMA semantic');
@@ -42,12 +42,12 @@ BEGIN TRY
             fact.work_mode,
             fact.job_posting_count,
             fact.loaded_at_utc
-        FROM dw_v2.fact_job_observation fact
-        JOIN dw_v2.dim_job job ON job.job_key = fact.job_key
-        JOIN dw_v2.dim_source source ON source.source_key = fact.source_key
-        JOIN dw_v2.dim_company company ON company.company_key = fact.company_key
-        JOIN dw_v2.dim_crawl_run run ON run.crawl_run_key = fact.crawl_run_key
-        JOIN dw_v2.dim_date date ON date.date_key = fact.date_key');
+        FROM dbo.fact_job_observation fact
+        JOIN dbo.dim_job job ON job.job_key = fact.job_key
+        JOIN dbo.dim_source source ON source.source_key = fact.source_key
+        JOIN dbo.dim_company company ON company.company_key = fact.company_key
+        JOIN dbo.dim_crawl_run run ON run.crawl_run_key = fact.crawl_run_key
+        JOIN dbo.dim_date date ON date.date_key = fact.date_key');
 
     EXEC(N'CREATE OR ALTER VIEW semantic.latest_job AS
         WITH ranked AS (
@@ -87,13 +87,13 @@ BEGIN TRY
             fact.level_text_snapshot,
             fact.skill_mention_count,
             fact.loaded_at_utc
-        FROM dw_v2.fact_job_necessary_skill fact
-        JOIN dw_v2.dim_job job ON job.job_key = fact.job_key
-        JOIN dw_v2.dim_date date ON date.date_key = fact.date_key
-        JOIN dw_v2.dim_source source ON source.source_key = fact.source_key
-        JOIN dw_v2.dim_crawl_run run ON run.crawl_run_key = fact.crawl_run_key
-        JOIN dw_v2.dim_skill skill ON skill.skill_key = fact.skill_key
-        JOIN dw_v2.dim_proficiency_level level
+        FROM dbo.fact_job_necessary_skill fact
+        JOIN dbo.dim_job job ON job.job_key = fact.job_key
+        JOIN dbo.dim_date date ON date.date_key = fact.date_key
+        JOIN dbo.dim_source source ON source.source_key = fact.source_key
+        JOIN dbo.dim_crawl_run run ON run.crawl_run_key = fact.crawl_run_key
+        JOIN dbo.dim_skill skill ON skill.skill_key = fact.skill_key
+        JOIN dbo.dim_proficiency_level level
           ON level.proficiency_level_key = fact.proficiency_level_key');
 
     EXEC(N'CREATE OR ALTER VIEW semantic.job_role_city AS
@@ -118,13 +118,13 @@ BEGIN TRY
             city.region_name,
             fact.combination_count,
             fact.loaded_at_utc
-        FROM dw_v2.fact_job_role_city fact
-        JOIN dw_v2.dim_job job ON job.job_key = fact.job_key
-        JOIN dw_v2.dim_date date ON date.date_key = fact.date_key
-        JOIN dw_v2.dim_source source ON source.source_key = fact.source_key
-        JOIN dw_v2.dim_crawl_run run ON run.crawl_run_key = fact.crawl_run_key
-        JOIN dw_v2.dim_role role ON role.role_key = fact.role_key
-        JOIN dw_v2.dim_city city ON city.city_key = fact.city_key');
+        FROM dbo.fact_job_role_city fact
+        JOIN dbo.dim_job job ON job.job_key = fact.job_key
+        JOIN dbo.dim_date date ON date.date_key = fact.date_key
+        JOIN dbo.dim_source source ON source.source_key = fact.source_key
+        JOIN dbo.dim_crawl_run run ON run.crawl_run_key = fact.crawl_run_key
+        JOIN dbo.dim_role role ON role.role_key = fact.role_key
+        JOIN dbo.dim_city city ON city.city_key = fact.city_key');
 
     EXEC(N'CREATE OR ALTER VIEW semantic.skill_demand_daily AS
         SELECT
@@ -140,10 +140,10 @@ BEGIN TRY
             SUM(CONVERT(bigint, fact.skill_mention_count)) AS skill_mention_count,
             COUNT_BIG(*) AS fact_row_count,
             COUNT(DISTINCT fact.job_key) AS distinct_job_count
-        FROM dw_v2.fact_job_necessary_skill fact
-        JOIN dw_v2.dim_date date ON date.date_key = fact.date_key
-        JOIN dw_v2.dim_source source ON source.source_key = fact.source_key
-        JOIN dw_v2.dim_skill skill ON skill.skill_key = fact.skill_key
+        FROM dbo.fact_job_necessary_skill fact
+        JOIN dbo.dim_date date ON date.date_key = fact.date_key
+        JOIN dbo.dim_source source ON source.source_key = fact.source_key
+        JOIN dbo.dim_skill skill ON skill.skill_key = fact.skill_key
         GROUP BY fact.date_key, date.calendar_date,
                  fact.source_key, source.source_code,
                  fact.skill_key, skill.skill_type, skill.skill_name,
@@ -165,11 +165,11 @@ BEGIN TRY
             SUM(CONVERT(bigint, fact.combination_count)) AS combination_count,
             COUNT_BIG(*) AS fact_row_count,
             COUNT(DISTINCT fact.job_key) AS distinct_job_count
-        FROM dw_v2.fact_job_role_city fact
-        JOIN dw_v2.dim_date date ON date.date_key = fact.date_key
-        JOIN dw_v2.dim_source source ON source.source_key = fact.source_key
-        JOIN dw_v2.dim_role role ON role.role_key = fact.role_key
-        JOIN dw_v2.dim_city city ON city.city_key = fact.city_key
+        FROM dbo.fact_job_role_city fact
+        JOIN dbo.dim_date date ON date.date_key = fact.date_key
+        JOIN dbo.dim_source source ON source.source_key = fact.source_key
+        JOIN dbo.dim_role role ON role.role_key = fact.role_key
+        JOIN dbo.dim_city city ON city.city_key = fact.city_key
         GROUP BY fact.date_key, date.calendar_date,
                  fact.source_key, source.source_code,
                  fact.role_key, role.role_name, role.normalized_name, role.role_category,
@@ -185,7 +185,7 @@ BEGIN TRY
                              fact.crawl_run_key DESC,
                              fact.job_observation_key DESC
                 ) AS observation_rank
-            FROM dw_v2.fact_job_observation fact
+            FROM dbo.fact_job_observation fact
         )
         SELECT
             ranked.job_key AS fact_job_key,
@@ -199,10 +199,10 @@ BEGIN TRY
             ranked.date_key AS observed_date_key,
             ranked.job_posting_count
         FROM ranked
-        JOIN dw_v2.dim_job job ON job.job_key = ranked.job_key
-        JOIN dw_v2.dim_source source ON source.source_key = ranked.source_key
-        JOIN dw_v2.dim_company company ON company.company_key = ranked.company_key
-        JOIN dw_v2.dim_crawl_run run ON run.crawl_run_key = ranked.crawl_run_key
+        JOIN dbo.dim_job job ON job.job_key = ranked.job_key
+        JOIN dbo.dim_source source ON source.source_key = ranked.source_key
+        JOIN dbo.dim_company company ON company.company_key = ranked.company_key
+        JOIN dbo.dim_crawl_run run ON run.crawl_run_key = ranked.crawl_run_key
         WHERE ranked.observation_rank = 1');
 
     EXEC(N'CREATE OR ALTER VIEW dw_v2_compat.dim_necessary_skill AS
@@ -212,7 +212,7 @@ BEGIN TRY
             skill.skill_name AS name,
             skill.category,
             skill.created_at_utc
-        FROM dw_v2.dim_skill skill
+        FROM dbo.dim_skill skill
         WHERE skill.skill_type IN (
             N''core_skill'', N''foreign_language'', N''framework'', N''programming_language''
         )');
@@ -227,7 +227,7 @@ BEGIN TRY
                              observation.crawl_run_key DESC,
                              observation.job_observation_key DESC
                 ) AS observation_rank
-            FROM dw_v2.fact_job_observation observation
+            FROM dbo.fact_job_observation observation
         )
         SELECT
             fact.job_necessary_skill_key AS fact_job_necessary_skill_key,
@@ -236,7 +236,7 @@ BEGIN TRY
             fact.context_no,
             fact.level_text_snapshot AS level_text,
             fact.skill_mention_count
-        FROM dw_v2.fact_job_necessary_skill fact
+        FROM dbo.fact_job_necessary_skill fact
         JOIN latest ON latest.observation_id = fact.observation_id
         WHERE latest.observation_rank = 1');
 
@@ -250,7 +250,7 @@ BEGIN TRY
                              observation.crawl_run_key DESC,
                              observation.job_observation_key DESC
                 ) AS observation_rank
-            FROM dw_v2.fact_job_observation observation
+            FROM dbo.fact_job_observation observation
         )
         SELECT
             fact.job_necessary_skill_key AS fact_job_necessary_skill_key,
@@ -270,15 +270,15 @@ BEGIN TRY
             fact.context_no,
             fact.level_text_snapshot AS level_text,
             fact.skill_mention_count
-        FROM dw_v2.fact_job_necessary_skill fact
+        FROM dbo.fact_job_necessary_skill fact
         JOIN latest ON latest.observation_id = fact.observation_id
-        JOIN dw_v2.fact_job_observation observation
+        JOIN dbo.fact_job_observation observation
           ON observation.observation_id = fact.observation_id
-        JOIN dw_v2.dim_job job ON job.job_key = fact.job_key
-        JOIN dw_v2.dim_source source ON source.source_key = fact.source_key
-        JOIN dw_v2.dim_company company ON company.company_key = observation.company_key
-        JOIN dw_v2.dim_crawl_run run ON run.crawl_run_key = fact.crawl_run_key
-        JOIN dw_v2.dim_skill skill ON skill.skill_key = fact.skill_key
+        JOIN dbo.dim_job job ON job.job_key = fact.job_key
+        JOIN dbo.dim_source source ON source.source_key = fact.source_key
+        JOIN dbo.dim_company company ON company.company_key = observation.company_key
+        JOIN dbo.dim_crawl_run run ON run.crawl_run_key = fact.crawl_run_key
+        JOIN dbo.dim_skill skill ON skill.skill_key = fact.skill_key
         WHERE latest.observation_rank = 1');
 
     EXEC(N'CREATE OR ALTER VIEW dw_v2_compat.fact_job_role_city AS
@@ -291,7 +291,7 @@ BEGIN TRY
                              observation.crawl_run_key DESC,
                              observation.job_observation_key DESC
                 ) AS observation_rank
-            FROM dw_v2.fact_job_observation observation
+            FROM dbo.fact_job_observation observation
         )
         SELECT
             fact.job_role_city_key AS fact_job_role_city_key,
@@ -299,7 +299,7 @@ BEGIN TRY
             fact.role_key,
             fact.city_key,
             fact.combination_count
-        FROM dw_v2.fact_job_role_city fact
+        FROM dbo.fact_job_role_city fact
         JOIN latest ON latest.observation_id = fact.observation_id
         WHERE latest.observation_rank = 1');
 
@@ -313,7 +313,7 @@ BEGIN TRY
                              observation.crawl_run_key DESC,
                              observation.job_observation_key DESC
                 ) AS observation_rank
-            FROM dw_v2.fact_job_observation observation
+            FROM dbo.fact_job_observation observation
         )
         SELECT
             fact.job_role_city_key AS fact_job_role_city_key,
@@ -324,10 +324,10 @@ BEGIN TRY
             role.role_category AS role_category,
             city.city_name AS city_name,
             fact.combination_count
-        FROM dw_v2.fact_job_role_city fact
+        FROM dbo.fact_job_role_city fact
         JOIN latest ON latest.observation_id = fact.observation_id
-        JOIN dw_v2.dim_role role ON role.role_key = fact.role_key
-        JOIN dw_v2.dim_city city ON city.city_key = fact.city_key
+        JOIN dbo.dim_role role ON role.role_key = fact.role_key
+        JOIN dbo.dim_city city ON city.city_key = fact.city_key
         WHERE latest.observation_rank = 1');
 
     COMMIT TRANSACTION;
